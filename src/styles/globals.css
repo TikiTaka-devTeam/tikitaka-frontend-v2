@@ -1,0 +1,14 @@
+:root {
+  font-family: Inter, Pretendard, system-ui, sans-serif;
+  color: #172033;
+  background: #f2f2f7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+.placeholder { min-height: 100vh; display: grid; place-content: center; padding: 24px; text-align: center; }
+.placeholder__eyebrow { color: #2766ec; font-weight: 700; }
+.placeholder h1 { margin: 0 0 12px; }
+.placeholder p { margin: 0 0 12px; }

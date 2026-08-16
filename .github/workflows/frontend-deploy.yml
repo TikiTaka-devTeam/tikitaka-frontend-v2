@@ -1,0 +1,48 @@
+name: Frontend Deploy to S3 and CloudFront
+
+# TODO: 배포 설정을 완료한 뒤 필요하면 push/main 트리거를 추가하세요.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Create production env file
+        run: |
+          {
+            echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}"
+            echo "VITE_FIREBASE_VAPID_KEY=${{ secrets.VITE_FIREBASE_VAPID_KEY }}"
+          } > .env.production
+      - name: Build
+        run: pnpm build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Upload build files to S3
+        run: aws s3 sync dist/ s3://${{ secrets.S3_BUCKET }} --delete
+      - name: Invalidate CloudFront cache
+        run: >-
+          aws cloudfront create-invalidation
+          --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          --paths "/*"
+
+      # TODO: 알림이 필요하면 새 저장소용 webhook 설정을 추가하세요.
