@@ -1,7 +1,5 @@
 # tikitaka-frontend-v2
 
-기존 `tikitaka-frontend`와 동일한 기술 스택 및 기능 단위 디렉터리 구조로 만든 프런트엔드 골격입니다. 실제 화면과 비즈니스 로직은 포함하지 않습니다.
-
 ## 기술 스택
 
 - React 19, React Router 7
