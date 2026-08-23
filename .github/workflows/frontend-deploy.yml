@@ -31,6 +31,7 @@ jobs:
         run: |
           {
             echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}"
+            echo "VITE_FIREBASE_VAPID_KEY=${{ secrets.VITE_FIREBASE_VAPID_KEY }}"
           } > .env.production
 
           grep -q '^VITE_API_BASE_URL=.' .env.production
@@ -38,3 +39,42 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  notify:
+    needs: deploy
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify Discord deploy success
+        if: ${{ needs.deploy.result == 'success' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          CONTENT=$(printf '✅[FRONTEND] 배포 성공\nRepository: %s\nBranch: %s\nURL: 차후 배포 예정' \
+            "$REPOSITORY" "$BRANCH")
+
+          jq -n --arg content "$CONTENT" '{content: $content}' |
+            curl --fail-with-body \
+              -H "Content-Type: application/json" \
+              --data-binary @- \
+              "$DISCORD_WEBHOOK_URL"
+
+      - name: Notify Discord deploy failure
+        if: ${{ needs.deploy.result == 'failure' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          ACTIONS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          CONTENT=$(printf '❌[FRONTEND] 배포 실패\nRepository: %s\nBranch: %s\nActions: %s' \
+            "$REPOSITORY" "$BRANCH" "$ACTIONS_URL")
+
+          jq -n --arg content "$CONTENT" '{content: $content}' |
+            curl --fail-with-body \
+              -H "Content-Type: application/json" \
+              --data-binary @- \
+              "$DISCORD_WEBHOOK_URL"
