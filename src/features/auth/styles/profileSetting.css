@@ -1,0 +1,266 @@
+.profile-setting-page {
+  min-height: 100vh;
+  padding: 66px 24px 80px;
+  background: #f7f7fb;
+  color: #111111;
+  font-family: "Tikitaka UI", sans-serif;
+}
+
+.profile-setting-header {
+  position: relative;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-setting-header h1 {
+  margin: 0;
+  color: #111111;
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.profile-setting-back {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.profile-setting-back img {
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+}
+
+.profile-setting-hero {
+  width: min(100%, 760px);
+  margin: 45px auto 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile-setting-avatar {
+  position: relative;
+  width: 153px;
+  height: 153px;
+  margin-bottom: 17px;
+}
+
+.profile-setting-avatar > img,
+.profile-setting-avatar__fallback {
+  width: 153px;
+  height: 153px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e5e5ea;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 65%;
+  color: #2b3550;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+  object-fit: cover;
+}
+
+.profile-setting-avatar__plus {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 37.5px;
+  height: 37.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 2px 6px rgba(39, 102, 236, 0.28);
+  cursor: pointer;
+}
+
+.profile-setting-avatar__plus[aria-disabled="true"] {
+  cursor: wait;
+  opacity: 0.75;
+}
+
+.profile-setting-avatar__plus input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+}
+
+.profile-setting-avatar__plus img {
+  display: block;
+  width: 15px;
+  height: 15px;
+}
+
+.profile-setting-hero strong {
+  color: #1e2a44;
+  font-size: 25px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.profile-setting-hero p {
+  margin: 6px 0 0;
+  color: #9b9b9f;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.profile-setting-avatar__error {
+  max-width: 320px;
+  margin-top: 10px;
+  color: #e11d48;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.profile-setting-panel {
+  width: min(100%, 575px);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid #e6e6ea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.profile-setting-group {
+  padding: 22px 32px 21px;
+  border-bottom: 1px solid #eeeeef;
+}
+
+.profile-setting-group--last {
+  border-bottom: 0;
+}
+
+.profile-setting-group h2 {
+  margin: 0 0 20px;
+  color: #2a2a2a;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.profile-setting-row {
+  width: 100%;
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #333333;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: left;
+}
+
+button.profile-setting-row {
+  cursor: pointer;
+}
+
+button.profile-setting-row:disabled {
+  cursor: wait;
+  opacity: 0.64;
+}
+
+.profile-setting-row__value {
+  min-width: 0;
+  color: #a0a0a4;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.profile-setting-message {
+  margin: 8px 0 0;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+@media (min-width: 1200px) {
+  .profile-setting-page {
+    padding-top: 63px;
+  }
+
+  .profile-setting-hero {
+    margin-top: 45px;
+  }
+}
+
+@media (max-width: 720px) {
+  .profile-setting-page {
+    padding: 42px 18px 54px;
+  }
+
+  .profile-setting-header h1 {
+    font-size: 23px;
+  }
+
+  .profile-setting-hero {
+    margin: 34px auto 26px;
+  }
+
+  .profile-setting-avatar,
+  .profile-setting-avatar > img,
+  .profile-setting-avatar__fallback {
+    width: 108px;
+    height: 108px;
+  }
+
+  .profile-setting-avatar__plus {
+    right: 5px;
+    bottom: 5px;
+    width: 31px;
+    height: 31px;
+  }
+
+  .profile-setting-avatar__plus img {
+    width: 15px;
+    height: 15px;
+  }
+
+  .profile-setting-panel {
+    border-radius: 8px;
+  }
+
+  .profile-setting-group {
+    padding: 20px 20px;
+  }
+
+  .profile-setting-row {
+    min-height: 40px;
+    font-size: 14px;
+  }
+}
