@@ -1,0 +1,256 @@
+* {
+  box-sizing: border-box;
+}
+
+.signup-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+
+  background: #FFFFFF;
+}
+
+.signup-card {
+  width: 560px;
+  background: white;
+}
+
+.signup-card h1 {
+  font-size: 32px;
+  /* Pretendard Black */
+  font-family: "Tikitaka UI", Pretendard, sans-serif;
+  font-weight: 900;
+  font-variation-settings: "wght" 900;
+  margin-top: 18px;
+  margin-bottom: 7px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: "Tikitaka UI", Pretendard, sans-serif;
+  font-variation-settings: "wght" 900;
+  margin: 40px 0 20px;
+}
+
+.signup-stepper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 23px;
+}
+
+.step-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-track-item {
+  display: flex;
+  align-items: center;
+}
+
+.step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  background: #E6E7E9;
+  position: relative;
+}
+
+.step-dot.active {
+  background: #E6E7E9;
+  box-shadow: inset 0 0 0 3px #2563eb;
+}
+
+.step-dot.completed {
+  background: #2563eb;
+  background-image: url("../../../assets/icons/OnlyCheck.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
+}
+
+.step-dot.active::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+.step-connector {
+  width: 224px;
+  height: 5px;
+  background: #E6E7E9;
+  margin: 0 0;
+}
+
+.step-connector.completed {
+  background: #2563eb;
+}
+
+.step-labels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 184px;
+  width: 100%;
+}
+
+.step-label {
+  font-size: 16px;
+  font-variation-settings: "wght" 900;
+  color: #979797;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.step-label.active {
+  color: #2563eb;
+  opacity: 1;
+}
+
+.terms-section {
+  padding: 0px 27px;    
+  margin-bottom: 13px;
+  
+}
+
+/* 제목 밑줄 */
+.title-line-thick {
+  width: 100%;
+  height: 3px;
+  background: #000000;
+  margin-bottom: 21px;
+}
+
+/* 제목 밑줄 얇은 선 */
+.title-line-thin {
+  width: 100%;
+  height: 1px;
+  background: #000000;
+  margin-bottom: 21px;
+}
+
+.terms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 19px;
+  min-height: 19px;
+  font-family: "Tikitaka UI", Pretendard, sans-serif;
+  font-variation-settings: "wght" 800;
+  line-height: 19px;
+  margin-bottom: 13px;
+}
+
+.terms-header h3 {
+    font-size: 16px;
+}
+.terms-header .checkbox-label {
+  line-height: 19px;
+  font-family: "Tikitaka UI", Pretendard, sans-serif;
+  font-variation-settings: "wght" 900;
+  font-size: 12px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+.checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background-image: url("../../../assets/icons/Checkbox.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+  background-image: url("../../../assets/icons/Check.svg");
+}
+
+.terms-content {
+  height: 174px;
+  border: 1px solid #dcdcdc;
+  border-radius: 12px;
+  padding: 0px 10px 0px 15px;
+}
+
+.terms-content-inner {
+  height: 100%;
+  overflow-y: auto;
+  font-family: "Tikitaka UI", Pretendard, sans-serif;
+  font-variation-settings: "wght" 400;
+  font-size: 12px;
+  padding-right: 10px;
+  box-sizing: border-box;
+}
+
+.terms-content pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.prev-btn,
+.next-btn {
+  width: 120px;
+  height: 48px;
+
+  border: none;
+  border-radius: 8px;
+
+  font-family: "Tikitaka UI", Pretendard, sans-serif;
+  font-variation-settings: "wght" 700;
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.prev-btn {
+  background: #979797;
+  color: white;
+}
+
+.next-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.next-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  color: #000000;
+}
+
+.blank-space {
+  height: 19px;
+}

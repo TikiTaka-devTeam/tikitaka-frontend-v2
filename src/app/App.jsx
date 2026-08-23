@@ -1,10 +1,68 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import PlaceholderPage from "../components/common/PlaceholderPage.jsx";
+import LoginPage from "../features/auth/pages/LoginPage.jsx";
+import SignupCompletePage from "../features/auth/pages/SignupCompletePage.jsx";
+import SignupInformPage from "../features/auth/pages/SignupInformPage.jsx";
+import SignupTermsPage from "../features/auth/pages/SignupTermsPage.jsx";
 
 function App() {
+  const accessToken = localStorage.getItem("tikitaka_access_token");
+
   return (
     <Routes>
-      <Route path="/" element={<PlaceholderPage />} />
+      <Route
+        path="/"
+        element={
+          accessToken ? (
+            <PlaceholderPage />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route path="/dashboard" element={<PlaceholderPage />} />
+
+      <Route
+        path="/login"
+        element={
+          accessToken ? <Navigate to="/dashboard" replace /> : <LoginPage />
+        }
+      />
+
+      <Route
+        path="/signup-terms"
+        element={
+          accessToken ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <SignupTermsPage />
+          )
+        }
+      />
+
+      <Route
+        path="/signup-inform"
+        element={
+          accessToken ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <SignupInformPage />
+          )
+        }
+      />
+
+      <Route
+        path="/signup-complete"
+        element={
+          accessToken ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <SignupCompletePage />
+          )
+        }
+      />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

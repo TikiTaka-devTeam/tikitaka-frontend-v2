@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+/* ============================= */
+/* Question List Toolbar Button */
+/* ============================= */
+
+.lecture-toolbar__question-all-btn {
+  width: 140px;
+  height: 33px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: 6px;
+  padding: 0;
+
+  border: 1px solid #000000;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #000000;
+
+  font-family: "Pretendard Variable", "Pretendard", system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+
+  text-align: center;
+
+  cursor: pointer;
+}

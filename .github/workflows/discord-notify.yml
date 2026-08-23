@@ -1,0 +1,38 @@
+name: Discord Notification
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord deploy success
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"✅[FRONTEND] 배포 성공\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nURL: 차후 배포 예정"
+            }" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Notify Discord deploy failure
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"❌[FRONTEND] 배포 실패\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nActions 확인 필요\"
+            }" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord PR opened
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{
+              \"content\": \"🔔[FRONTEND] PR이 생성되었습니다. \nRepository: ${{ github.repository }}\nTitle: ${{ github.event.pull_request.title }}\nAuthor: ${{ github.event.pull_request.user.login }}\nBranch: ${{ github.event.pull_request.head.ref }} → ${{ github.event.pull_request.base.ref }}\nURL: ${{ github.event.pull_request.html_url }}\"
+            }" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
