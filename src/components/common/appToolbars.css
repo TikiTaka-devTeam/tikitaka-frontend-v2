@@ -1,0 +1,100 @@
+.dashboard-utility,
+.dashboard-bottom-nav {
+  z-index: 5;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(15px);
+}
+
+.dashboard-utility {
+  position: absolute;
+  top: 35px;
+  right: 20px;
+  width: 138px;
+  height: 48px;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 28px;
+  opacity: 0.9;
+}
+
+.dashboard-utility button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dashboard-utility img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+.dashboard-utility__profile { border-radius: 50%; }
+
+.dashboard-bottom-nav {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: 306px;
+  height: 70px;
+  padding: 12px 22px;
+  display: flex;
+  gap: 6px;
+  border-radius: 30px;
+  box-shadow: 0 12px 28px rgba(20, 33, 61, 0.13), inset 0 1px 1px rgba(255, 255, 255, 0.58);
+}
+
+.dashboard-bottom-nav button {
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 23px;
+  background: transparent;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dashboard-bottom-nav button:first-child { width: 130px; }
+.dashboard-bottom-nav button:last-child { width: 124px; }
+.dashboard-bottom-nav button.is-active { color: #2e6bff; }
+.dashboard-bottom-nav img { width: 20px; height: 20px; }
+
+@media (max-width: 1179px) {
+  .dashboard-bottom-nav { position: fixed; }
+}
+
+@media (max-width: 719px) {
+  .dashboard-utility { top: 35px; right: 16px; }
+  .dashboard-bottom-nav { bottom: 12px; }
+}
+
+@media (max-width: 379px) {
+  .dashboard-bottom-nav {
+    width: calc(100% - 24px);
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .dashboard-bottom-nav button:first-child,
+  .dashboard-bottom-nav button:last-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .dashboard-bottom-nav button { gap: 7px; font-size: 14px; }
+}

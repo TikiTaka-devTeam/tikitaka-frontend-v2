@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import logoSrc from "../../../assets/images/logo_tikitaka_blue.svg";
-import { BottomNavigation, SystemStatusBar, UtilityToolbar } from "../components/DashboardChrome.jsx";
+import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
+import { SystemStatusBar } from "../components/DashboardChrome.jsx";
 import { NextClassCard, TaskSummaryCard } from "../components/DashboardCards.jsx";
 import WeeklyTimetable from "../components/WeeklyTimetable.jsx";
 import "../styles/dashboard.css";
@@ -15,7 +16,7 @@ function DashboardPage() {
       <div className="dashboard-page__orb dashboard-page__orb--left" aria-hidden="true" />
       <div className="dashboard-page__orb dashboard-page__orb--right" aria-hidden="true" />
       <SystemStatusBar />
-      <UtilityToolbar />
+      <AppToolbars />
 
       <div className="dashboard-shell">
         <header className="dashboard-brand">
@@ -34,8 +35,6 @@ function DashboardPage() {
           </aside>
         </div>
       </div>
-
-      <BottomNavigation />
     </main>
   );
 }
