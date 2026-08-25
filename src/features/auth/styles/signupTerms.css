@@ -254,3 +254,100 @@
 .blank-space {
   height: 19px;
 }
+
+@media (max-width: 640px) {
+  .signup-container {
+    min-height: 100svh;
+    padding: 24px 16px 40px;
+  }
+
+  .signup-card {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .signup-card h1 {
+    margin-top: 0;
+    font-size: 28px;
+  }
+
+  .section-title {
+    margin: 32px 0 16px;
+    font-size: 18px;
+  }
+
+  .signup-stepper {
+    width: 100%;
+    margin-bottom: 18px;
+  }
+
+  .step-track {
+    width: 100%;
+  }
+
+  .step-track-item {
+    min-width: 0;
+  }
+
+  .step-connector {
+    width: clamp(70px, calc((100vw - 108px) / 2), 224px);
+  }
+
+  .step-labels {
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .step-label {
+    font-size: 13px;
+  }
+
+  .terms-section {
+    padding: 0;
+  }
+
+  .terms-header {
+    height: auto;
+    min-height: 20px;
+    gap: 12px;
+  }
+
+  .terms-header h3 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .terms-header .checkbox-label {
+    flex-shrink: 0;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .terms-content {
+    height: 160px;
+    padding-left: 12px;
+  }
+
+  .button-group {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .prev-btn,
+  .next-btn {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .step-connector {
+    width: clamp(54px, calc((100vw - 108px) / 2), 224px);
+  }
+
+  .step-label {
+    font-size: 12px;
+  }
+}
