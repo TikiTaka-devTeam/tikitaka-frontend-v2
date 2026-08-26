@@ -1,10 +1,10 @@
-import logoWhiteSrc from "../../../assets/images/logo_tikitaka_white.svg?url";
+import BrandLogo from "../../../components/common/BrandLogo.jsx";
 
 function AuthBrandPanel({ onSignUp }) {
   return (
     <section className="auth-brand-panel" aria-label="tikitaka service intro">
       <div className="auth-brand-panel__nav">
-        <img className="auth-brand-panel__logo" src={logoWhiteSrc} alt="tikitaka" />
+        <BrandLogo variant="white" imageClassName="auth-brand-panel__logo" />
         <div className="auth-brand-panel__links">
           <button type="button" onClick={onSignUp}>Sign Up</button>
           <button type="button" className="auth-brand-panel__contact">
