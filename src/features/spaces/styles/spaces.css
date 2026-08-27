@@ -1,32 +1,33 @@
 .spaces-page {
-  --u: min(
-    0.082644628vw,
-    0.119904077vh
-  );
-
   position: relative;
   width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
   background-color: #edf0f6;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
+  font-family: inherit;
 }
 
 .spaces-layout {
   position: relative;
-  width: calc(1210 * var(--u));
-  min-height: calc(834 * var(--u));
+  width: calc(var(--app-u) * 1210);
+  min-height: calc(var(--app-u) * 834);
   margin: 0 auto;
+}
+
+.spaces-brand-logo {
+  position: absolute;
+  top: calc(var(--app-u) * 59);
+  left: calc(var(--app-u) * 40);
+  z-index: 10;
 }
 
 .spaces-title {
   position: absolute;
-  top: calc(167 * var(--u));
-  left: calc(50 * var(--u));
+  top: calc(var(--app-u) * 167);
+  left: calc(var(--app-u) * 50);
   margin: 0;
   color: #141f36;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(18 * var(--u));
+  font-size: calc(var(--app-u) * 18);
   font-weight: 700;
   line-height: normal;
   letter-spacing: 0;
@@ -35,37 +36,34 @@
 
 .spaces-tabs {
   position: absolute;
-  top: calc(164 * var(--u));
-  left: calc(149 * var(--u));
-  width: calc(127 * var(--u));
-  height: calc(35 * var(--u));
+  top: calc(var(--app-u) * 164);
+  left: calc(var(--app-u) * 149);
+  width: calc(var(--app-u) * 127);
+  height: calc(var(--app-u) * 35);
   display: flex;
   align-items: center;
-  box-sizing: border-box;
   padding:
-    calc(4 * var(--u))
-    calc(6 * var(--u))
-    calc(3 * var(--u));
-  gap: calc(3 * var(--u));
+    calc(var(--app-u) * 4)
+    calc(var(--app-u) * 6)
+    calc(var(--app-u) * 3);
+  gap: calc(var(--app-u) * 3);
   background-color: #e5edfa;
-  border-radius: calc(14 * var(--u));
+  border-radius: calc(var(--app-u) * 14);
 }
 
 .spaces-tab {
-  width: calc(56 * var(--u));
-  height: calc(28 * var(--u));
-  flex: 0 0 calc(56 * var(--u));
+  width: calc(var(--app-u) * 56);
+  height: calc(var(--app-u) * 28);
+  flex: 0 0 calc(var(--app-u) * 56);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
   padding: 0;
   border: 0;
-  border-radius: calc(10 * var(--u));
+  border-radius: calc(var(--app-u) * 10);
   background-color: transparent;
   color: #8993a6;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(12 * var(--u));
+  font-size: calc(var(--app-u) * 12);
   font-weight: 600;
   line-height: normal;
   letter-spacing: 0;
@@ -79,72 +77,64 @@
 
 .add-space-button {
   position: absolute;
-  top: calc(176 * var(--u));
-  left: calc(1076 * var(--u));
-  width: calc(92 * var(--u));
-  height: calc(32 * var(--u));
+  top: calc(var(--app-u) * 176);
+  left: calc(var(--app-u) * 1076);
+  width: calc(var(--app-u) * 92);
+  height: calc(var(--app-u) * 32);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
   padding: 0;
   border: 0;
-  border-radius: calc(14 * var(--u));
+  border-radius: calc(var(--app-u) * 14);
   background-color: #2e6bff;
   color: #ffffff;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(11 * var(--u));
+  font-size: calc(var(--app-u) * 11);
   font-weight: 700;
   line-height: normal;
   letter-spacing: 0;
   box-shadow:
     0
-    calc(5 * var(--u))
-    calc(14 * var(--u))
+    calc(var(--app-u) * 5)
+    calc(var(--app-u) * 14)
     rgba(20, 36, 71, 0.1);
   cursor: pointer;
 }
 
 .space-grid {
   position: absolute;
-  top: calc(221 * var(--u));
-  left: calc(40 * var(--u));
-  width: calc(1130 * var(--u));
+  top: calc(var(--app-u) * 221);
+  left: calc(var(--app-u) * 40);
+  width: calc(var(--app-u) * 1130);
   display: grid;
   grid-template-columns:
-    repeat(3, calc(366 * var(--u)));
-  column-gap: calc(16 * var(--u));
-  row-gap: calc(16 * var(--u));
+    repeat(3, calc(var(--app-u) * 366));
+  column-gap: calc(var(--app-u) * 16);
+  row-gap: calc(var(--app-u) * 16);
   align-items: start;
 }
 
 .space-card {
   position: relative;
-  width: calc(366 * var(--u));
-  height: calc(112 * var(--u));
-  box-sizing: border-box;
+  width: calc(var(--app-u) * 366);
+  height: calc(var(--app-u) * 112);
   background-color: #ffffff;
-  border:
-    calc(1 * var(--u))
-    solid
-    #dee5f2;
-  border-radius: calc(17 * var(--u));
+  border: calc(var(--app-u) * 1) solid #dee5f2;
+  border-radius: calc(var(--app-u) * 17);
   overflow: visible;
 }
 
 .space-card__semester {
   position: absolute;
-  top: calc(15 * var(--u));
-  left: calc(16 * var(--u));
-  width: calc(49 * var(--u));
-  height: calc(18 * var(--u));
+  top: calc(var(--app-u) * 15);
+  left: calc(var(--app-u) * 16);
+  width: calc(var(--app-u) * 49);
+  height: calc(var(--app-u) * 18);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
-  border-radius: calc(7 * var(--u));
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(10 * var(--u));
+  border-radius: calc(var(--app-u) * 7);
+  font-size: calc(var(--app-u) * 10);
   font-weight: 700;
   line-height: normal;
   letter-spacing: 0;
@@ -153,14 +143,13 @@
 
 .space-card__title {
   position: absolute;
-  top: calc(42 * var(--u));
-  left: calc(16 * var(--u));
-  max-width: calc(300 * var(--u));
+  top: calc(var(--app-u) * 42);
+  left: calc(var(--app-u) * 16);
+  max-width: calc(var(--app-u) * 300);
   margin: 0;
   padding: 0;
   color: #141f36;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(17 * var(--u));
+  font-size: calc(var(--app-u) * 17);
   font-weight: 700;
   line-height: normal;
   letter-spacing: 0;
@@ -171,14 +160,13 @@
 
 .space-card__info {
   position: absolute;
-  top: calc(70 * var(--u));
-  left: calc(16 * var(--u));
-  max-width: calc(300 * var(--u));
+  top: calc(var(--app-u) * 70);
+  left: calc(var(--app-u) * 16);
+  max-width: calc(var(--app-u) * 300);
   margin: 0;
   padding: 0;
   color: #4d5c75;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(12 * var(--u));
+  font-size: calc(var(--app-u) * 12);
   font-weight: 500;
   line-height: normal;
   letter-spacing: 0;
@@ -193,23 +181,22 @@
 
 .space-card__menu-wrapper {
   position: absolute;
-  top: calc(16 * var(--u));
-  right: calc(16 * var(--u));
-  width: calc(20 * var(--u));
-  height: calc(20 * var(--u));
+  top: calc(var(--app-u) * 16);
+  right: calc(var(--app-u) * 16);
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
   z-index: 20;
 }
 
 .space-card__more-button {
-  width: calc(20 * var(--u));
-  height: calc(20 * var(--u));
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
   padding: 0;
   border: 0;
-  border-radius: calc(6 * var(--u));
+  border-radius: calc(var(--app-u) * 6);
   background-color: transparent;
   cursor: pointer;
 }
@@ -220,49 +207,46 @@
 
 .space-card__more-icon {
   display: block;
-  width: calc(20 * var(--u));
-  height: calc(20 * var(--u));
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
 }
 
 .space-menu {
   position: absolute;
-  top: calc(24 * var(--u));
+  top: calc(var(--app-u) * 24);
   right: 0;
-  width: calc(90 * var(--u));
-  height: calc(76 * var(--u));
-  box-sizing: border-box;
+  width: calc(var(--app-u) * 90);
+  height: calc(var(--app-u) * 76);
   display: flex;
   flex-direction: column;
-  gap: calc(20 * var(--u));
+  gap: calc(var(--app-u) * 20);
   padding:
-    calc(12 * var(--u))
-    calc(16 * var(--u));
+    calc(var(--app-u) * 12)
+    calc(var(--app-u) * 16);
   background-color: #ffffff;
-  border-radius: calc(15 * var(--u));
+  border-radius: calc(var(--app-u) * 15);
   box-shadow:
     0
-    calc(18 * var(--u))
-    calc(42 * var(--u))
+    calc(var(--app-u) * 18)
+    calc(var(--app-u) * 42)
     rgba(10, 26, 56, 0.22);
   z-index: 30;
 }
 
 .space-menu__item {
   width: 100%;
-  height: calc(16 * var(--u));
-  flex: 0 0 calc(16 * var(--u));
+  height: calc(var(--app-u) * 16);
+  flex: 0 0 calc(var(--app-u) * 16);
   display: flex;
   align-items: center;
-  gap: calc(9 * var(--u));
-  box-sizing: border-box;
+  gap: calc(var(--app-u) * 9);
   padding: 0;
   border: 0;
   background-color: transparent;
   color: #0d1a33;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(13 * var(--u));
+  font-size: calc(var(--app-u) * 13);
   font-weight: 500;
-  line-height: calc(16 * var(--u));
+  line-height: calc(var(--app-u) * 16);
   letter-spacing: 0;
   white-space: nowrap;
   cursor: pointer;
@@ -270,9 +254,9 @@
 
 .space-menu__icon {
   display: block;
-  width: calc(15 * var(--u));
-  height: calc(15 * var(--u));
-  flex: 0 0 calc(15 * var(--u));
+  width: calc(var(--app-u) * 15);
+  height: calc(var(--app-u) * 15);
+  flex: 0 0 calc(var(--app-u) * 15);
 }
 
 .space-menu__item--delete {
@@ -298,8 +282,7 @@
   margin: 0;
   padding: 0;
   color: #5a6170;
-  font-family: "Pretendard Variable", Pretendard, sans-serif;
-  font-size: calc(16 * var(--u));
+  font-size: calc(var(--app-u) * 16);
   font-weight: 400;
   line-height: normal;
   letter-spacing: 0;
@@ -311,9 +294,6 @@
 .add-space-button:focus-visible,
 .space-card__more-button:focus-visible,
 .space-menu__item:focus-visible {
-  outline:
-    calc(2 * var(--u))
-    solid
-    #487eff;
-  outline-offset: calc(2 * var(--u));
+  outline: calc(var(--app-u) * 2) solid #487eff;
+  outline-offset: calc(var(--app-u) * 2);
 }

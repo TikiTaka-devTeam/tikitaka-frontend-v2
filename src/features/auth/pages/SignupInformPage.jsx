@@ -622,13 +622,13 @@ function SignupInformPage() {
               </label>
             </div>
           </div>
-        </div>
 
-        {errorMessage && (
-          <p className="signup-inform-error" role="alert">
-            {errorMessage}
-          </p>
-        )}
+          {errorMessage && (
+            <p className="signup-inform-error" role="alert">
+              {errorMessage}
+            </p>
+          )}
+        </div>
 
         <div className="title-line-thin signup-inform-bottom-line" />
 

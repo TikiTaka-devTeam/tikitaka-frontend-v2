@@ -30,45 +30,19 @@
   background: rgba(185, 212, 255, 0.13);
 }
 
-.dashboard-status {
-  position: absolute;
-  z-index: 3;
-  top: 2px;
-  left: 0;
-  right: 0;
-  height: 24px;
-  padding: 0 17px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #2e3b54;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.dashboard-status > div {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.dashboard-status img { display: block; width: 16px; height: 10px; object-fit: contain; }
-.dashboard-status img:last-child { width: 21px; }
-
 .dashboard-shell {
   position: relative;
   z-index: 1;
   width: 1130px;
   height: 100%;
   margin: 0 auto;
-  padding-top: 58px;
+  padding-top: 35px;
 }
 
-.dashboard-brand { position: relative; height: 106px; }
-.dashboard-brand button { width: 132px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.dashboard-brand { position: relative; height: 129px; }
+.dashboard-brand button { width: 132px; height: 48px; padding: 0; display: flex; align-items: center; border: 0; background: transparent; cursor: pointer; }
 .dashboard-brand img { display: block; width: 132px; height: 44px; object-fit: contain; }
-.dashboard-brand p { position: absolute; top: 77px; left: 2px; margin: 0; color: #000; font-size: 14px; line-height: 17px; font-weight: 500; white-space: nowrap; }
+.dashboard-brand p { position: absolute; top: 100px; left: 2px; margin: 0; color: #000; font-size: 14px; line-height: 17px; font-weight: 500; white-space: nowrap; }
 
 .dashboard-content { display: grid; grid-template-columns: 763px 347px; gap: 20px; }
 .dashboard-sidebar { display: flex; flex-direction: column; gap: 18px; }
@@ -136,16 +110,35 @@
   width: 120px; 
   height: var(--course-height);
   min-height: 42px;
-  padding: 10px 9px 8px 11px;
+  padding: 0;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.82);
   border-radius: 14px;
   background: var(--course-bg);
   box-shadow: 0 4px 12px rgba(20,36,71,.05);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
 }
 
-.dashboard-course__accent { position: absolute; top: 7px; bottom: max(30px, 35%); left: -1px; width: 3px; border-radius: 2px; background: var(--course-color); }
-.dashboard-course h3 { margin: 0 0 5px; font-size: 12px; line-height: 14px; font-weight: 700; white-space: nowrap; }
+.dashboard-course.is-selected {
+  border-color: transparent;
+  box-shadow: inset 0 0 0 2px var(--course-color), 0 4px 12px rgba(20,36,71,.05);
+}
+
+.dashboard-course:focus-visible {
+  outline: 2px solid var(--course-color);
+  outline-offset: 2px;
+}
+
+.dashboard-course__accent { position: absolute; top: 7px; left: -1px; width: 3px; height: 60%; border-radius: 2px; background: var(--course-color); }
+.dashboard-course__content { position: absolute; top: 11px; right: 5px; bottom: 8px; left: 12px; padding-right: 3px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--course-color) 45%, transparent) transparent; }
+.dashboard-course__content::-webkit-scrollbar { width: 3px; }
+.dashboard-course__content::-webkit-scrollbar-thumb { border-radius: 3px; background: color-mix(in srgb, var(--course-color) 45%, transparent); }
+.dashboard-course__content::-webkit-scrollbar-track { background: transparent; }
+.dashboard-course h3 { margin: 0 0 7px; overflow-wrap: anywhere; font-size: 12px; line-height: 14px; font-weight: 700; white-space: normal; }
 .dashboard-course p { margin: 0; color: #576682; font-size: 9px; line-height: 11px; font-weight: 500; white-space: nowrap; }
 .dashboard-course--purple { --course-bg: rgba(242,235,255,.88); --course-color: #804ffa; }
 .dashboard-course--green { --course-bg: rgba(227,247,240,.88); --course-color: #1ab878; }
@@ -166,7 +159,7 @@
 .dashboard-next-class { height: 151px; padding: 17px 19px; }
 .dashboard-card__eyebrow { display: block; color: #758094; font-size: 10px; font-weight: 700; }
 .dashboard-next-class__badge { position: absolute; top: 15px; right: 25px; width: 74px; height: 28px; display: grid; place-items: center; border-radius: 12px; background: rgba(229,240,255,.92); color: #2e66f5; font-size: 10px; font-weight: 700; }
-.dashboard-next-class h2 { margin: 13px 0 4px; color: #292e3d; font-size: 16px; line-height: 19px; }
+.dashboard-next-class h2 { margin: 15px 0 12px; color: #292e3d; font-size: 16px; line-height: 19px; }
 .dashboard-next-class p { margin: 0; color: #758094; font-size: 12px; font-weight: 500; }
 .dashboard-next-class button { position: absolute; right: 25px; bottom: 19px; width: 117px; height: 30px; border: 0; border-radius: 12px; background: #2e6bff; color: #fff; box-shadow: 0 5px 14px rgba(20,36,71,.1); font-size: 11px; font-weight: 700; cursor: pointer; }
 
@@ -175,7 +168,7 @@
 .dashboard-tasks h2 { margin: 0 0 3px; color: #292e3d; font-size: 16px; line-height: 19px; }
 .dashboard-tasks header span { color: #758094; font-size: 10px; font-weight: 700; }
 .dashboard-tasks header strong { width: 30px; height: 24px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.65); border-radius: 12px; background: rgba(229,240,255,.9); color: #2e6bff; font-size: 11px; }
-.dashboard-tasks ul { margin: 0; padding: 0; list-style: none; }
+.dashboard-tasks ul { max-height: 332px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
 .dashboard-tasks li { position: relative; height: 51px; border-bottom: 1px solid rgba(209,219,237,.28); }
 .dashboard-tasks li.is-read { background: rgba(147,147,147,.1); }
 .dashboard-tasks li:last-child { border-bottom: 0; }
@@ -186,7 +179,11 @@
 .dashboard-task__dot--green { background: #1ab878; }
 .dashboard-task__dot--red { background: #ed4f5c; }
 .dashboard-task__dot--blue { background: #2e66f5; }
+.dashboard-task__dot--purple { background: #804ffa; }
+.dashboard-task__dot--sky { background: #409ced; }
+.dashboard-task__dot--orange { background: #f58a29; }
 .dashboard-tasks li.is-read .dashboard-task__dot { background: #758094; }
+.dashboard-tasks li.dashboard-tasks__empty { padding: 32px 20px; border-bottom: 0; color: #758094; font-size: 12px; text-align: center; }
 
 @media (max-width: 1179px) {
   .dashboard-page {
@@ -234,6 +231,10 @@
     height: 106px;
   }
 
+  .dashboard-brand p {
+    top: 77px;
+  }
+
   .dashboard-sidebar {
     display: flex;
     width: 100%;
@@ -251,10 +252,6 @@
 @media (max-width: 379px) {
   .dashboard-shell {
     width: calc(100% - 24px);
-  }
-
-  .dashboard-status > span:nth-child(2) {
-    display: none;
   }
 
 }

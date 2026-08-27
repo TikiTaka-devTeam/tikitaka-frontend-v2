@@ -1,29 +1,92 @@
 .dashboard-utility,
+.dashboard-search-toolbar,
 .dashboard-bottom-nav {
   z-index: 5;
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  border: calc(var(--app-u) * 1) solid rgba(255, 255, 255, 0.78);
   background: rgba(255, 255, 255, 0.66);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(15px);
+  box-shadow:
+    0 calc(var(--app-u) * 8) calc(var(--app-u) * 12) rgba(0, 0, 0, 0.1),
+    inset 0 calc(var(--app-u) * 1) calc(var(--app-u) * 1)
+      rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(calc(var(--app-u) * 15));
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dashboard-search-toolbar {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--app-u) * 59);
+  right: calc(var(--app-u) * 40);
+  width: calc(var(--app-u) * 327);
+  height: calc(var(--app-u) * 48);
+  padding: 0 calc(var(--app-u) * 20);
+  display: flex;
+  align-items: center;
+  border-radius: calc(var(--app-u) * 28);
+  opacity: 0.9;
+}
+
+.dashboard-search-toolbar input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #2e3b54;
+  font-size: calc(var(--app-u) * 14);
+}
+
+.dashboard-search-toolbar input::placeholder {
+  color: rgba(148, 158, 178, 0.62);
+}
+
+.dashboard-search-toolbar input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.dashboard-search-toolbar button {
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dashboard-search-toolbar img {
+  display: block;
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
 }
 
 .dashboard-utility {
   position: absolute;
-  top: 35px;
-  right: 20px;
-  width: 138px;
-  height: 48px;
-  padding: 0 15px;
+  top: calc(var(--app-u) * 35);
+  right: calc(var(--app-u) * 20);
+  width: calc(var(--app-u) * 138);
+  height: calc(var(--app-u) * 48);
+  padding: 0 calc(var(--app-u) * 15);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-radius: 28px;
+  border-radius: calc(var(--app-u) * 28);
   opacity: 0.9;
 }
 
 .dashboard-utility button {
-  width: 20px;
-  height: 20px;
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
   padding: 0;
   border: 0;
   background: transparent;
@@ -32,62 +95,94 @@
 
 .dashboard-utility img {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
   object-fit: cover;
 }
 
-.dashboard-utility__profile { border-radius: 50%; }
+.dashboard-utility__profile {
+  border-radius: 50%;
+}
 
 .dashboard-bottom-nav {
   position: absolute;
   left: 50%;
-  bottom: 16px;
+  bottom: calc(var(--app-u) * 16);
   transform: translateX(-50%);
-  width: 306px;
-  height: 70px;
-  padding: 12px 22px;
+  width: calc(var(--app-u) * 306);
+  height: calc(var(--app-u) * 70);
+  padding:
+    calc(var(--app-u) * 12)
+    calc(var(--app-u) * 22);
   display: flex;
-  gap: 6px;
-  border-radius: 30px;
-  box-shadow: 0 12px 28px rgba(20, 33, 61, 0.13), inset 0 1px 1px rgba(255, 255, 255, 0.58);
+  gap: calc(var(--app-u) * 6);
+  border-radius: calc(var(--app-u) * 30);
+  box-shadow:
+    0
+    calc(var(--app-u) * 12)
+    calc(var(--app-u) * 28)
+    rgba(20, 33, 61, 0.13),
+    inset
+    0
+    calc(var(--app-u) * 1)
+    calc(var(--app-u) * 1)
+    rgba(255, 255, 255, 0.58);
 }
 
 .dashboard-bottom-nav button {
-  height: 44px;
+  height: calc(var(--app-u) * 44);
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: calc(var(--app-u) * 10);
   border: 0;
-  border-radius: 23px;
+  border-radius: calc(var(--app-u) * 23);
   background: transparent;
-  color: #000;
-  font-size: 16px;
+  color: #000000;
+  font-size: calc(var(--app-u) * 16);
   font-weight: 700;
   cursor: pointer;
 }
 
-.dashboard-bottom-nav button:first-child { width: 130px; }
-.dashboard-bottom-nav button:last-child { width: 124px; }
-.dashboard-bottom-nav button.is-active { color: #2e6bff; }
-.dashboard-bottom-nav img { width: 20px; height: 20px; }
+.dashboard-bottom-nav button:first-child {
+  width: calc(var(--app-u) * 130);
+}
+
+.dashboard-bottom-nav button:last-child {
+  width: calc(var(--app-u) * 124);
+}
+
+.dashboard-bottom-nav button.is-active {
+  color: #2e6bff;
+}
+
+.dashboard-bottom-nav img {
+  width: calc(var(--app-u) * 20);
+  height: calc(var(--app-u) * 20);
+}
 
 @media (max-width: 1179px) {
-  .dashboard-bottom-nav { position: fixed; }
+  .dashboard-bottom-nav {
+    position: fixed;
+  }
 }
 
 @media (max-width: 719px) {
-  .dashboard-utility { top: 35px; right: 16px; }
-  .dashboard-bottom-nav { bottom: 12px; }
+  .dashboard-utility {
+    right: calc(var(--app-u) * 16);
+  }
+
+  .dashboard-bottom-nav {
+    bottom: calc(var(--app-u) * 12);
+  }
 }
 
 @media (max-width: 379px) {
   .dashboard-bottom-nav {
     width: calc(100% - 24px);
-    padding-right: 12px;
-    padding-left: 12px;
+    padding-right: calc(var(--app-u) * 12);
+    padding-left: calc(var(--app-u) * 12);
   }
 
   .dashboard-bottom-nav button:first-child,
@@ -96,5 +191,8 @@
     min-width: 0;
   }
 
-  .dashboard-bottom-nav button { gap: 7px; font-size: 14px; }
+  .dashboard-bottom-nav button {
+    gap: calc(var(--app-u) * 7);
+    font-size: calc(var(--app-u) * 14);
+  }
 }

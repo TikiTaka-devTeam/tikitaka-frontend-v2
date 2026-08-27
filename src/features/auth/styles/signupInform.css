@@ -24,7 +24,8 @@
 }
 
 .signup-inform-scroll {
-  max-height: 488px;
+  /* Keep the actions aligned with the Signup Terms page. */
+  max-height: 457px;
   overflow-y: auto;
   padding: 0 34px 16px;
   scrollbar-color: #979797 transparent;
@@ -368,7 +369,7 @@
 
 .signup-inform-error {
   min-height: 18px;
-  margin: 4px 34px 10px;
+  margin: 4px 0 10px;
   color: #e11d48;
   font-size: 12px;
   font-weight: 700;
@@ -380,7 +381,8 @@
 
 @media (max-width: 640px) {
   .signup-inform-page {
-    padding: 24px 16px;
+    min-height: 100svh;
+    padding: 24px 16px 40px;
   }
 
   .signup-inform-card {
@@ -388,14 +390,52 @@
   }
 
   .signup-inform-scroll {
+    max-height: none;
+    overflow: visible;
     padding: 0 0 16px;
   }
 
-  .signup-inform-inline,
-  .signup-inform-phone,
-  .signup-inform-code,
   .signup-inform-grid {
     grid-template-columns: 1fr;
+  }
+
+  .signup-inform-card h1 {
+    margin-top: 0;
+    font-size: 28px;
+  }
+
+  .signup-inform-inline {
+    grid-template-columns: minmax(0, 1fr) 88px;
+    gap: 8px;
+  }
+
+  .signup-inform-phone {
+    grid-template-columns: 78px minmax(0, 1fr) 88px;
+    gap: 6px;
+  }
+
+  .signup-inform-phone select {
+    width: 78px;
+    padding-left: 12px;
+  }
+
+  .signup-inform-code {
+    grid-template-columns: minmax(0, 1fr) 88px;
+    gap: 8px;
+  }
+
+  .signup-inform-field input,
+  .signup-inform-field select,
+  .signup-inform-password,
+  .signup-inform-phone input,
+  .signup-inform-phone select,
+  .signup-inform-code input,
+  .signup-inform-action {
+    height: 42px;
+  }
+
+  .signup-inform-password input {
+    height: 40px;
   }
 
   .signup-inform-code {
@@ -410,9 +450,36 @@
   .signup-inform-profile {
     grid-template-columns: 1fr;
     gap: 28px;
+    min-height: auto;
+    padding: 24px 0 12px;
   }
 
   .signup-inform-profile-uploader {
     justify-self: center;
+  }
+
+  .signup-inform-error {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .signup-inform-phone {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .signup-inform-phone .signup-inform-action {
+    grid-column: 1 / -1;
+  }
+
+  .signup-inform-phone select {
+    width: 72px;
+    padding-left: 10px;
+  }
+
+  .signup-inform-role-options button {
+    width: auto;
+    flex: 1;
   }
 }

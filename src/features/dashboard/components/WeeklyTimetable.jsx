@@ -3,26 +3,32 @@ import { getCoursePosition } from "../utils/timetable.js";
 
 const TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
-function CourseBlock({ course }) {
+function CourseBlock({ course, isSelected, onSelect }) {
   const { top, height } = getCoursePosition(course);
 
   return (
-    <article
-      className={`dashboard-course dashboard-course--${course.color}`}
+    <button
+      type="button"
+      className={`dashboard-course dashboard-course--${course.color}${isSelected ? " is-selected" : ""}`}
       style={{
         "--course-day": course.day,
         "--course-top": `${top}px`,
         "--course-height": `${height}px`,
       }}
+      aria-pressed={isSelected}
+      aria-label={`${course.title}, ${course.start} – ${course.end}, ${course.room}`}
+      onClick={() => onSelect(course)}
     >
       <span className="dashboard-course__accent" aria-hidden="true" />
-      <h3>{course.title}</h3>
-      <p>{course.start} – {course.end}<br />{course.room}</p>
-    </article>
+      <div className="dashboard-course__content">
+        <h3>{course.title}</h3>
+        <p>{course.start} – {course.end}<br />{course.room}</p>
+      </div>
+    </button>
   );
 }
 
-function WeeklyTimetable({ semesterLabel }) {
+function WeeklyTimetable({ semesterLabel, selectedCourseId, onCourseSelect }) {
   const todayIndex = new Date().getDay() - 1;
 
   return (
@@ -57,7 +63,14 @@ function WeeklyTimetable({ semesterLabel }) {
         <time className="dashboard-timetable__time" style={{ "--time-index": index }} key={time}>{time}</time>
       ))}
 
-      {COURSES.map((course) => <CourseBlock course={course} key={course.id} />)}
+      {COURSES.map((course) => (
+        <CourseBlock
+          course={course}
+          isSelected={course.id === selectedCourseId}
+          onSelect={onCourseSelect}
+          key={course.id}
+        />
+      ))}
     </section>
   );
 }

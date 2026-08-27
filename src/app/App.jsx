@@ -1,13 +1,12 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import PlaceholderPage from "../components/common/PlaceholderPage.jsx";
-
 import LoginPage from "../features/auth/pages/LoginPage.jsx";
 import SignupCompletePage from "../features/auth/pages/SignupCompletePage.jsx";
 import SignupInformPage from "../features/auth/pages/SignupInformPage.jsx";
 import SignupTermsPage from "../features/auth/pages/SignupTermsPage.jsx";
 
 import DashboardPage from "../features/dashboard/pages/DashboardPage.jsx";
+import SearchPage from "../features/search/pages/SearchPage.jsx";
 import SpacesPage from "../features/spaces/pages/SpacesPage.jsx";
 
 function App() {
@@ -27,6 +26,7 @@ function App() {
       />
 
       <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/search" element={<SearchPage />} />
       <Route path="/spaces" element={<SpacesPage />} />
 
       <Route
