@@ -40,7 +40,7 @@
 }
 
 .dashboard-brand { position: relative; height: 129px; }
-.dashboard-brand button { width: 132px; height: 48px; padding: 0; display: flex; align-items: center; border: 0; background: transparent; cursor: pointer; }
+.dashboard-brand button { width: 132px; height: 44px; padding: 0; display: flex; align-items: center; border: 0; background: transparent; cursor: pointer; }
 .dashboard-brand img { display: block; width: 132px; height: 44px; object-fit: contain; }
 .dashboard-brand p { position: absolute; top: 100px; left: 2px; margin: 0; color: #000; font-size: 14px; line-height: 17px; font-weight: 500; white-space: nowrap; }
 
@@ -199,6 +199,11 @@
     height: auto;
   }
 
+  .dashboard-brand button {
+    position: relative;
+    left: calc(24px - max(24px, calc(50vw - 381.5px)));
+  }
+
   .dashboard-content {
     display: flex;
     flex-direction: column;
@@ -229,6 +234,10 @@
 
   .dashboard-brand {
     height: 106px;
+  }
+
+  .dashboard-brand button {
+    left: 0;
   }
 
   .dashboard-brand p {
