@@ -13,6 +13,23 @@ function SearchPage() { const navigate = useNavigate(); return <main className="
   <div className="search-page__orb search-page__orb--middle" aria-hidden="true" /><div className="search-page__orb search-page__orb--top" aria-hidden="true" /><div className="search-page__orb search-page__orb--bottom" aria-hidden="true" />
   <SystemStatusBar /><SearchToolbar /><BottomNavigation />
   <header className="search-page__brand"><button type="button" onClick={() => navigate("/dashboard")} aria-label="대시보드로 이동"><img src={logoSrc} alt="tikitaka" /></button></header>
-  <div className="search-page__content">{EMPTY_SECTIONS.map(({ title, empty, modifier }, index) => <section className={`search-empty search-empty--${modifier}`} key={title}><header><h1>{title}</h1>{index === 0 && <button type="button">전체 삭제</button>}</header><p>{empty}</p></section>)}</div>
+  <div className="search-page__content">
+    {EMPTY_SECTIONS.map(
+      ({ title, empty, modifier }, index) => 
+      <section className={`search-empty search-empty--${modifier}`} key={title}>
+        <header>
+          <h1>
+            {title}
+          </h1>
+          {index === 0 && <button type="button">
+            전체 삭제
+          </button>}
+        </header>
+        <p>
+          {empty}
+        </p>
+      </section>)
+      }
+    </div>
 </main>; }
 export default SearchPage;
