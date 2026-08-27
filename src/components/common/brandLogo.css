@@ -1,0 +1,18 @@
+.brand-logo {
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.brand-logo img {
+  display: block;
+}
+
+.brand-logo:focus-visible {
+  outline: 2px solid #2e6bff;
+  outline-offset: 4px;
+  border-radius: 4px;
+}

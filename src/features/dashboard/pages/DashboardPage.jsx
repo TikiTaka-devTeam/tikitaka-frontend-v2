@@ -1,13 +1,12 @@
-import { useNavigate } from "react-router-dom";
-import logoSrc from "../../../assets/images/logo_tikitaka_blue.svg";
+import { useState } from "react";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
-import { SystemStatusBar } from "../components/DashboardChrome.jsx";
+import BrandLogo from "../../../components/common/BrandLogo.jsx";
 import { NextClassCard, TaskSummaryCard } from "../components/DashboardCards.jsx";
 import WeeklyTimetable from "../components/WeeklyTimetable.jsx";
 import "../styles/dashboard.css";
 
 function DashboardPage() {
-  const navigate = useNavigate();
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const now = new Date();
   const semesterLabel = `${now.getFullYear()}년 ${now.getMonth() < 6 ? 1 : 2}학기`;
 
@@ -15,23 +14,24 @@ function DashboardPage() {
     <main className="dashboard-page">
       <div className="dashboard-page__orb dashboard-page__orb--left" aria-hidden="true" />
       <div className="dashboard-page__orb dashboard-page__orb--right" aria-hidden="true" />
-      <SystemStatusBar />
       <AppToolbars onSearch={() => navigate("/search")} />
 
       <div className="dashboard-shell">
         <header className="dashboard-brand">
-          <button type="button" onClick={() => navigate("/dashboard")} aria-label="대시보드로 이동">
-            <img src={logoSrc} alt="tikitaka" />
-          </button>
+          <BrandLogo />
           <p>{semesterLabel}</p>
         </header>
         <div className="dashboard-content">
           <div className="dashboard-timetable-scroll">
-            <WeeklyTimetable semesterLabel={semesterLabel} />
+            <WeeklyTimetable
+              semesterLabel={semesterLabel}
+              selectedCourseId={selectedCourse?.id}
+              onCourseSelect={setSelectedCourse}
+            />
           </div>
           <aside className="dashboard-sidebar">
-            <NextClassCard />
-            <TaskSummaryCard />
+            <NextClassCard selectedCourse={selectedCourse} />
+            <TaskSummaryCard selectedCourse={selectedCourse} />
           </aside>
         </div>
       </div>
