@@ -18,10 +18,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --app-u: min(
-    0.082644628vw,
-    0.119904077vh
-  );
+  --app-frame-max: 1210px;
+  --app-content-max: 1130px;
+  --app-gutter: clamp(16px, 3.3vw, 40px);
+  --app-logo-top: 59px;
 
   --page-bg: #f2f2f7;
   --text-main: #212326;
@@ -56,4 +56,34 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+.app-frame {
+  position: relative;
+  width: min(100%, var(--app-frame-max));
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-inline: auto;
+}
+
+.app-container {
+  position: relative;
+  width: min(
+    calc(100% - (var(--app-gutter) * 2)),
+    var(--app-content-max)
+  );
+  margin-inline: auto;
+}
+
+.app-brand {
+  position: absolute;
+  top: var(--app-logo-top);
+  left: var(--app-gutter);
+  z-index: 10;
+}
+
+@media (max-width: 700px) {
+  :root {
+    --app-logo-top: 24px;
+  }
 }

@@ -9,12 +9,12 @@
 
 .brand-logo img {
   display: block;
-  width: calc(var(--app-u) * 132);
-  height: calc(var(--app-u) * 43);
+  width: clamp(112px, 10.91vw, 132px);
+  height: auto;
 }
 
 .brand-logo:focus-visible {
-  outline: calc(var(--app-u) * 2) solid #2e6bff;
-  outline-offset: calc(var(--app-u) * 4);
-  border-radius: calc(var(--app-u) * 4);
+  outline: 2px solid #2e6bff;
+  outline-offset: 4px;
+  border-radius: 4px;
 }

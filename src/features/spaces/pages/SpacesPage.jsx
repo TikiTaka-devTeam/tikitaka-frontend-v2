@@ -55,82 +55,88 @@ function SpacesPage() {
 
   return (
     <main className="spaces-page">
-      <div className="spaces-layout">
+      <div className="app-frame spaces-frame">
         <BrandLogo
           variant="blue"
-          className="spaces-brand-logo"
+          className="app-brand"
         />
 
-        <h1 className="spaces-title">
-          Space 목록
-        </h1>
+        <AppToolbars
+          onSearch={handleSearch}
+          onNotifications={handleNotifications}
+        />
 
-        <div
-          className="spaces-tabs"
-          role="tablist"
-          aria-label="Space 상태"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={selectedTab === "active"}
-            className={`spaces-tab ${
-              selectedTab === "active"
-                ? "spaces-tab--selected"
-                : ""
-            }`}
-            onClick={() => setSelectedTab("active")}
-          >
-            활성화
-          </button>
+        <div className="app-container spaces-container">
+          <div className="spaces-header">
+            <div className="spaces-header__left">
+              <h1 className="spaces-title">
+                Space 목록
+              </h1>
 
-          <button
-            type="button"
-            role="tab"
-            aria-selected={selectedTab === "archived"}
-            className={`spaces-tab ${
-              selectedTab === "archived"
-                ? "spaces-tab--selected"
-                : ""
-            }`}
-            onClick={() => setSelectedTab("archived")}
-          >
-            보관됨
-          </button>
+              <div
+                className="spaces-tabs"
+                role="tablist"
+                aria-label="Space 상태"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedTab === "active"}
+                  className={`spaces-tab ${
+                    selectedTab === "active"
+                      ? "spaces-tab--selected"
+                      : ""
+                  }`}
+                  onClick={() => setSelectedTab("active")}
+                >
+                  활성화
+                </button>
+
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedTab === "archived"}
+                  className={`spaces-tab ${
+                    selectedTab === "archived"
+                      ? "spaces-tab--selected"
+                      : ""
+                  }`}
+                  onClick={() => setSelectedTab("archived")}
+                >
+                  보관됨
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="add-space-button"
+              onClick={handleAddSpace}
+            >
+              Add Space
+            </button>
+          </div>
+
+          {visibleSpaces.length > 0 && (
+            <div className="space-grid">
+              {visibleSpaces.map((space) => (
+                <SpaceCard
+                  key={space.id}
+                  space={space}
+                  onArchive={handleArchive}
+                  onActivate={handleActivate}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        <button
-          type="button"
-          className="add-space-button"
-          onClick={handleAddSpace}
-        >
-          Add Space
-        </button>
-
-        {visibleSpaces.length > 0 && (
-          <div className="space-grid">
-            {visibleSpaces.map((space) => (
-              <SpaceCard
-                key={space.id}
-                space={space}
-                onArchive={handleArchive}
-                onActivate={handleActivate}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
+        {visibleSpaces.length === 0 && (
+          <SpaceEmptyState />
         )}
       </div>
-
-      {visibleSpaces.length === 0 && (
-        <SpaceEmptyState />
-      )}
-
-      <AppToolbars
-        onSearch={handleSearch}
-        onNotifications={handleNotifications}
-      />
     </main>
   );
 }
