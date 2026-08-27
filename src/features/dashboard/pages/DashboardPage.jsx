@@ -14,7 +14,7 @@ function DashboardPage() {
     <main className="dashboard-page">
       <div className="dashboard-page__orb dashboard-page__orb--left" aria-hidden="true" />
       <div className="dashboard-page__orb dashboard-page__orb--right" aria-hidden="true" />
-      <AppToolbars />
+      <AppToolbars onSearch={() => navigate("/search")} />
 
       <div className="dashboard-shell">
         <header className="dashboard-brand">
