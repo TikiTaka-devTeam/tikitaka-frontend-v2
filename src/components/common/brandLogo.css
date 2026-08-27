@@ -9,6 +9,8 @@
 
 .brand-logo img {
   display: block;
+  width: clamp(112px, 10.91vw, 132px);
+  height: auto;
 }
 
 .brand-logo:focus-visible {
