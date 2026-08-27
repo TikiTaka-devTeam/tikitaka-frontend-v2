@@ -403,12 +403,19 @@ API 관련 코드는 가능한 한 중앙화된 client/module 구조를 사용�
 
 ```text
 src/
-├── api/
-│   ├── client.js
-│   ├── authApi.js
-│   ├── spaceApi.js
-│   ├── documentApi.js
-│   └── questionApi.js
+└── api/
+    ├── client.js
+    ├── authApi.js
+    ├── dashboardApi.js
+    ├── searchApi.js
+    ├── spaceApi.js
+    ├── documentApi.js
+    ├── noticeApi.js
+    ├── questionApi.js
+    ├── assignmentApi.js
+    ├── memberApi.js
+    ├── notificationApi.js
+    └── noteApi.js
 ```
 
 실제 Repository 구조가 이와 다르다면 **현재 Repository 구조를 우선한다.**
