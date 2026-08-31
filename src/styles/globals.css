@@ -77,9 +77,24 @@ select {
 
 .app-brand {
   position: absolute;
-  top: var(--app-logo-top);
-  left: var(--app-gutter);
+  top: 35px;
+  left: clamp(24px, calc(50% - 565px), 40px);
+  width: 132px;
+  height: 44px;
   z-index: 10;
+}
+
+.app-brand img {
+  width: 132px;
+  height: 44px;
+  object-fit: contain;
+}
+
+@media (max-width: 719px) {
+  .app-brand {
+    top: 92px;
+    left: 16px;
+  }
 }
 
 @media (max-width: 700px) {
