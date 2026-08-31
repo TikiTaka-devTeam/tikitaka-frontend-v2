@@ -1,0 +1,44 @@
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-actions__button {
+  width: 107px;
+  height: 44px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+
+  cursor: pointer;
+}
+
+.modal-actions__cancel {
+  border: 1px solid #d8dbe7;
+
+  background: #ffffff;
+  color: #3e4257;
+}
+
+.modal-actions__confirm {
+  border: 0;
+
+  background: #2e6bff;
+  color: #ffffff;
+}
+
+.modal-actions__confirm:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+}

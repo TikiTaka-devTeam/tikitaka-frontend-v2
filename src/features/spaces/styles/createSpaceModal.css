@@ -1,0 +1,515 @@
+.create-space-modal {
+  position: relative;
+
+  width: min(520px, calc(100vw - 32px));
+  height: min(650px, calc(100dvh - 32px));
+
+  padding: 32px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+  color: #141c2e;
+
+  box-shadow:
+    0 18px 42px rgba(10, 26, 56, 0.22);
+}
+
+/* =========================
+   Header
+========================= */
+
+.create-space-modal__header {
+  flex: 0 0 auto;
+}
+
+.create-space-modal__title {
+  margin: 0;
+
+  color: #141c2e;
+
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 29px;
+
+  text-align: left;
+}
+
+.create-space-modal__description {
+  margin:
+    10px
+    0
+    0
+    1px;
+
+  color: #758094;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 17px;
+}
+
+.create-space-modal__divider {
+  width: 100%;
+  height: 1px;
+
+  margin-top: 12px;
+
+  background: #e0e5f2;
+}
+
+/* =========================
+   Scroll Area
+========================= */
+
+.create-space-modal__body-wrap {
+  position: relative;
+
+  min-height: 0;
+  flex: 1;
+
+  margin-top: 32px;
+}
+
+.create-space-modal__body {
+  width: calc(100% + 10px);
+  height: 100%;
+
+  margin-right: -10px;
+  padding-right: 10px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: #c4cbd8 transparent;
+}
+
+.create-space-modal__body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.create-space-modal__body::-webkit-scrollbar-track {
+  margin-block: 8px;
+
+  background: transparent;
+}
+
+.create-space-modal__body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background: #c4cbd8;
+}
+
+.create-space-modal__body-fade {
+  position: absolute;
+
+  left: 0;
+  right: 10px;
+  bottom: 0;
+
+  height: 60px;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  z-index: 5;
+}
+
+.create-space-modal__body-fade::before {
+  content: "";
+
+  position: absolute;
+
+  left: -30px;
+  right: -30px;
+  top: -40px;
+  bottom: -40px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.32) 30%,
+    rgba(255, 255, 255, 0.72) 65%,
+    rgba(255, 255, 255, 1) 100%
+  );
+
+  filter: blur(20px);
+}
+
+/* =========================
+   Common Field
+========================= */
+
+.create-space-modal__field {
+  width: 100%;
+}
+
+.create-space-modal__field-label {
+  display: block;
+
+  margin: 0;
+
+  color: #292e3d;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+}
+
+.create-space-modal__field-input {
+  width: 100%;
+  height: 48px;
+
+  margin-top: 8px;
+  padding: 0 14px;
+
+  border: 1px solid #e0e5f2;
+  border-radius: 10px;
+  outline: none;
+
+  background: #ffffff;
+
+  color: #292e3d;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+
+  transition: border-color 0.15s ease;
+}
+
+.create-space-modal__field-input::placeholder {
+  color: #94a1b8;
+}
+
+.create-space-modal__field-input:focus {
+  border-color: #2e6bff;
+}
+
+.create-space-modal__field-input.has-value {
+  border-color: #2e6bff;
+}
+
+/* =========================
+   Class Time
+========================= */
+
+.create-space-modal__time-section {
+  margin-top: 36px;
+}
+
+.create-space-modal__time-list {
+  margin-top: 8px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.create-space-modal__time-box {
+  position: relative;
+
+  width: 100%;
+  height: 130px;
+
+  flex: 0 0 130px;
+
+  border: 1px solid #e0e5f2;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  transition: border-color 0.15s ease;
+}
+
+.create-space-modal__time-box[data-active="true"] {
+  border-color: #2e6bff;
+}
+
+/* =========================
+   Remove Time
+========================= */
+
+.create-space-modal__remove-time {
+  position: absolute;
+
+  top: 13px;
+  right: 16px;
+
+  width: 16px;
+  height: 16px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  outline: none;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  z-index: 3;
+}
+
+.create-space-modal__remove-time img {
+  display: block;
+
+  width: 16px;
+  height: 16px;
+
+  object-fit: contain;
+}
+
+/* =========================
+   Day Buttons
+========================= */
+
+.create-space-modal__day-list {
+  position: absolute;
+
+  top: 16px;
+  left: 20px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.create-space-modal__day-button {
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #e6e7e9;
+  color: #c4c4c4;
+
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.create-space-modal__day-button.is-selected {
+  background: #2e6bff;
+  color: #ffffff;
+}
+
+/* =========================
+   Time Input Row
+========================= */
+
+.create-space-modal__time-row {
+  position: absolute;
+
+  left: 20px;
+  bottom: 11px;
+
+  display: flex;
+  align-items: center;
+}
+
+.create-space-modal__time-picker {
+  width: 113px;
+  height: 47px;
+
+  padding: 0 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: 1px solid #e0e5f2;
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+.create-space-modal__time-input {
+  width: 58px;
+  min-width: 0;
+
+  padding: 0;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: #e0e5f2;
+
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.create-space-modal__time-input.has-value {
+  color: #212326;
+}
+
+.create-space-modal__time-input::placeholder {
+  color: #e0e5f2;
+
+  opacity: 1;
+}
+
+.create-space-modal__time-separator {
+  margin: 0 12px;
+
+  color: #212326;
+
+  font-size: 18px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+/* =========================
+   AM / PM
+========================= */
+
+.create-space-modal__period {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+}
+
+.create-space-modal__period-trigger {
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+  color: #212326;
+
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+
+  cursor: pointer;
+}
+
+.create-space-modal__period-dropdown {
+  position: absolute;
+
+  top: calc(100% + 16px);
+  right: -9px;
+
+  width: 64px;
+  height: 64px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 18px 42px rgba(10, 26, 56, 0.22);
+
+  z-index: 30;
+}
+
+.create-space-modal__period-option {
+  width: 35px;
+  height: 17px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #b2b8c4;
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 17px;
+
+  cursor: pointer;
+}
+
+.create-space-modal__period-option.is-selected {
+  background: #ebeef5;
+  color: #212326;
+}
+
+/* =========================
+   Add Time
+========================= */
+
+.create-space-modal__add-time {
+  margin-top: 8px;
+  margin-left: auto;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border: 0;
+
+  background: transparent;
+  color: #2e6bff;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+
+  cursor: pointer;
+}
+
+/* =========================
+   Classroom
+========================= */
+
+.create-space-modal__classroom {
+  margin-top: 26px;
+}
+
+/* =========================
+   Bottom Actions
+========================= */
+
+.create-space-modal__actions {
+  flex: 0 0 auto;
+
+  margin-top: 14px;
+  margin-bottom: 2px;
+  margin-left: auto;
+}
