@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import BrandLogo from "../../../components/common/BrandLogo.jsx";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
 
+import CreateSpaceModal from "../components/CreateSpaceModal.jsx";
+import SaveCompleteModal from "../components/SaveCompleteModal.jsx";
+import SaveConfirmModal from "../components/SaveConfirmModal.jsx";
 import SpaceCard from "../components/SpaceCard.jsx";
 import SpaceEmptyState from "../components/SpaceEmptyState.jsx";
 
@@ -14,6 +17,12 @@ function SpacesPage() {
 
   const [selectedTab, setSelectedTab] = useState("active");
   const [spaces] = useState([]);
+
+  const [spaceModalStep, setSpaceModalStep] =
+    useState(null);
+
+  const [pendingSpaceData, setPendingSpaceData] =
+    useState(null);
 
   const visibleSpaces = useMemo(() => {
     return spaces.filter((space) => {
@@ -26,7 +35,36 @@ function SpacesPage() {
   }, [spaces, selectedTab]);
 
   const handleAddSpace = () => {
-    console.log("Add Space");
+    setPendingSpaceData(null);
+    setSpaceModalStep("create");
+  };
+
+  const handleCloseCreateModal = () => {
+    setPendingSpaceData(null);
+    setSpaceModalStep(null);
+  };
+
+  const handleCreateSpaceSave = (spaceData) => {
+    setPendingSpaceData(spaceData);
+    setSpaceModalStep("confirm");
+  };
+
+  const handleConfirmCancel = () => {
+    setSpaceModalStep("create");
+  };
+
+  const handleConfirmSave = () => {
+    console.log(
+      "생성할 Space:",
+      pendingSpaceData,
+    );
+
+    setSpaceModalStep("complete");
+  };
+
+  const handleCompleteConfirm = () => {
+    setPendingSpaceData(null);
+    setSpaceModalStep(null);
   };
 
   const handleArchive = (spaceId) => {
@@ -81,13 +119,17 @@ function SpacesPage() {
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={selectedTab === "active"}
+                  aria-selected={
+                    selectedTab === "active"
+                  }
                   className={`spaces-tab ${
                     selectedTab === "active"
                       ? "spaces-tab--selected"
                       : ""
                   }`}
-                  onClick={() => setSelectedTab("active")}
+                  onClick={() =>
+                    setSelectedTab("active")
+                  }
                 >
                   활성화
                 </button>
@@ -95,13 +137,17 @@ function SpacesPage() {
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={selectedTab === "archived"}
+                  aria-selected={
+                    selectedTab === "archived"
+                  }
                   className={`spaces-tab ${
                     selectedTab === "archived"
                       ? "spaces-tab--selected"
                       : ""
                   }`}
-                  onClick={() => setSelectedTab("archived")}
+                  onClick={() =>
+                    setSelectedTab("archived")
+                  }
                 >
                   보관됨
                 </button>
@@ -137,6 +183,27 @@ function SpacesPage() {
           <SpaceEmptyState />
         )}
       </div>
+
+      {spaceModalStep === "create" && (
+        <CreateSpaceModal
+          initialData={pendingSpaceData}
+          onClose={handleCloseCreateModal}
+          onSave={handleCreateSpaceSave}
+        />
+      )}
+
+      {spaceModalStep === "confirm" && (
+        <SaveConfirmModal
+          onCancel={handleConfirmCancel}
+          onConfirm={handleConfirmSave}
+        />
+      )}
+
+      {spaceModalStep === "complete" && (
+        <SaveCompleteModal
+          onConfirm={handleCompleteConfirm}
+        />
+      )}
     </main>
   );
 }
