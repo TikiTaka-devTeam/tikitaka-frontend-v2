@@ -9,7 +9,7 @@ import homeBlackIcon from "../../assets/icons/dashboard-home-black.svg";
 import spacesIcon from "../../assets/icons/dashboard-spaces.svg";
 import spacesBlackIcon from "../../assets/icons/dashboard-spaces-black.svg";
 
-import userIcon from "../../assets/icons/userIcon.png";
+import profileAvatar from "../../assets/images/profile-avatar.svg";
 
 import "./appToolbars.css";
 
@@ -49,6 +49,7 @@ function readProfileImage() {
 export function UtilityToolbar({
   onSearch,
   onNotifications,
+  onProfile,
   profilePath = "/profile-setting",
   profileImage,
 }) {
@@ -87,15 +88,13 @@ export function UtilityToolbar({
       <button
         type="button"
         aria-label="내 정보"
-        onClick={() =>
-          navigate(profilePath)
-        }
+        onClick={onProfile || (() => navigate(profilePath))}
       >
         <img
           className="dashboard-utility__profile"
           src={
             resolvedProfileImage ||
-            userIcon
+            profileAvatar
           }
           alt=""
         />

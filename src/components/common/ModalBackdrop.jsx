@@ -7,6 +7,7 @@ function ModalBackdrop({
   onClose,
   closeOnBackdrop = false,
   closeOnEscape = true,
+  className = "",
 }) {
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -37,7 +38,7 @@ function ModalBackdrop({
 
   return createPortal(
     <div
-      className="modal-backdrop"
+      className={`modal-backdrop ${className}`}
       onMouseDown={handleBackdropMouseDown}
     >
       {children}
