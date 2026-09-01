@@ -378,15 +378,49 @@ Tikitaka Frontend 작업의 기본 원칙은 다음과 같다.
 
 The following documents are authoritative project specifications:
 
-- `API-SPEC.md`
-  - Source of truth for backend API integration.
-  - Read before answering API-related questions or modifying API-related code.
-  - Do not invent endpoints, request/response fields, or authentication behavior not defined in the specification.
+## `FRONTEND-GUIDE.md`
 
-- `RESPONSIVE.md`
-  - Source of truth for responsive UI behavior.
-  - Read before answering responsive-design questions or modifying responsive layouts.
-  - Follow the defined breakpoints and responsive rules instead of introducing arbitrary ones.
+Read when:
+
+- implementing a new feature
+- modifying existing feature behavior
+- deciding where a feature belongs
+- working with Space, Document, Slide, Question, Drawing, or User context
+- making frontend architecture decisions
+- working on existing Tikitaka UI/UX
+
+Treat this document as the primary project/domain guide.
+
+
+## `API-SPEC.md`
+
+Read before:
+
+- implementing API integration
+- modifying API calls
+- answering questions about backend communication
+- working with request/response data
+- working with authentication or authorization behavior
+
+Treat `API-SPEC.md` as the source of truth for backend API contracts.
+
+Do not invent endpoints, parameters, request fields, or response fields that
+are not defined in the specification.
+
+
+## `RESPONSIVE.md`
+
+Read before:
+
+- implementing responsive layouts
+- modifying responsive behavior
+- changing breakpoints
+- handling tablet/mobile/desktop layout differences
+
+Treat `RESPONSIVE.md` as the source of truth for responsive behavior.
+
+Do not introduce arbitrary breakpoints or responsive rules that conflict with
+this document.
 
 If a task involves both API integration and responsive behavior, read both documents before proceeding.
 
