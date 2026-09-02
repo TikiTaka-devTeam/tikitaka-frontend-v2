@@ -18,6 +18,7 @@
 .spaces-page__orb {
   position: absolute;
   border-radius: 50%;
+  filter: blur(50px);
 }
 
 .spaces-page__orb--left {
@@ -25,8 +26,7 @@
   top: 560px;
   width: 410px;
   height: 410px;
-  background: rgba(185, 212, 255, 0.25);
-  filter: blur(90px);
+  background: rgba(185, 212, 255, 0.13);
 }
 
 .spaces-page__orb--right {
@@ -34,8 +34,7 @@
   right: -150px;
   width: 460px;
   height: 460px;
-  background: rgba(215, 203, 255, 0.25);
-  filter: blur(100px);
+  background: rgba(185, 212, 255, 0.13);
 }
 
 .spaces-frame {

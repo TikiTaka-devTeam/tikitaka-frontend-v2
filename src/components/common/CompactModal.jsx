@@ -7,9 +7,10 @@ function CompactModal({
   labelledBy,
   describedBy,
   className = "",
+  backdropClassName = "",
 }) {
   return (
-    <ModalBackdrop onClose={onClose}>
+    <ModalBackdrop onClose={onClose} className={backdropClassName}>
       <section
         className={`compact-modal ${className}`}
         role="dialog"

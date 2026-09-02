@@ -24,4 +24,14 @@ export const TASKS = [
   { id: 12, spaceId: "embedded-system", title: "회로 구성도 업로드", due: "다음 주", dueAt: "2026-09-02T23:59:00+09:00", color: "orange" },
 ];
 
+export const NOTIFICATIONS = [
+  { id: 1, group: "오늘", spaceId: "capstone-design", color: "purple", title: "캡스톤디자인에 공지가 추가되었습니다.", meta: "2시간 전 · 실무중심산학협력프로젝트1 · 김승훈" },
+  { id: 2, group: "오늘", spaceId: "operating-system", color: "green", title: "운영체제에 새로운 강의자료가 업로드되었습니다.", meta: "3시간 전 · 운영체제1분반 · 김승훈" },
+  { id: 3, group: "오늘", spaceId: "internet-protocol", color: "blue", title: "인터넷프로토콜에 새로운 강의자료가 업로드됐어요!", meta: "8시간 전 · 인터넷프로토콜1분반 · 박태근" },
+  { id: 4, group: "오늘", spaceId: "operating-system", color: "green", title: "운영체제 4. Threads에 남긴 질문에 답변이 달렸어요!", meta: "9시간 전 · 운영체제1분반 · 김승훈" },
+  { id: 5, group: "오늘", spaceId: "data-visualization", color: "sky", title: "데이터 시각화 과제가 등록되었습니다.", meta: "10시간 전 · 데이터 시각화1분반 · 이서연" },
+  { id: 6, group: "어제", spaceId: "problem-solving-design", color: "red", title: "문제해결설계에 새 공지가 추가되었습니다.", meta: "1일 전 · 문제해결설계1분반 · 최지훈" },
+  { id: 7, group: "어제", spaceId: "embedded-system", color: "orange", title: "임베디드시스템 강의자료가 업로드되었습니다.", meta: "1일 전 · 임베디드시스템1분반 · 한유진" },
+];
+
 export const SPACES_PATH = "/spaces";

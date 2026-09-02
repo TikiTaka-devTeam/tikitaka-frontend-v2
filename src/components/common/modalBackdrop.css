@@ -10,3 +10,7 @@
 
   background: rgba(13, 23, 43, 0.42);
 }
+
+.modal-backdrop--light {
+  background: rgba(10, 18, 31, 0.08);
+}

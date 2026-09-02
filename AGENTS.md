@@ -371,3 +371,57 @@ Tikitaka Frontend 작업의 기본 원칙은 다음과 같다.
 > Read first. Understand existing patterns. Change the minimum necessary. Preserve the existing Tikitaka design and architecture.
 
 큰 리팩터링보다 **정확한 최소 변경**을 우선한다.
+
+---
+
+# 19. Project References
+
+The following documents are authoritative project specifications:
+
+## `FRONTEND-GUIDE.md`
+
+Read when:
+
+- implementing a new feature
+- modifying existing feature behavior
+- deciding where a feature belongs
+- working with Space, Document, Slide, Question, Drawing, or User context
+- making frontend architecture decisions
+- working on existing Tikitaka UI/UX
+
+Treat this document as the primary project/domain guide.
+
+
+## `API-SPEC.md`
+
+Read before:
+
+- implementing API integration
+- modifying API calls
+- answering questions about backend communication
+- working with request/response data
+- working with authentication or authorization behavior
+
+Treat `API-SPEC.md` as the source of truth for backend API contracts.
+
+Do not invent endpoints, parameters, request fields, or response fields that
+are not defined in the specification.
+
+
+## `RESPONSIVE.md`
+
+Read before:
+
+- implementing responsive layouts
+- modifying responsive behavior
+- changing breakpoints
+- handling tablet/mobile/desktop layout differences
+
+Treat `RESPONSIVE.md` as the source of truth for responsive behavior.
+
+Do not introduce arbitrary breakpoints or responsive rules that conflict with
+this document.
+
+If a task involves both API integration and responsive behavior, read both documents before proceeding.
+
+If a required behavior is not specified in these documents, do not assume it. Check the existing implementation first, and ask the user when a significant decision is required.

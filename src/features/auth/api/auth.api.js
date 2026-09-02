@@ -3,12 +3,21 @@ import { apiClient } from "../../../lib/api/client";
 export const login = (payload) => apiClient.post("/auth/login", payload);
 
 export const checkEmailDuplicate = (email) => 
-    apiClient.get("/auth/check-email", { params: { email }, skipAuth: true });
+    apiClient.get("/auth/email/check", { params: { email }, skipAuth: true });
 
 export const signup = (payload) =>
   apiClient.post("/auth/signup", payload);
 
-export const getCurrentUser = () => apiClient.get("/users");
+export const getCurrentUser = () => apiClient.get("/users/me");
+
+export const changePassword = (payload) =>
+  apiClient.patch("/users/me/password", payload);
+
+export const updateMyProfileImage = (payload) =>
+  apiClient.patch("/users/me/profile-image", payload);
+
+export const createInquiry = (payload) =>
+  apiClient.post("/inquiries", payload);
 
 export const getProfileImageUploadUrl = (payload) =>
   apiClient.post("/auth/create-profile-image", payload, { skipAuth: true });

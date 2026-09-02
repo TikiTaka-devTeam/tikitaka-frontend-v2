@@ -10,6 +10,10 @@ import BrandLogo from "../../../components/common/BrandLogo.jsx";
 import {
   AppToolbars,
 } from "../../../components/common/AppToolbars.jsx";
+import {
+  COURSES,
+  WEEK_DAYS,
+} from "../../dashboard/data/dashboard.js";
 
 import ActivateCompleteModal from "../components/ActivateCompleteModal.jsx";
 import ActivateConfirmModal from "../components/ActivateConfirmModal.jsx";
@@ -56,6 +60,51 @@ const DAY_API_VALUES = {
   토: "SATURDAY",
   일: "SUNDAY",
 };
+
+const MOCK_PROFESSORS = {
+  "internet-protocol": "박태근",
+  "capstone-design": "김승훈",
+  "operating-system": "김승훈",
+  "data-visualization": "이서연",
+  "problem-solving-design": "최지훈",
+  "embedded-system": "한유진",
+};
+
+const ACTIVE_SPACE_MOCKS =
+  COURSES.map((course) => {
+    const day =
+      WEEK_DAYS[course.day];
+
+    return {
+      id: `mock-${course.spaceId}`,
+      name: course.title,
+      semester: "2026-1",
+      professor:
+        MOCK_PROFESSORS[
+          course.spaceId
+        ] ?? "",
+      schedule: `${day} ${course.start} - ${course.end}`,
+      room: course.room,
+      classroom: course.room,
+      schedules: [
+        {
+          day:
+            DAY_API_VALUES[day],
+          start_time:
+            course.start,
+          end_time: course.end,
+        },
+      ],
+      color:
+        course.color.toUpperCase(),
+      status: "ACTIVE",
+      archived: false,
+      participationStatus:
+        "APPROVED",
+      isPending: false,
+      isMock: true,
+    };
+  });
 
 function readUserRole() {
   const getRoleFromUser = (user) => {
@@ -294,6 +343,32 @@ function normalizeSpacesResponse(
   ];
 }
 
+function getSpaceList(
+  data,
+  status,
+) {
+  const normalizedSpaces =
+    normalizeSpacesResponse(
+      data,
+      status,
+    );
+
+  if (
+    status === "ACTIVE" &&
+    normalizedSpaces.length === 0
+  ) {
+    return ACTIVE_SPACE_MOCKS;
+  }
+
+  return normalizedSpaces;
+}
+
+function getFallbackSpaces(status) {
+  return status === "ACTIVE"
+    ? ACTIVE_SPACE_MOCKS
+    : [];
+}
+
 function convertTo24Hour(
   time,
   period,
@@ -526,7 +601,7 @@ function SpacesPage() {
             );
 
           setSpaces(
-            normalizeSpacesResponse(
+            getSpaceList(
               data,
               status,
             ),
@@ -537,7 +612,11 @@ function SpacesPage() {
             error,
           );
 
-          setSpaces([]);
+          setSpaces(
+            getFallbackSpaces(
+              status,
+            ),
+          );
         } finally {
           setIsSpacesLoading(
             false,
@@ -564,7 +643,7 @@ function SpacesPage() {
         }
 
         setSpaces(
-          normalizeSpacesResponse(
+          getSpaceList(
             data,
             status,
           ),
@@ -580,7 +659,11 @@ function SpacesPage() {
           error,
         );
 
-        setSpaces([]);
+        setSpaces(
+          getFallbackSpaces(
+            status,
+          ),
+        );
       })
       .finally(() => {
         if (isCancelled) {
@@ -1343,7 +1426,8 @@ function SpacesPage() {
                         space
                       }
                       canManage={
-                        isProfessor
+                        isProfessor &&
+                        !space.isMock
                       }
                       onArchive={
                         handleArchive
