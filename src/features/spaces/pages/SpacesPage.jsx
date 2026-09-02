@@ -58,14 +58,8 @@ const DAY_API_VALUES = {
 };
 
 function readUserRole() {
-  const getRoleFromUser = (
-    user,
-  ) => {
-    if (
-      !user ||
-      typeof user !==
-        "object"
-    ) {
+  const getRoleFromUser = (user) => {
+    if (!user || typeof user !== "object") {
       return "";
     }
 
@@ -73,29 +67,21 @@ function readUserRole() {
       user.account_type ??
       user.accountType ??
       user.role ??
-      user.user
-        ?.account_type ??
-      user.user
-        ?.accountType ??
+      user.user?.account_type ??
+      user.user?.accountType ??
       user.user?.role ??
       ""
     );
   };
 
-  const userStorageKeys =
-    [
-      "tikitaka_user",
-      "user",
-    ];
+  const userStorageKeys = [
+    "tikitaka_user",
+    "user",
+  ];
 
-  for (
-    const key of
-    userStorageKeys
-  ) {
+  for (const key of userStorageKeys) {
     const rawUser =
-      localStorage.getItem(
-        key,
-      );
+      localStorage.getItem(key);
 
     if (!rawUser) {
       continue;
@@ -103,19 +89,13 @@ function readUserRole() {
 
     try {
       const parsedUser =
-        JSON.parse(
-          rawUser,
-        );
+        JSON.parse(rawUser);
 
       const role =
-        getRoleFromUser(
-          parsedUser,
-        );
+        getRoleFromUser(parsedUser);
 
       if (role) {
-        return String(
-          role,
-        ).toUpperCase();
+        return String(role).toUpperCase();
       }
     } catch {
       continue;
@@ -142,30 +122,22 @@ function readUserRole() {
 function formatSchedules(
   schedules = [],
 ) {
-  if (
-    !Array.isArray(
-      schedules,
-    )
-  ) {
+  if (!Array.isArray(schedules)) {
     return "";
   }
 
   return schedules
     .map((schedule) => {
       const day =
-        DAY_LABELS[
-          schedule.day
-        ] ??
+        DAY_LABELS[schedule.day] ??
         schedule.day ??
         "";
 
       const startTime =
-        schedule.start_time ??
-        "";
+        schedule.start_time ?? "";
 
       const endTime =
-        schedule.end_time ??
-        "";
+        schedule.end_time ?? "";
 
       if (
         startTime &&
@@ -192,21 +164,18 @@ function normalizeApprovedSpace(
     space.year &&
     space.semester
       ? `${space.year}-${space.semester}`
-      : space.semester ??
-        "";
+      : space.semester ?? "";
 
   return {
     id: space.space_id,
 
     name:
-      space.space_name ??
-      "",
+      space.space_name ?? "",
 
     semester,
 
     professor:
-      space.professor_name ??
-      "",
+      space.professor_name ?? "",
 
     schedule:
       formatSchedules(
@@ -214,24 +183,20 @@ function normalizeApprovedSpace(
       ),
 
     room:
-      space.classroom ??
-      "",
+      space.classroom ?? "",
 
     classroom:
-      space.classroom ??
-      "",
+      space.classroom ?? "",
 
     schedules:
-      space.schedules ??
-      [],
+      space.schedules ?? [],
 
     color:
       space.color_key ??
       "COLOR_1",
 
     spaceCode:
-      space.space_code ??
-      null,
+      space.space_code ?? null,
 
     status:
       space.status ??
@@ -259,14 +224,12 @@ function normalizePendingSpace(
       space.space_member_id,
 
     name:
-      space.space_name ??
-      "",
+      space.space_name ?? "",
 
     semester: "",
 
     professor:
-      space.professor_name ??
-      "",
+      space.professor_name ?? "",
 
     schedule:
       formatSchedules(
@@ -274,16 +237,13 @@ function normalizePendingSpace(
       ),
 
     room:
-      space.classroom ??
-      "",
+      space.classroom ?? "",
 
     classroom:
-      space.classroom ??
-      "",
+      space.classroom ?? "",
 
     schedules:
-      space.schedules ??
-      [],
+      space.schedules ?? [],
 
     color:
       space.color_key ??
@@ -298,11 +258,40 @@ function normalizePendingSpace(
       "PENDING",
 
     requestedAt:
-      space.requested_at ??
-      null,
+      space.requested_at ?? null,
 
     isPending: true,
   };
+}
+
+function normalizeSpacesResponse(
+  data,
+  status,
+) {
+  const approvedSpaces =
+    (
+      data?.spaces ?? []
+    ).map((space) =>
+      normalizeApprovedSpace(
+        space,
+        status,
+      ),
+    );
+
+  const pendingSpaces =
+    status === "ACTIVE"
+      ? (
+          data?.pending_spaces ??
+          []
+        ).map(
+          normalizePendingSpace,
+        )
+      : [];
+
+  return [
+    ...approvedSpaces,
+    ...pendingSpaces,
+  ];
 }
 
 function convertTo24Hour(
@@ -337,9 +326,7 @@ function convertTo24Hour(
     hour += 12;
   }
 
-  return `${String(
-    hour,
-  ).padStart(
+  return `${String(hour).padStart(
     2,
     "0",
   )}:${minute}`;
@@ -367,14 +354,11 @@ function createSpaceRequestData(
           );
 
         return (
-          schedule.days ??
-          []
+          schedule.days ?? []
         )
           .map((day) => ({
             day:
-              DAY_API_VALUES[
-                day
-              ],
+              DAY_API_VALUES[day],
             start_time:
               startTime,
             end_time:
@@ -423,12 +407,10 @@ function SpacesPage() {
     readUserRole();
 
   const isProfessor =
-    userRole ===
-    "PROFESSOR";
+    userRole === "PROFESSOR";
 
   const isStudent =
-    userRole ===
-    "STUDENT";
+    userRole === "STUDENT";
 
   const [
     selectedTab,
@@ -443,7 +425,7 @@ function SpacesPage() {
   const [
     isSpacesLoading,
     setIsSpacesLoading,
-  ] = useState(false);
+  ] = useState(true);
 
   const [
     spaceModalStep,
@@ -528,8 +510,7 @@ function SpacesPage() {
   const loadSpaces =
     useCallback(
       async (
-        statusOverride =
-          null,
+        statusOverride = null,
       ) => {
         const status =
           statusOverride ??
@@ -538,43 +519,18 @@ function SpacesPage() {
             ? "ACTIVE"
             : "ARCHIVED");
 
-        setIsSpacesLoading(
-          true,
-        );
-
         try {
           const data =
             await getSpaces(
               status,
             );
 
-          const approvedSpaces =
-            (
-              data?.spaces ??
-              []
-            ).map(
-              (space) =>
-                normalizeApprovedSpace(
-                  space,
-                  status,
-                ),
-            );
-
-          const pendingSpaces =
-            status ===
-            "ACTIVE"
-              ? (
-                  data?.pending_spaces ??
-                  []
-                ).map(
-                  normalizePendingSpace,
-                )
-              : [];
-
-          setSpaces([
-            ...approvedSpaces,
-            ...pendingSpaces,
-          ]);
+          setSpaces(
+            normalizeSpacesResponse(
+              data,
+              status,
+            ),
+          );
         } catch (error) {
           console.error(
             "Space 목록 조회 실패:",
@@ -592,14 +548,94 @@ function SpacesPage() {
     );
 
   useEffect(() => {
-    loadSpaces();
-  }, [loadSpaces]);
+    let isCancelled =
+      false;
+
+    const status =
+      selectedTab ===
+      "active"
+        ? "ACTIVE"
+        : "ARCHIVED";
+
+    getSpaces(status)
+      .then((data) => {
+        if (isCancelled) {
+          return;
+        }
+
+        setSpaces(
+          normalizeSpacesResponse(
+            data,
+            status,
+          ),
+        );
+      })
+      .catch((error) => {
+        if (isCancelled) {
+          return;
+        }
+
+        console.error(
+          "Space 목록 조회 실패:",
+          error,
+        );
+
+        setSpaces([]);
+      })
+      .finally(() => {
+        if (isCancelled) {
+          return;
+        }
+
+        setIsSpacesLoading(
+          false,
+        );
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedTab]);
+
+  const handleActiveTab =
+    () => {
+      if (
+        selectedTab ===
+        "active"
+      ) {
+        return;
+      }
+
+      setIsSpacesLoading(
+        true,
+      );
+
+      setSelectedTab(
+        "active",
+      );
+    };
+
+  const handleArchivedTab =
+    () => {
+      if (
+        selectedTab ===
+        "archived"
+      ) {
+        return;
+      }
+
+      setIsSpacesLoading(
+        true,
+      );
+
+      setSelectedTab(
+        "archived",
+      );
+    };
 
   const handleAddSpace =
     () => {
-      if (
-        !isProfessor
-      ) {
+      if (!isProfessor) {
         return;
       }
 
@@ -662,6 +698,10 @@ function SpacesPage() {
           "active",
         );
 
+        setIsSpacesLoading(
+          true,
+        );
+
         await loadSpaces(
           "ACTIVE",
         );
@@ -716,9 +756,7 @@ function SpacesPage() {
 
   const handleCreateSpaceSave =
     (spaceData) => {
-      if (
-        !isProfessor
-      ) {
+      if (!isProfessor) {
         return;
       }
 
@@ -777,6 +815,10 @@ function SpacesPage() {
             requestData,
           );
 
+          setIsSpacesLoading(
+            true,
+          );
+
           await loadSpaces(
             selectedTab ===
               "active"
@@ -790,6 +832,10 @@ function SpacesPage() {
 
           setSelectedTab(
             "active",
+          );
+
+          setIsSpacesLoading(
+            true,
           );
 
           await loadSpaces(
@@ -846,9 +892,7 @@ function SpacesPage() {
 
   const handleArchive =
     (spaceId) => {
-      if (
-        !isProfessor
-      ) {
+      if (!isProfessor) {
         return;
       }
 
@@ -895,6 +939,10 @@ function SpacesPage() {
           archivingSpaceId,
         );
 
+        setIsSpacesLoading(
+          true,
+        );
+
         await loadSpaces(
           "ACTIVE",
         );
@@ -934,9 +982,7 @@ function SpacesPage() {
 
   const handleActivate =
     (spaceId) => {
-      if (
-        !isProfessor
-      ) {
+      if (!isProfessor) {
         return;
       }
 
@@ -983,6 +1029,10 @@ function SpacesPage() {
           activatingSpaceId,
         );
 
+        setIsSpacesLoading(
+          true,
+        );
+
         await loadSpaces(
           "ARCHIVED",
         );
@@ -1022,9 +1072,7 @@ function SpacesPage() {
 
   const handleEdit =
     (spaceOrId) => {
-      if (
-        !isProfessor
-      ) {
+      if (!isProfessor) {
         return;
       }
 
@@ -1038,9 +1086,7 @@ function SpacesPage() {
                 spaceOrId,
             );
 
-      if (
-        !selectedSpace
-      ) {
+      if (!selectedSpace) {
         return;
       }
 
@@ -1077,9 +1123,7 @@ function SpacesPage() {
 
   const handleDelete =
     (spaceId) => {
-      if (
-        !isProfessor
-      ) {
+      if (!isProfessor) {
         return;
       }
 
@@ -1124,6 +1168,10 @@ function SpacesPage() {
       try {
         await deleteSpace(
           deletingSpaceId,
+        );
+
+        setIsSpacesLoading(
+          true,
         );
 
         await loadSpaces(
@@ -1226,10 +1274,8 @@ function SpacesPage() {
                       ? "spaces-tab--selected"
                       : ""
                   }`}
-                  onClick={() =>
-                    setSelectedTab(
-                      "active",
-                    )
+                  onClick={
+                    handleActiveTab
                   }
                 >
                   활성화
@@ -1248,10 +1294,8 @@ function SpacesPage() {
                       ? "spaces-tab--selected"
                       : ""
                   }`}
-                  onClick={() =>
-                    setSelectedTab(
-                      "archived",
-                    )
+                  onClick={
+                    handleArchivedTab
                   }
                 >
                   보관됨
@@ -1285,8 +1329,7 @@ function SpacesPage() {
           </div>
 
           {!isSpacesLoading &&
-            spaces.length >
-              0 && (
+            spaces.length > 0 && (
               <div className="space-grid">
                 {spaces.map(
                   (space) => (
@@ -1322,8 +1365,7 @@ function SpacesPage() {
         </div>
 
         {!isSpacesLoading &&
-          spaces.length ===
-            0 && (
+          spaces.length === 0 && (
             <SpaceEmptyState />
           )}
       </div>
