@@ -29,7 +29,7 @@ export async function getSpaces(
 ) {
   const response =
     await axios.get(
-      `${API_BASE_URL}/api/v1/spaces`,
+      `${API_BASE_URL}/spaces`,
       {
         params: {
           status,
@@ -46,7 +46,7 @@ export async function createSpace(
 ) {
   const response =
     await axios.post(
-      `${API_BASE_URL}/api/v1/spaces`,
+      `${API_BASE_URL}/spaces`,
       spaceData,
       getAuthConfig(),
     );
@@ -60,7 +60,7 @@ export async function updateSpace(
 ) {
   const response =
     await axios.patch(
-      `${API_BASE_URL}/api/v1/spaces/${spaceId}`,
+      `${API_BASE_URL}/spaces/${spaceId}`,
       spaceData,
       getAuthConfig(),
     );
@@ -73,7 +73,7 @@ export async function archiveSpace(
 ) {
   const response =
     await axios.patch(
-      `${API_BASE_URL}/api/v1/spaces/${spaceId}/archive`,
+      `${API_BASE_URL}/spaces/${spaceId}/archive`,
       null,
       getAuthConfig(),
     );
@@ -86,7 +86,7 @@ export async function restoreSpace(
 ) {
   const response =
     await axios.patch(
-      `${API_BASE_URL}/api/v1/spaces/${spaceId}/restore`,
+      `${API_BASE_URL}/spaces/${spaceId}/restore`,
       null,
       getAuthConfig(),
     );
@@ -98,7 +98,7 @@ export async function deleteSpace(
   spaceId,
 ) {
   await axios.delete(
-    `${API_BASE_URL}/api/v1/spaces/${spaceId}`,
+    `${API_BASE_URL}/spaces/${spaceId}`,
     getAuthConfig(),
   );
 }
@@ -108,7 +108,7 @@ export async function joinSpace(
 ) {
   const response =
     await axios.post(
-      `${API_BASE_URL}/api/v1/spaces/join`,
+      `${API_BASE_URL}/spaces/join`,
       {
         space_code: spaceCode,
       },
