@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import searchIcon from "../../assets/icons/dashboard-search.svg";
@@ -10,7 +11,9 @@ import spacesIcon from "../../assets/icons/dashboard-spaces.svg";
 import spacesBlackIcon from "../../assets/icons/dashboard-spaces-black.svg";
 
 import profileAvatar from "../../assets/images/profile-avatar.svg";
-
+import NotificationPanel from "../../features/dashboard/components/NotificationPanel.jsx";
+import ProfileActionModal from "../../features/dashboard/components/ProfileActionModal.jsx";
+import ProfileMenu from "../../features/dashboard/components/ProfileMenu.jsx";
 import "./appToolbars.css";
 
 const DEFAULT_NAV_ITEMS = [
@@ -213,16 +216,41 @@ export function BottomNavigation({
   );
 }
 
-export function AppToolbars(props) {
-  return (
-    <>
-      <UtilityToolbar
-        {...props}
-      />
+export function AppToolbars({ items, onNotifications, onProfile, ...utilityProps }) {
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [profileAction, setProfileAction] = useState(null);
+  const [profileImage, setProfileImage] = useState(undefined);
 
-      <BottomNavigation
-        items={props.items}
-      />
-    </>
-  );
+  const handleNotifications = () => {
+    setIsProfileMenuOpen(false);
+    setIsNotificationsOpen((isOpen) => !isOpen);
+    onNotifications?.();
+  };
+
+  const handleProfile = () => {
+    setIsNotificationsOpen(false);
+    setIsProfileMenuOpen((isOpen) => !isOpen);
+    onProfile?.();
+  };
+
+  return <>
+    <UtilityToolbar
+      {...utilityProps}
+      onNotifications={handleNotifications}
+      onProfile={handleProfile}
+      profileImage={profileImage}
+    />
+    {isNotificationsOpen ? <NotificationPanel onClose={() => setIsNotificationsOpen(false)} /> : null}
+    {isProfileMenuOpen ? <ProfileMenu onSelect={(action) => {
+      setIsProfileMenuOpen(false);
+      setProfileAction(action);
+    }} /> : null}
+    {profileAction ? <ProfileActionModal
+      action={profileAction}
+      onClose={() => setProfileAction(null)}
+      onProfileUpdated={setProfileImage}
+    /> : null}
+    <BottomNavigation items={items} />
+  </>;
 }

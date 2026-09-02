@@ -1,14 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 
 import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
+import inquiryChevronIcon from "../../../assets/icons/inquiry-chevron.svg";
 import profileEditPencilIcon from "../../../assets/icons/profile-edit-pencil.svg";
 import profileAvatar from "../../../assets/images/profile-avatar.svg";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
 import ModalBackdrop from "../../../components/common/ModalBackdrop.jsx";
 import { logout, updateProfileImage } from "../../auth/api/auth.api.js";
-import { getSystemNotice, getSystemNotices } from "../../notices/api/notices.api.js";
+import { getSystemNotices } from "../../notices/api/notices.api.js";
 import "../../spaces/styles/saveStatusModal.css";
+
+const MOCK_SYSTEM_NOTICE = {
+  system_notice_id: "mock-system-notice",
+  title: "서비스 공지사항 테스트",
+  content: "공지사항 출력용 목업입니다. 실제 공지사항은 서버에서 불러옵니다.",
+  created_at: "2026-09-02T00:00:00+09:00",
+};
 
 function readStoredUser() {
   try {
@@ -102,7 +110,6 @@ function PasswordContent({ onClose }) {
 }
 
 function NoticesContent({ onClose }) {
-  const [selectedNotice, setSelectedNotice] = useState(null);
   const [notices, setNotices] = useState([]);
   const [status, setStatus] = useState("loading");
 
@@ -110,38 +117,42 @@ function NoticesContent({ onClose }) {
     let isMounted = true;
     getSystemNotices().then(({ data }) => {
       if (!isMounted) return;
-      setNotices(Array.isArray(data) ? data : []);
+      const systemNotices = Array.isArray(data) ? data : [];
+      setNotices(systemNotices.length > 0 ? systemNotices : [MOCK_SYSTEM_NOTICE]);
       setStatus("success");
     }).catch(() => {
-      if (isMounted) setStatus("error");
+      if (!isMounted) return;
+      setNotices([MOCK_SYSTEM_NOTICE]);
+      setStatus("success");
     });
     return () => { isMounted = false; };
   }, []);
 
-  const handleNoticeSelect = async (notice) => {
-    const noticeId = notice.system_notice_id;
-    if (!noticeId) return;
-    setStatus("loading-detail");
-    try {
-      const { data } = await getSystemNotice(noticeId);
-      setSelectedNotice(data);
-      setStatus("success");
-    } catch {
-      setStatus("detail-error");
-    }
+  const formatNoticeDate = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}.${month}.${day}`;
   };
 
-  return <><ModalHeader title="공지사항" onClose={onClose} /><div className="profile-action-modal__notices">{status === "loading" ? <p className="profile-action-modal__status">공지사항을 불러오는 중입니다.</p> : null}{status === "error" ? <p className="profile-action-modal__status" role="alert">공지사항을 불러오지 못했습니다.</p> : null}{status === "detail-error" ? <p className="profile-action-modal__status" role="alert">공지사항 상세 내용을 불러오지 못했습니다.</p> : null}{selectedNotice ? <article><button type="button" onClick={() => setSelectedNotice(null)}>← 목록</button><h3>{selectedNotice.title}</h3>{selectedNotice.created_at ? <time>{new Date(selectedNotice.created_at).toLocaleDateString("ko-KR")}</time> : null}<p>{selectedNotice.content}</p></article> : <ul>{notices.map((notice) => <li key={notice.system_notice_id}><button type="button" onClick={() => handleNoticeSelect(notice)}><strong>{notice.title}</strong>{notice.created_at ? <time>{new Date(notice.created_at).toLocaleDateString("ko-KR")}</time> : null}</button></li>)}</ul>}</div></>;
+  return <ModalBackdrop onClose={onClose} className="modal-backdrop--light"><section className="profile-notices-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-notices-title" aria-describedby="profile-notices-description"><header><h2 id="profile-notices-title">공지사항</h2><p id="profile-notices-description">tikitaka의 업데이트와 서비스 안내를 확인합니다.</p></header><div className="profile-notices-dialog__divider" /><div className="profile-notices-dialog__body">{status === "loading" ? <p className="profile-notices-dialog__status">공지사항을 불러오는 중입니다.</p> : null}{status === "error" ? <p className="profile-notices-dialog__status" role="alert">공지사항을 불러오지 못했습니다.</p> : null}{status === "success" && notices.length === 0 ? <p className="profile-notices-dialog__status">등록된 공지사항이 없습니다.</p> : null}{notices.map((notice) => <article className="profile-notice-card" key={notice.system_notice_id}><h3>{notice.title}</h3>{notice.created_at ? <time dateTime={notice.created_at}>{formatNoticeDate(notice.created_at)}</time> : null}<p>{notice.content}</p></article>)}</div><ModalActions className="profile-notices-dialog__actions" onConfirm={onClose} confirmText="닫기" showCancel={false} /></section></ModalBackdrop>;
 }
 
 function InquiryContent({ onClose }) {
-  const [message, setMessage] = useState("");
   const handleSubmit = (event) => {
     event.preventDefault();
-    event.currentTarget.reset();
-    setMessage("문의 내용이 임시 저장되었습니다.");
+    const formData = new FormData(event.currentTarget);
+    const requestBody = {
+      category: formData.get("category"),
+      title: formData.get("title"),
+      content: formData.get("content"),
+    };
+
+    console.log(JSON.stringify(requestBody, null, 2));
   };
-  return <><ModalHeader title="문의하기" onClose={onClose} /><form className="profile-action-modal__form" onSubmit={handleSubmit}><label>문의 제목<input name="title" required /></label><label>문의 내용<textarea name="content" rows="5" required /></label>{message ? <p role="status">{message}</p> : null}<button className="profile-action-modal__primary" type="submit">문의 남기기</button></form></>;
+  return <ModalBackdrop onClose={onClose} className="modal-backdrop--light"><form className="profile-inquiry-dialog" aria-labelledby="profile-inquiry-title" aria-describedby="profile-inquiry-description" onSubmit={handleSubmit}><header><h2 id="profile-inquiry-title">문의하기</h2><p id="profile-inquiry-description">오류 제보, 기능 제안 또는 서비스 이용 문의를 남겨주세요</p></header><div className="profile-inquiry-dialog__divider" /><div className="profile-inquiry-dialog__body"><label className="profile-inquiry-control"><span>분류</span><span className="profile-inquiry-control__select"><select name="category" defaultValue="ERROR_REPORT"><option value="ERROR_REPORT">오류 제보</option><option value="FEATURE_REQUEST">기능 제안</option><option value="SERVICE_INQUIRY">서비스 이용 문의</option></select><img src={inquiryChevronIcon} alt="" /></span></label><label className="profile-inquiry-control"><span>제목</span><input name="title" placeholder="문의 제목을 적어주세요" required /></label><label className="profile-inquiry-control"><span>문의 내용</span><textarea name="content" placeholder="문의 내용을 적어주세요" required /></label></div><ModalActions className="profile-inquiry-dialog__actions" onCancel={onClose} cancelText="취소" confirmText="등록" confirmType="submit" /></form></ModalBackdrop>;
 }
 
 function LogoutContent({ onClose }) {
@@ -163,10 +174,16 @@ function ProfileActionModal({ action, onClose, onProfileUpdated }) {
     return <ProfileEditFlow onClose={onClose} onProfileUpdated={onProfileUpdated} />;
   }
 
+  if (action === "notices") {
+    return <NoticesContent onClose={onClose} />;
+  }
+
+  if (action === "inquiry") {
+    return <InquiryContent onClose={onClose} />;
+  }
+
   return <CompactModal className={`profile-action-modal profile-action-modal--${action}`} labelledBy={`profile-action-${action}`} onClose={onClose}>
     {action === "password" ? <PasswordContent onClose={onClose} /> : null}
-    {action === "notices" ? <NoticesContent onClose={onClose} /> : null}
-    {action === "inquiry" ? <InquiryContent onClose={onClose} /> : null}
     {action === "logout" ? <LogoutContent onClose={onClose} /> : null}
   </CompactModal>;
 }

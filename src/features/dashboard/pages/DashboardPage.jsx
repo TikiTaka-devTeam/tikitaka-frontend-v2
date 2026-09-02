@@ -7,9 +7,6 @@ import {
   NextClassCard,
   TaskSummaryCard,
 } from "../components/DashboardCards.jsx";
-import NotificationPanel from "../components/NotificationPanel.jsx";
-import ProfileActionModal from "../components/ProfileActionModal.jsx";
-import ProfileMenu from "../components/ProfileMenu.jsx";
 import WeeklyTimetable from "../components/WeeklyTimetable.jsx";
 
 import "../styles/dashboard.css";
@@ -17,10 +14,6 @@ import "../styles/dashboard.css";
 function DashboardPage() {
   const navigate = useNavigate();
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [profileAction, setProfileAction] = useState(null);
-  const [profileImage, setProfileImage] = useState(undefined);
 
   const now = new Date();
 
@@ -46,35 +39,7 @@ function DashboardPage() {
 
         <AppToolbars
           onSearch={() => navigate("/search")}
-          onNotifications={() => {
-            setIsProfileMenuOpen(false);
-            setIsNotificationsOpen((isOpen) => !isOpen);
-          }}
-          onProfile={() => {
-            setIsNotificationsOpen(false);
-            setIsProfileMenuOpen((isOpen) => !isOpen);
-          }}
-          profileImage={profileImage}
         />
-
-        {isNotificationsOpen ? (
-          <NotificationPanel onClose={() => setIsNotificationsOpen(false)} />
-        ) : null}
-
-        {isProfileMenuOpen ? (
-          <ProfileMenu onSelect={(action) => {
-            setIsProfileMenuOpen(false);
-            setProfileAction(action);
-          }} />
-        ) : null}
-
-        {profileAction ? (
-          <ProfileActionModal
-            action={profileAction}
-            onClose={() => setProfileAction(null)}
-            onProfileUpdated={setProfileImage}
-          />
-        ) : null}
 
         <div className="app-container dashboard-shell">
           <header className="dashboard-brand">

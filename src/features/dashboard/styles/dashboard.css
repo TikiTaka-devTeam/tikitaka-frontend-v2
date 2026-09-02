@@ -1091,31 +1091,212 @@
 .profile-action-modal__form input:focus,
 .profile-action-modal__form textarea:focus { border-color: #2e66f5; }
 
-.profile-action-modal__notices ul {
-  margin: 0;
-  padding: 8px 0;
-  list-style: none;
+.profile-notices-dialog {
+  width: min(520px, calc(100vw - 32px));
+  height: min(650px, calc(100dvh - 32px));
+  padding: 32px;
+  display: grid;
+  grid-template-rows: 60px 1px minmax(0, 1fr) 48px;
+  gap: 12px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(10, 26, 56, 0.22);
 }
 
-.profile-action-modal__notices li + li { border-top: 1px solid #eaecf0; }
+.profile-notices-dialog > header { overflow: hidden; }
 
-.profile-action-modal__notices li button {
-  width: 100%;
-  padding: 18px 24px;
-  display: grid;
-  gap: 6px;
-  border: 0;
+.profile-notices-dialog > header h2 {
+  margin: 0;
+  color: #141c2e;
+  font-size: 24px;
+  line-height: 29px;
+}
+
+.profile-notices-dialog > header p {
+  margin: 7px 0 0 1px;
+  color: #758094;
+  font-size: 14px;
+}
+
+.profile-notices-dialog__divider { background: #e0e5f2; }
+
+.profile-notices-dialog__body {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.profile-notice-card {
+  position: relative;
+  min-height: 118px;
+  flex: 0 0 118px;
+  padding: 30px 24px 34px;
+  overflow: hidden;
+  border: 1px solid #e9ebf2;
+  border-radius: 10px;
+  background: #fafafd;
+}
+
+.profile-notice-card h3 {
+  max-width: calc(100% - 105px);
+  margin: 0;
+  overflow: hidden;
+  color: #282b3f;
+  font-size: 18px;
+  line-height: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-notice-card time {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: #9a9eb0;
+  font-size: 12px;
+}
+
+.profile-notice-card p {
+  margin: 16px 0 0;
+  overflow: hidden;
+  color: #73778c;
+  font-size: 14px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-notices-dialog__status {
+  margin: 0;
+  padding: 40px 20px;
+  color: #758094;
+  font-size: 14px;
+  text-align: center;
+}
+
+.profile-notices-dialog__actions { justify-content: flex-end; }
+
+.profile-notices-dialog__actions .modal-actions__confirm {
+  border: 1px solid #d8dbe7;
   background: #ffffff;
-  text-align: left;
+  color: #3e4257;
+}
+
+.profile-inquiry-dialog {
+  width: min(520px, calc(100vw - 32px));
+  height: min(650px, calc(100dvh - 32px));
+  padding: 32px;
+  display: grid;
+  grid-template-rows: 60px 1px minmax(0, 1fr) 48px;
+  gap: 12px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(10, 26, 56, 0.22);
+}
+
+.profile-inquiry-dialog > header { overflow: hidden; }
+
+.profile-inquiry-dialog > header h2 {
+  margin: 0;
+  color: #141c2e;
+  font-size: 24px;
+  line-height: 29px;
+}
+
+.profile-inquiry-dialog > header p {
+  margin: 7px 0 0 1px;
+  color: #7b7f93;
+  font-size: 14px;
+}
+
+.profile-inquiry-dialog__divider { background: #e0e5f2; }
+
+.profile-inquiry-dialog__body {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.profile-inquiry-control {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #292e3d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-inquiry-control input,
+.profile-inquiry-control textarea,
+.profile-inquiry-control__select {
+  width: 100%;
+  border: 1px solid #d6deeb;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.profile-inquiry-control input {
+  height: 48px;
+  padding: 0 14px;
+  outline: 0;
+}
+
+.profile-inquiry-control textarea {
+  height: 146px;
+  padding: 14px;
+  outline: 0;
+  resize: none;
+}
+
+.profile-inquiry-control input::placeholder,
+.profile-inquiry-control textarea::placeholder {
+  color: #94a1b8;
+}
+
+.profile-inquiry-control input:focus,
+.profile-inquiry-control textarea:focus,
+.profile-inquiry-control__select:focus-within {
+  border-color: #2e6bff;
+}
+
+.profile-inquiry-control__select {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.profile-inquiry-control__select select {
+  width: 100%;
+  height: 100%;
+  padding: 0 44px 0 16px;
+  border: 0;
+  outline: 0;
+  appearance: none;
+  background: transparent;
+  color: #292e3d;
+  font-size: 14px;
   cursor: pointer;
 }
 
-.profile-action-modal__notices time { color: #667085; font-size: 11px; }
+.profile-inquiry-control__select img {
+  position: absolute;
+  right: 16px;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
 
-.profile-action-modal__notices article { padding: 24px; }
-.profile-action-modal__notices article > button { padding: 0; border: 0; background: transparent; color: #2e66f5; cursor: pointer; }
-.profile-action-modal__notices article h3 { margin: 22px 0 7px; }
-.profile-action-modal__notices article p { color: #576682; font-size: 13px; line-height: 1.6; }
+.profile-inquiry-dialog__actions { justify-content: flex-end; }
 
 .profile-action-modal__logout p { margin: 10px 0 16px; color: #334059; }
 .profile-action-modal__logout div { display: flex; gap: 10px; }
@@ -1137,6 +1318,14 @@
   }
 
   .profile-edit-dialog {
+    padding: 24px;
+  }
+
+  .profile-notices-dialog {
+    padding: 24px;
+  }
+
+  .profile-inquiry-dialog {
     padding: 24px;
   }
 }
