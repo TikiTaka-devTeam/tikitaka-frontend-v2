@@ -20,9 +20,6 @@
     0 18px 42px rgba(10, 26, 56, 0.22);
 }
 
-/* =========================
-   Header
-========================= */
 
 .create-space-modal__header {
   flex: 0 0 auto;
@@ -63,14 +60,12 @@
   background: #e0e5f2;
 }
 
-/* =========================
-   Scroll Area
-========================= */
 
 .create-space-modal__body-wrap {
   position: relative;
 
   min-height: 0;
+
   flex: 1;
 
   margin-top: 32px;
@@ -143,9 +138,6 @@
   filter: blur(20px);
 }
 
-/* =========================
-   Common Field
-========================= */
 
 .create-space-modal__field {
   width: 100%;
@@ -172,6 +164,7 @@
 
   border: 1px solid #e0e5f2;
   border-radius: 10px;
+
   outline: none;
 
   background: #ffffff;
@@ -197,9 +190,6 @@
   border-color: #2e6bff;
 }
 
-/* =========================
-   Class Time
-========================= */
 
 .create-space-modal__time-section {
   margin-top: 36px;
@@ -230,13 +220,10 @@
   transition: border-color 0.15s ease;
 }
 
-.create-space-modal__time-box[data-active="true"] {
+.create-space-modal__time-box.has-value {
   border-color: #2e6bff;
 }
 
-/* =========================
-   Remove Time
-========================= */
 
 .create-space-modal__remove-time {
   position: absolute;
@@ -272,9 +259,6 @@
   object-fit: contain;
 }
 
-/* =========================
-   Day Buttons
-========================= */
 
 .create-space-modal__day-list {
   position: absolute;
@@ -304,6 +288,7 @@
   border-radius: 50%;
 
   background: #e6e7e9;
+
   color: #c4c4c4;
 
   font-size: 18px;
@@ -318,9 +303,6 @@
   color: #ffffff;
 }
 
-/* =========================
-   Time Input Row
-========================= */
 
 .create-space-modal__time-row {
   position: absolute;
@@ -372,7 +354,6 @@
 
 .create-space-modal__time-input::placeholder {
   color: #e0e5f2;
-
   opacity: 1;
 }
 
@@ -386,15 +367,14 @@
   line-height: normal;
 }
 
-/* =========================
-   AM / PM
-========================= */
 
 .create-space-modal__period {
   position: relative;
 
   display: flex;
   align-items: center;
+
+  z-index: 20;
 }
 
 .create-space-modal__period-trigger {
@@ -403,6 +383,7 @@
   border: 0;
 
   background: transparent;
+
   color: #212326;
 
   font-size: 16px;
@@ -415,32 +396,34 @@
 .create-space-modal__period-dropdown {
   position: absolute;
 
-  top: calc(100% + 16px);
-  right: -9px;
+  top: 24px;
+  right: -10px;
 
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 62px;
+
+  padding: 6px 0;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  gap: 10px;
+  gap: 4px;
 
-  border-radius: 12px;
+  border-radius: 10px;
 
   background: #ffffff;
 
   box-shadow:
-    0 18px 42px rgba(10, 26, 56, 0.22);
+    0 8px 20px rgba(10, 26, 56, 0.16);
 
   z-index: 30;
 }
 
 .create-space-modal__period-option {
-  width: 35px;
-  height: 17px;
+  width: 36px;
+  height: 21px;
 
   padding: 0;
 
@@ -467,9 +450,6 @@
   color: #212326;
 }
 
-/* =========================
-   Add Time
-========================= */
 
 .create-space-modal__add-time {
   margin-top: 8px;
@@ -485,6 +465,7 @@
   border: 0;
 
   background: transparent;
+
   color: #2e6bff;
 
   font-size: 14px;
@@ -494,17 +475,11 @@
   cursor: pointer;
 }
 
-/* =========================
-   Classroom
-========================= */
 
 .create-space-modal__classroom {
   margin-top: 26px;
 }
 
-/* =========================
-   Bottom Actions
-========================= */
 
 .create-space-modal__actions {
   flex: 0 0 auto;
