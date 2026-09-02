@@ -5,10 +5,7 @@ import ArchiveIcon from "../../../assets/icons/archive.svg?react";
 
 import "../styles/archiveStatusModal.css";
 
-function ArchiveConfirmModal({
-  onCancel,
-  onConfirm,
-}) {
+function ArchiveConfirmModal({ onCancel, onConfirm }) {
   return (
     <CompactModal
       onClose={onCancel}
@@ -16,10 +13,7 @@ function ArchiveConfirmModal({
       describedBy="archive-confirm-modal-description"
       className="archive-status-modal"
     >
-      <div
-        className="archive-status-modal__icon-box"
-        aria-hidden="true"
-      >
+      <div className="archive-status-modal__icon-box" aria-hidden="true">
         <ArchiveIcon className="archive-status-modal__archive-icon" />
       </div>
 

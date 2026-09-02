@@ -1,16 +1,13 @@
 import axios from "axios";
 
 const configuredBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:8080";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-const normalizedBaseUrl =
-  configuredBaseUrl.replace(/\/$/, "");
+const normalizedBaseUrl = configuredBaseUrl.replace(/\/$/, "");
 
-const API_BASE_URL =
-  normalizedBaseUrl.endsWith("/api/v1")
-    ? normalizedBaseUrl
-    : `${normalizedBaseUrl}/api/v1`;
+const API_BASE_URL = normalizedBaseUrl.endsWith("/api/v1")
+  ? normalizedBaseUrl
+  : `${normalizedBaseUrl}/api/v1`;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -35,8 +32,7 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest =
-      error.config;
+    const originalRequest = error.config;
 
     if (
       error.response?.status !== 401 ||
@@ -46,10 +42,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const refreshToken =
-      localStorage.getItem(
-        "tikitaka_refresh_token",
-      );
+    const refreshToken = localStorage.getItem("tikitaka_refresh_token");
 
     if (!refreshToken) {
       return Promise.reject(error);
@@ -60,31 +53,19 @@ apiClient.interceptors.response.use(
     try {
       if (!refreshRequest) {
         refreshRequest = axios
-          .post(
-            `${API_BASE_URL}/auth/token/refresh`,
-            {
-              refresh_token:
-                refreshToken,
-            },
-          )
+          .post(`${API_BASE_URL}/auth/token/refresh`, {
+            refresh_token: refreshToken,
+          })
           .then(({ data }) => {
-            const accessToken =
-              data?.access_token;
+            const accessToken = data?.access_token;
 
             if (!accessToken) {
-              throw new Error(
-                "Access Token 재발급 응답이 올바르지 않습니다.",
-              );
+              throw new Error("Access Token 재발급 응답이 올바르지 않습니다.");
             }
 
-            localStorage.setItem(
-              "tikitaka_access_token",
-              accessToken,
-            );
+            localStorage.setItem("tikitaka_access_token", accessToken);
 
-            if (
-              data?.refresh_token
-            ) {
+            if (data?.refresh_token) {
               localStorage.setItem(
                 "tikitaka_refresh_token",
                 data.refresh_token,
@@ -98,38 +79,21 @@ apiClient.interceptors.response.use(
           });
       }
 
-      const accessToken =
-        await refreshRequest;
+      const accessToken = await refreshRequest;
 
-      originalRequest.headers.Authorization =
-        `Bearer ${accessToken}`;
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
-      return apiClient(
-        originalRequest,
-      );
+      return apiClient(originalRequest);
     } catch (refreshError) {
-      localStorage.removeItem(
-        "tikitaka_access_token",
-      );
-      localStorage.removeItem(
-        "tikitaka_refresh_token",
-      );
-      localStorage.removeItem(
-        "tikitaka_user",
-      );
+      localStorage.removeItem("tikitaka_access_token");
+      localStorage.removeItem("tikitaka_refresh_token");
+      localStorage.removeItem("tikitaka_user");
 
-      if (
-        window.location.pathname !==
-        "/login"
-      ) {
-        window.location.replace(
-          "/login",
-        );
+      if (window.location.pathname !== "/login") {
+        window.location.replace("/login");
       }
 
-      return Promise.reject(
-        refreshError,
-      );
+      return Promise.reject(refreshError);
     }
   },
 );

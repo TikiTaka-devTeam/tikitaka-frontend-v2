@@ -1,7 +1,17 @@
 import { COURSES, WEEK_DAYS } from "../data/dashboard.js";
 import { getCoursePosition } from "../utils/timetable.js";
 
-const TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+const TIMES = [
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+];
 
 function CourseBlock({ course, isSelected, onSelect }) {
   const { top, height } = getCoursePosition(course);
@@ -22,7 +32,11 @@ function CourseBlock({ course, isSelected, onSelect }) {
       <span className="dashboard-course__accent" aria-hidden="true" />
       <div className="dashboard-course__content">
         <h3>{course.title}</h3>
-        <p>{course.start} – {course.end}<br />{course.room}</p>
+        <p>
+          {course.start} – {course.end}
+          <br />
+          {course.room}
+        </p>
       </div>
     </button>
   );
@@ -32,7 +46,10 @@ function WeeklyTimetable({ semesterLabel, selectedCourseId, onCourseSelect }) {
   const todayIndex = new Date().getDay() - 1;
 
   return (
-    <section className="dashboard-timetable" aria-label={`${semesterLabel} 주간 시간표`}>
+    <section
+      className="dashboard-timetable"
+      aria-label={`${semesterLabel} 주간 시간표`}
+    >
       <div className="dashboard-timetable__header-wash" aria-hidden="true" />
       {todayIndex >= 0 && todayIndex < WEEK_DAYS.length ? (
         <div
@@ -55,12 +72,22 @@ function WeeklyTimetable({ semesterLabel, selectedCourseId, onCourseSelect }) {
       ))}
 
       <div className="dashboard-timetable__grid" aria-hidden="true">
-        {Array.from({ length: 6 }, (_, index) => <i className="vertical" key={`v-${index}`} />)}
-        {TIMES.map((time) => <i className="horizontal" key={time} />)}
+        {Array.from({ length: 6 }, (_, index) => (
+          <i className="vertical" key={`v-${index}`} />
+        ))}
+        {TIMES.map((time) => (
+          <i className="horizontal" key={time} />
+        ))}
       </div>
 
       {TIMES.map((time, index) => (
-        <time className="dashboard-timetable__time" style={{ "--time-index": index }} key={time}>{time}</time>
+        <time
+          className="dashboard-timetable__time"
+          style={{ "--time-index": index }}
+          key={time}
+        >
+          {time}
+        </time>
       ))}
 
       {COURSES.map((course) => (

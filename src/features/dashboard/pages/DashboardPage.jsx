@@ -23,23 +23,15 @@ function DashboardPage() {
 
   return (
     <main className="dashboard-page">
-      <div
-        className="dashboard-background"
-        aria-hidden="true"
-      >
+      <div className="dashboard-background" aria-hidden="true">
         <div className="dashboard-page__orb dashboard-page__orb--left" />
         <div className="dashboard-page__orb dashboard-page__orb--right" />
       </div>
 
       <div className="app-frame dashboard-frame">
-        <BrandLogo
-          variant="blue"
-          className="app-brand"
-        />
+        <BrandLogo variant="blue" className="app-brand" />
 
-        <AppToolbars
-          onSearch={() => navigate("/search")}
-        />
+        <AppToolbars onSearch={() => navigate("/search")} />
 
         <div className="app-container dashboard-shell">
           <header className="dashboard-brand">
@@ -56,13 +48,9 @@ function DashboardPage() {
             </div>
 
             <aside className="dashboard-sidebar">
-              <NextClassCard
-                selectedCourse={selectedCourse}
-              />
+              <NextClassCard selectedCourse={selectedCourse} />
 
-              <TaskSummaryCard
-                selectedCourse={selectedCourse}
-              />
+              <TaskSummaryCard selectedCourse={selectedCourse} />
             </aside>
           </div>
         </div>

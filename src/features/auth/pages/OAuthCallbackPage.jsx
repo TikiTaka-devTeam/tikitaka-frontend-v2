@@ -21,7 +21,12 @@ function OAuthCallbackPage() {
       sessionStorage.removeItem("tikitaka_oauth_state");
       sessionStorage.removeItem("tikitaka_oauth_provider");
 
-      if (!authorizationCode || !provider || !returnedState || returnedState !== expectedState) {
+      if (
+        !authorizationCode ||
+        !provider ||
+        !returnedState ||
+        returnedState !== expectedState
+      ) {
         setErrorMessage("OAuth 인증 정보를 확인하지 못했습니다.");
         return;
       }
@@ -36,10 +41,13 @@ function OAuthCallbackPage() {
             throw new Error("OAuth 회원가입 토큰이 없습니다.");
           }
 
-          sessionStorage.setItem("tikitaka_oauth_signup", JSON.stringify({
-            signupToken: data.signup_token,
-            profile: data.oauth_profile || {},
-          }));
+          sessionStorage.setItem(
+            "tikitaka_oauth_signup",
+            JSON.stringify({
+              signupToken: data.signup_token,
+              profile: data.oauth_profile || {},
+            }),
+          );
           navigate("/signup-terms", { replace: true });
           return;
         }
@@ -59,13 +67,19 @@ function OAuthCallbackPage() {
         navigate("/dashboard", { replace: true });
       } catch (error) {
         if (isMounted) {
-          setErrorMessage(error.response?.data?.message || error.message || "OAuth 로그인에 실패했습니다.");
+          setErrorMessage(
+            error.response?.data?.message ||
+              error.message ||
+              "OAuth 로그인에 실패했습니다.",
+          );
         }
       }
     };
 
     void completeOAuthLogin();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [navigate, searchParams]);
 
   return (
@@ -73,10 +87,20 @@ function OAuthCallbackPage() {
       <section className="login-form-panel" aria-live="polite">
         <div className="login-form-panel__inner">
           <div className="login-form-panel__header">
-            <h1>{errorMessage ? "로그인에 실패했습니다" : "로그인 중입니다"}</h1>
+            <h1>
+              {errorMessage ? "로그인에 실패했습니다" : "로그인 중입니다"}
+            </h1>
             <p>{errorMessage || "OAuth 인증 정보를 확인하고 있습니다."}</p>
           </div>
-          {errorMessage ? <button type="button" className="login-form__submit" onClick={() => navigate("/login", { replace: true })}>로그인 화면으로 돌아가기</button> : null}
+          {errorMessage ? (
+            <button
+              type="button"
+              className="login-form__submit"
+              onClick={() => navigate("/login", { replace: true })}
+            >
+              로그인 화면으로 돌아가기
+            </button>
+          ) : null}
         </div>
       </section>
     </main>

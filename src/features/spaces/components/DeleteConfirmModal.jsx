@@ -5,10 +5,7 @@ import DeleteIcon from "../../../assets/icons/delete.svg?react";
 
 import "../styles/deleteStatusModal.css";
 
-function DeleteConfirmModal({
-  onCancel,
-  onConfirm,
-}) {
+function DeleteConfirmModal({ onCancel, onConfirm }) {
   return (
     <CompactModal
       onClose={onCancel}
@@ -16,10 +13,7 @@ function DeleteConfirmModal({
       describedBy="delete-confirm-modal-description"
       className="delete-status-modal"
     >
-      <div
-        className="delete-status-modal__icon-box"
-        aria-hidden="true"
-      >
+      <div className="delete-status-modal__icon-box" aria-hidden="true">
         <DeleteIcon className="delete-status-modal__delete-icon" />
       </div>
 

@@ -5,9 +5,7 @@ import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 
 import "../styles/archiveStatusModal.css";
 
-function ArchiveCompleteModal({
-  onConfirm,
-}) {
+function ArchiveCompleteModal({ onConfirm }) {
   return (
     <CompactModal
       onClose={onConfirm}
@@ -15,10 +13,7 @@ function ArchiveCompleteModal({
       describedBy="archive-complete-modal-description"
       className="archive-status-modal"
     >
-      <div
-        className="archive-status-modal__icon-box"
-        aria-hidden="true"
-      >
+      <div className="archive-status-modal__icon-box" aria-hidden="true">
         <span
           className="archive-status-modal__check-icon"
           style={{

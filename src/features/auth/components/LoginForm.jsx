@@ -53,7 +53,9 @@ function LoginForm({ onSignUp }) {
       setSuccessMessage("로그인되었습니다.");
       window.location.assign("/");
     } catch {
-      setErrorMessage("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+      setErrorMessage(
+        "로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -98,17 +100,27 @@ function LoginForm({ onSignUp }) {
             비밀번호 찾기
           </button>
 
-          {errorMessage ? <p className="login-form__error">{errorMessage}</p> : null}
-          {successMessage ? <p className="login-form__success">{successMessage}</p> : null}
+          {errorMessage ? (
+            <p className="login-form__error">{errorMessage}</p>
+          ) : null}
+          {successMessage ? (
+            <p className="login-form__success">{successMessage}</p>
+          ) : null}
 
-          <button type="submit" className="login-form__submit" disabled={isSubmitting}>
+          <button
+            type="submit"
+            className="login-form__submit"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "로그인 중" : "로그인"}
           </button>
         </form>
 
         <p className="login-form-panel__signup">
           {"아직 계정이 없으시다면? "}
-          <button type="button" onClick={onSignUp}>{"회원가입 하러 가기!"}</button>
+          <button type="button" onClick={onSignUp}>
+            {"회원가입 하러 가기!"}
+          </button>
         </p>
 
         <div className="login-form-panel__divider">

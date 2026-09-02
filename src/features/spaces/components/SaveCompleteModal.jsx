@@ -3,10 +3,7 @@ import ModalActions from "../../../components/common/ModalActions.jsx";
 import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 import "../styles/saveStatusModal.css";
 
-function SaveCompleteModal({
-  mode = "create",
-  onConfirm,
-}) {
+function SaveCompleteModal({ mode = "create", onConfirm }) {
   const isEditMode = mode === "edit";
 
   return (
@@ -21,10 +18,7 @@ function SaveCompleteModal({
       </div>
 
       <div className="save-status-modal__text">
-        <h2
-          id="save-complete-modal-title"
-          className="save-status-modal__title"
-        >
+        <h2 id="save-complete-modal-title" className="save-status-modal__title">
           저장되었습니다
         </h2>
 

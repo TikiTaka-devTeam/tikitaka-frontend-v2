@@ -33,9 +33,7 @@ const DEFAULT_NAV_ITEMS = [
 
 function readProfileImage() {
   try {
-    const user = JSON.parse(
-      localStorage.getItem("tikitaka_user") || "null",
-    );
+    const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
 
     return (
       user?.profile_url ||
@@ -58,34 +56,16 @@ export function UtilityToolbar({
 }) {
   const navigate = useNavigate();
 
-  const resolvedProfileImage =
-    profileImage ?? readProfileImage();
+  const resolvedProfileImage = profileImage ?? readProfileImage();
 
   return (
-    <nav
-      className="dashboard-utility"
-      aria-label="빠른 메뉴"
-    >
-      <button
-        type="button"
-        aria-label="통합 검색"
-        onClick={onSearch}
-      >
-        <img
-          src={searchIcon}
-          alt=""
-        />
+    <nav className="dashboard-utility" aria-label="빠른 메뉴">
+      <button type="button" aria-label="통합 검색" onClick={onSearch}>
+        <img src={searchIcon} alt="" />
       </button>
 
-      <button
-        type="button"
-        aria-label="알림"
-        onClick={onNotifications}
-      >
-        <img
-          src={notificationIcon}
-          alt=""
-        />
+      <button type="button" aria-label="알림" onClick={onNotifications}>
+        <img src={notificationIcon} alt="" />
       </button>
 
       <button
@@ -95,10 +75,7 @@ export function UtilityToolbar({
       >
         <img
           className="dashboard-utility__profile"
-          src={
-            resolvedProfileImage ||
-            profileAvatar
-          }
+          src={resolvedProfileImage || profileAvatar}
           alt=""
         />
       </button>
@@ -106,11 +83,7 @@ export function UtilityToolbar({
   );
 }
 
-export function SearchToolbar({
-  value,
-  onChange,
-  onSubmit,
-}) {
+export function SearchToolbar({ value, onChange, onSubmit }) {
   function handleSubmit(event) {
     event.preventDefault();
     onSubmit?.();
@@ -122,10 +95,7 @@ export function SearchToolbar({
       role="search"
       onSubmit={handleSubmit}
     >
-      <label
-        className="sr-only"
-        htmlFor="global-search"
-      >
+      <label className="sr-only" htmlFor="global-search">
         통합 검색
       </label>
 
@@ -139,84 +109,52 @@ export function SearchToolbar({
         autoFocus
       />
 
-      <button
-        type="submit"
-        aria-label="검색"
-      >
-        <img
-          src={searchIcon}
-          alt=""
-        />
+      <button type="submit" aria-label="검색">
+        <img src={searchIcon} alt="" />
       </button>
     </form>
   );
 }
 
-export function BottomNavigation({
-  items = DEFAULT_NAV_ITEMS,
-}) {
+export function BottomNavigation({ items = DEFAULT_NAV_ITEMS }) {
   const location = useLocation();
   const navigate = useNavigate();
 
   return (
-    <nav
-      className="dashboard-bottom-nav"
-      aria-label="주요 메뉴"
-    >
-      {items.map(
-        ({
-          label,
-          path,
-          icon,
-          activeIcon,
-          inactiveIcon,
-        }) => {
-          const isActive =
-            location.pathname === path ||
-            location.pathname.startsWith(
-              `${path}/`,
-            );
+    <nav className="dashboard-bottom-nav" aria-label="주요 메뉴">
+      {items.map(({ label, path, icon, activeIcon, inactiveIcon }) => {
+        const isActive =
+          location.pathname === path ||
+          location.pathname.startsWith(`${path}/`);
 
-          const resolvedIcon =
-            isActive
-              ? activeIcon ?? icon
-              : inactiveIcon ?? icon;
+        const resolvedIcon = isActive
+          ? (activeIcon ?? icon)
+          : (inactiveIcon ?? icon);
 
-          return (
-            <button
-              key={path}
-              type="button"
-              className={
-                isActive
-                  ? "is-active"
-                  : undefined
-              }
-              aria-current={
-                isActive
-                  ? "page"
-                  : undefined
-              }
-              onClick={() =>
-                navigate(path)
-              }
-            >
-              <img
-                src={resolvedIcon}
-                alt=""
-              />
+        return (
+          <button
+            key={path}
+            type="button"
+            className={isActive ? "is-active" : undefined}
+            aria-current={isActive ? "page" : undefined}
+            onClick={() => navigate(path)}
+          >
+            <img src={resolvedIcon} alt="" />
 
-              <span>
-                {label}
-              </span>
-            </button>
-          );
-        },
-      )}
+            <span>{label}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }
 
-export function AppToolbars({ items, onNotifications, onProfile, ...utilityProps }) {
+export function AppToolbars({
+  items,
+  onNotifications,
+  onProfile,
+  ...utilityProps
+}) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [profileAction, setProfileAction] = useState(null);
@@ -234,23 +172,33 @@ export function AppToolbars({ items, onNotifications, onProfile, ...utilityProps
     onProfile?.();
   };
 
-  return <>
-    <UtilityToolbar
-      {...utilityProps}
-      onNotifications={handleNotifications}
-      onProfile={handleProfile}
-      profileImage={profileImage}
-    />
-    {isNotificationsOpen ? <NotificationPanel onClose={() => setIsNotificationsOpen(false)} /> : null}
-    {isProfileMenuOpen ? <ProfileMenu onSelect={(action) => {
-      setIsProfileMenuOpen(false);
-      setProfileAction(action);
-    }} /> : null}
-    {profileAction ? <ProfileActionModal
-      action={profileAction}
-      onClose={() => setProfileAction(null)}
-      onProfileUpdated={setProfileImage}
-    /> : null}
-    <BottomNavigation items={items} />
-  </>;
+  return (
+    <>
+      <UtilityToolbar
+        {...utilityProps}
+        onNotifications={handleNotifications}
+        onProfile={handleProfile}
+        profileImage={profileImage}
+      />
+      {isNotificationsOpen ? (
+        <NotificationPanel onClose={() => setIsNotificationsOpen(false)} />
+      ) : null}
+      {isProfileMenuOpen ? (
+        <ProfileMenu
+          onSelect={(action) => {
+            setIsProfileMenuOpen(false);
+            setProfileAction(action);
+          }}
+        />
+      ) : null}
+      {profileAction ? (
+        <ProfileActionModal
+          action={profileAction}
+          onClose={() => setProfileAction(null)}
+          onProfileUpdated={setProfileImage}
+        />
+      ) : null}
+      <BottomNavigation items={items} />
+    </>
+  );
 }

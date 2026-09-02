@@ -5,10 +5,7 @@ import ActivityIcon from "../../../assets/icons/activity.svg?react";
 
 import "../styles/activateStatusModal.css";
 
-function ActivateConfirmModal({
-  onCancel,
-  onConfirm,
-}) {
+function ActivateConfirmModal({ onCancel, onConfirm }) {
   return (
     <CompactModal
       onClose={onCancel}
@@ -16,10 +13,7 @@ function ActivateConfirmModal({
       describedBy="activate-confirm-modal-description"
       className="activate-status-modal"
     >
-      <div
-        className="activate-status-modal__icon-box"
-        aria-hidden="true"
-      >
+      <div className="activate-status-modal__icon-box" aria-hidden="true">
         <ActivityIcon className="activate-status-modal__activity-icon" />
       </div>
 

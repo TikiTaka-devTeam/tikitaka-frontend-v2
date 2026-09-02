@@ -46,7 +46,11 @@ function SocialLoginButtons() {
 
   return (
     <div className="social-login-buttons">
-      <button type="button" className="social-login-button social-login-button--google" onClick={() => startOAuthLogin("GOOGLE")}>
+      <button
+        type="button"
+        className="social-login-button social-login-button--google"
+        onClick={() => startOAuthLogin("GOOGLE")}
+      >
         <img
           className="social-login-button__google-mark"
           src={googleLogoSrc}
@@ -56,7 +60,11 @@ function SocialLoginButtons() {
         <span>{"Continue with Google"}</span>
       </button>
 
-      <button type="button" className="social-login-button social-login-button--kakao" onClick={() => startOAuthLogin("KAKAO")}>
+      <button
+        type="button"
+        className="social-login-button social-login-button--kakao"
+        onClick={() => startOAuthLogin("KAKAO")}
+      >
         <img src={kakaoLogoSrc} alt="" aria-hidden="true" />
         <span>{"카카오로 로그인"}</span>
       </button>

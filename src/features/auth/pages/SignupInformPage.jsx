@@ -44,7 +44,7 @@ const campusOptions = [
   "명지대학교",
   "인제대학교",
   "안양대학교",
-  "수원대학교"
+  "수원대학교",
 ];
 
 const initialForm = {
@@ -117,16 +117,14 @@ function isDuplicateEmailError(error) {
 }
 
 function getApiErrorCode(error) {
-  return (
-    error.response?.data?.code ||
-    error.response?.data?.error_code ||
-    ""
-  );
+  return error.response?.data?.code || error.response?.data?.error_code || "";
 }
 
 function readOAuthSignupContext() {
   try {
-    return JSON.parse(sessionStorage.getItem("tikitaka_oauth_signup") || "null");
+    return JSON.parse(
+      sessionStorage.getItem("tikitaka_oauth_signup") || "null",
+    );
   } catch {
     return null;
   }
@@ -176,7 +174,14 @@ function SignupInformPage() {
       form.univ &&
       form.major.trim() &&
       form.memberIdNumber.trim(),
-    [emailChecked, form, isOAuthSignup, passwordsMatch, phoneVerificationToken, phoneVerified],
+    [
+      emailChecked,
+      form,
+      isOAuthSignup,
+      passwordsMatch,
+      phoneVerificationToken,
+      phoneVerified,
+    ],
   );
 
   useEffect(() => {
@@ -264,13 +269,20 @@ function SignupInformPage() {
       return;
     }
 
-    const formattedPhoneNumber = formatPhoneNumber(form.phonePrefix, phoneNumber);
+    const formattedPhoneNumber = formatPhoneNumber(
+      form.phonePrefix,
+      phoneNumber,
+    );
     setIsSendingPhoneCode(true);
     setPhoneErrorMessage("");
 
     try {
       const { data } = await checkPhoneDuplicate(formattedPhoneNumber);
-      const isDuplicated = data === true || data?.duplicated === true || data?.exists === true || data?.available === false;
+      const isDuplicated =
+        data === true ||
+        data?.duplicated === true ||
+        data?.exists === true ||
+        data?.available === false;
 
       if (isDuplicated) {
         setPhoneErrorMessage("이미 가입된 휴대폰 번호입니다.");
@@ -288,11 +300,16 @@ function SignupInformPage() {
       const code = getApiErrorCode(error);
       const messages = {
         PHONE_NUMBER_ALREADY_REGISTERED: "이미 가입된 휴대폰 번호입니다.",
-        PHONE_VERIFICATION_RESEND_LIMITED: "잠시 후 인증번호를 다시 요청해주세요.",
+        PHONE_VERIFICATION_RESEND_LIMITED:
+          "잠시 후 인증번호를 다시 요청해주세요.",
         PHONE_VERIFICATION_RATE_LIMITED: "인증번호 발송 횟수를 초과했습니다.",
         SMS_DELIVERY_UNAVAILABLE: "인증번호를 발송하지 못했습니다.",
       };
-      setPhoneErrorMessage(messages[code] || error.response?.data?.message || "인증번호 발송에 실패했습니다.");
+      setPhoneErrorMessage(
+        messages[code] ||
+          error.response?.data?.message ||
+          "인증번호 발송에 실패했습니다.",
+      );
     } finally {
       setIsSendingPhoneCode(false);
     }
@@ -318,7 +335,10 @@ function SignupInformPage() {
 
     try {
       const phoneNumber = formatPhoneNumber(form.phonePrefix, form.phoneNumber);
-      const { data } = await confirmPhoneVerification(phoneNumber, form.verificationCode.trim());
+      const { data } = await confirmPhoneVerification(
+        phoneNumber,
+        form.verificationCode.trim(),
+      );
       const token = data?.verification_token;
 
       if (!token) {
@@ -337,7 +357,12 @@ function SignupInformPage() {
       };
       setPhoneVerified(false);
       setPhoneVerificationToken("");
-      setPhoneErrorMessage(messages[code] || error.response?.data?.message || error.message || "인증번호 확인에 실패했습니다.");
+      setPhoneErrorMessage(
+        messages[code] ||
+          error.response?.data?.message ||
+          error.message ||
+          "인증번호 확인에 실패했습니다.",
+      );
     } finally {
       setIsVerifyingPhoneCode(false);
     }
@@ -403,21 +428,27 @@ function SignupInformPage() {
       };
 
       const { data } = isOAuthSignup
-        ? await oauthSignup({
-            signup_token: oauthSignupContext.signupToken,
-            ...commonPayload,
-          }, selectedProfileFile)
-        : await signup({
-            email: commonPayload.email,
-            password: form.password,
-            name: commonPayload.name,
-            phone_number: commonPayload.phone_number,
-            phone_verification_token: commonPayload.phone_verification_token,
-            account_type: commonPayload.account_type,
-            univ: commonPayload.univ,
-            major: commonPayload.major,
-            member_id_number: commonPayload.member_id_number,
-          }, selectedProfileFile);
+        ? await oauthSignup(
+            {
+              signup_token: oauthSignupContext.signupToken,
+              ...commonPayload,
+            },
+            selectedProfileFile,
+          )
+        : await signup(
+            {
+              email: commonPayload.email,
+              password: form.password,
+              name: commonPayload.name,
+              phone_number: commonPayload.phone_number,
+              phone_verification_token: commonPayload.phone_verification_token,
+              account_type: commonPayload.account_type,
+              univ: commonPayload.univ,
+              major: commonPayload.major,
+              member_id_number: commonPayload.member_id_number,
+            },
+            selectedProfileFile,
+          );
       profileUrlToShow = data?.profile_url || profileUrlToShow;
       sessionStorage.removeItem("tikitaka_oauth_signup");
 
@@ -485,75 +516,85 @@ function SignupInformPage() {
                 disabled={isCheckingEmail}
                 onClick={handleEmailCheck}
               >
-                {isCheckingEmail ? "확인 중" : emailChecked ? "완료" : "중복 확인"}
+                {isCheckingEmail
+                  ? "확인 중"
+                  : emailChecked
+                    ? "완료"
+                    : "중복 확인"}
               </button>
             </div>
             {emailErrorMessage && (
-              <p className="signup-inform-field-error">
-                {emailErrorMessage}
-              </p>
+              <p className="signup-inform-field-error">{emailErrorMessage}</p>
             )}
           </label>
 
-          {!isOAuthSignup && <label className="signup-inform-field">
-            <span>비밀번호</span>
-            <div className="signup-inform-password">
-              <input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={handleChange}
-                placeholder="비밀번호를 입력해주세요. (8자 이상)"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
-              >
-                <img
-                  src={showPassword ? watchPasswordIcon : hidePasswordIcon}
-                  alt=""
+          {!isOAuthSignup && (
+            <label className="signup-inform-field">
+              <span>비밀번호</span>
+              <div className="signup-inform-password">
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="비밀번호를 입력해주세요. (8자 이상)"
                 />
-              </button>
-            </div>
-            {form.password && form.password.length < 8 && (
-              <p className="signup-inform-field-error">
-                비밀번호는 8자리 이상으로 입력해주세요.
-              </p>
-            )}
-          </label>}
-
-          {!isOAuthSignup && <label className="signup-inform-field">
-            <span>비밀번호 확인</span>
-            <div className="signup-inform-password">
-              <input
-                name="passwordConfirm"
-                type={showPasswordConfirm ? "text" : "password"}
-                value={form.passwordConfirm}
-                onChange={handleChange}
-                placeholder="확인을 위하여 위와 동일하게 입력해주세요."
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswordConfirm((prev) => !prev)}
-                aria-label={
-                  showPasswordConfirm ? "비밀번호 확인 숨기기" : "비밀번호 확인 보기"
-                }
-              >
-                <img
-                  src={
-                    showPasswordConfirm ? watchPasswordIcon : hidePasswordIcon
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={
+                    showPassword ? "비밀번호 숨기기" : "비밀번호 보기"
                   }
-                  alt=""
+                >
+                  <img
+                    src={showPassword ? watchPasswordIcon : hidePasswordIcon}
+                    alt=""
+                  />
+                </button>
+              </div>
+              {form.password && form.password.length < 8 && (
+                <p className="signup-inform-field-error">
+                  비밀번호는 8자리 이상으로 입력해주세요.
+                </p>
+              )}
+            </label>
+          )}
+
+          {!isOAuthSignup && (
+            <label className="signup-inform-field">
+              <span>비밀번호 확인</span>
+              <div className="signup-inform-password">
+                <input
+                  name="passwordConfirm"
+                  type={showPasswordConfirm ? "text" : "password"}
+                  value={form.passwordConfirm}
+                  onChange={handleChange}
+                  placeholder="확인을 위하여 위와 동일하게 입력해주세요."
                 />
-              </button>
-            </div>
-            {form.passwordConfirm && !passwordsMatch && (
-              <p className="signup-inform-field-error">
-                비밀번호가 일치하지 않습니다.
-              </p>
-            )}
-          </label>}
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordConfirm((prev) => !prev)}
+                  aria-label={
+                    showPasswordConfirm
+                      ? "비밀번호 확인 숨기기"
+                      : "비밀번호 확인 보기"
+                  }
+                >
+                  <img
+                    src={
+                      showPasswordConfirm ? watchPasswordIcon : hidePasswordIcon
+                    }
+                    alt=""
+                  />
+                </button>
+              </div>
+              {form.passwordConfirm && !passwordsMatch && (
+                <p className="signup-inform-field-error">
+                  비밀번호가 일치하지 않습니다.
+                </p>
+              )}
+            </label>
+          )}
 
           <div className="signup-inform-field">
             <span>휴대폰 번호</span>
@@ -582,13 +623,15 @@ function SignupInformPage() {
                 disabled={isSendingPhoneCode}
                 onClick={handleSendCode}
               >
-                {isSendingPhoneCode ? "전송 중" : phoneCodeSent ? "인증번호 재전송" : "인증번호 전송"}
+                {isSendingPhoneCode
+                  ? "전송 중"
+                  : phoneCodeSent
+                    ? "인증번호 재전송"
+                    : "인증번호 전송"}
               </button>
             </div>
             {phoneErrorMessage && (
-              <p className="signup-inform-field-error">
-                {phoneErrorMessage}
-              </p>
+              <p className="signup-inform-field-error">{phoneErrorMessage}</p>
             )}
             {phoneCodeSent && (
               <div className="signup-inform-verification">
@@ -607,7 +650,11 @@ function SignupInformPage() {
                     disabled={isVerifyingPhoneCode || phoneVerified}
                     onClick={handleVerifyCode}
                   >
-                    {isVerifyingPhoneCode ? "확인 중" : phoneVerified ? "인증 완료" : "인증번호 확인"}
+                    {isVerifyingPhoneCode
+                      ? "확인 중"
+                      : phoneVerified
+                        ? "인증 완료"
+                        : "인증번호 확인"}
                   </button>
                 </div>
                 <div className="signup-inform-code-meta">
@@ -617,7 +664,11 @@ function SignupInformPage() {
                       {formatVerificationTime(verificationTimeLeft)}
                     </strong>
                   </span>
-                  <button type="button" disabled={isSendingPhoneCode} onClick={handleExtendTime}>
+                  <button
+                    type="button"
+                    disabled={isSendingPhoneCode}
+                    onClick={handleExtendTime}
+                  >
                     시간연장
                   </button>
                 </div>

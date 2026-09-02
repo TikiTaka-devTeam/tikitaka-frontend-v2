@@ -5,24 +5,15 @@ import ModalBackdrop from "../../../components/common/ModalBackdrop.jsx";
 
 import "../styles/joinSpaceModal.css";
 
-function JoinSpaceModal({
-  onClose,
-  onJoin,
-  isSubmitting = false,
-}) {
-  const [spaceCode, setSpaceCode] =
-    useState("");
+function JoinSpaceModal({ onClose, onJoin, isSubmitting = false }) {
+  const [spaceCode, setSpaceCode] = useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const trimmedSpaceCode =
-      spaceCode.trim();
+    const trimmedSpaceCode = spaceCode.trim();
 
-    if (
-      !trimmedSpaceCode ||
-      isSubmitting
-    ) {
+    if (!trimmedSpaceCode || isSubmitting) {
       return;
     }
 
@@ -40,10 +31,7 @@ function JoinSpaceModal({
         onSubmit={handleSubmit}
       >
         <div className="join-space-modal__header">
-          <h2
-            id="join-space-modal-title"
-            className="join-space-modal__title"
-          >
+          <h2 id="join-space-modal-title" className="join-space-modal__title">
             참여 신청
           </h2>
 
@@ -51,28 +39,21 @@ function JoinSpaceModal({
             id="join-space-modal-description"
             className="join-space-modal__description"
           >
-            Space 코드를 입력하여 Space에
-            참여하세요
+            Space 코드를 입력하여 Space에 참여하세요
           </p>
         </div>
 
         <div className="join-space-modal__body">
           <input
             className={`join-space-modal__input ${
-              spaceCode.trim()
-                ? "has-value"
-                : ""
+              spaceCode.trim() ? "has-value" : ""
             }`}
             type="text"
             value={spaceCode}
             placeholder="SPACECODE"
             aria-label="Space 코드"
             disabled={isSubmitting}
-            onChange={(event) =>
-              setSpaceCode(
-                event.target.value,
-              )
-            }
+            onChange={(event) => setSpaceCode(event.target.value)}
             autoFocus
           />
         </div>
@@ -82,16 +63,9 @@ function JoinSpaceModal({
             className="join-space-modal__actions"
             onCancel={onClose}
             cancelText="취소"
-            confirmText={
-              isSubmitting
-                ? "신청 중"
-                : "신청"
-            }
+            confirmText={isSubmitting ? "신청 중" : "신청"}
             confirmType="submit"
-            confirmDisabled={
-              isSubmitting ||
-              !spaceCode.trim()
-            }
+            confirmDisabled={isSubmitting || !spaceCode.trim()}
           />
         </div>
       </form>
