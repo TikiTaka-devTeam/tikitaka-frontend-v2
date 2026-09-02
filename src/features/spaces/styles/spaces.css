@@ -75,7 +75,7 @@
 .spaces-tabs {
   width: 127px;
   height: 35px;
-  padding: 4px 6px 3px;
+  padding: 3.5px 6px 3.5px;
   display: flex;
   align-items: center;
   gap: 3px;
