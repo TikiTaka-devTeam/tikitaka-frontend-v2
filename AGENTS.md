@@ -407,6 +407,20 @@ Treat `API-SPEC.md` as the source of truth for backend API contracts.
 Do not invent endpoints, parameters, request fields, or response fields that
 are not defined in the specification.
 
+## `API-DETAIL.md`
+
+Read after reading API-SPEC.md to specify API:
+
+- implementing API integration
+- modifying API calls
+- answering questions about backend communication
+- working with request/response data
+- working with authentication or authorization behavior
+
+Treat `API-DETAIL.md` as the source of truth for backend API contracts.
+
+Do not invent endpoints, parameters, request fields, or response fields that
+are not defined in the specification.
 
 ## `RESPONSIVE.md`
 

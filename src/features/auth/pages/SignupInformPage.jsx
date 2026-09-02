@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import SignupStepper from "../components/SignupStepper.jsx";
-import { checkEmailDuplicate, signup, createProfileImage } from "../api/auth.api.js";
+import {
+  checkEmailDuplicate,
+  checkPhoneDuplicate,
+  confirmPhoneVerification,
+  oauthSignup,
+  sendPhoneVerification,
+  signup,
+} from "../api/auth.api.js";
 
 import addImgIcon from "../../../assets/icons/addImg.svg";
 import hidePasswordIcon from "../../../assets/icons/HidePassword.svg";
@@ -56,8 +63,6 @@ const initialForm = {
 };
 
 const VERIFICATION_TIME_LIMIT = 300;
-const DEVELOPMENT_VERIFICATION_CODE = "111111";
-
 function formatPhoneNumber(prefix, number) {
   const digits = number.replace(/\D/g, "");
 
@@ -111,9 +116,32 @@ function isDuplicateEmailError(error) {
   );
 }
 
+function getApiErrorCode(error) {
+  return (
+    error.response?.data?.code ||
+    error.response?.data?.error_code ||
+    ""
+  );
+}
+
+function readOAuthSignupContext() {
+  try {
+    return JSON.parse(sessionStorage.getItem("tikitaka_oauth_signup") || "null");
+  } catch {
+    return null;
+  }
+}
+
 function SignupInformPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState(initialForm);
+  const [oauthSignupContext] = useState(readOAuthSignupContext);
+  const isOAuthSignup = Boolean(oauthSignupContext?.signupToken);
+  const [form, setForm] = useState(() => ({
+    ...initialForm,
+    email: oauthSignupContext?.profile?.email || "",
+    name: oauthSignupContext?.profile?.name || "",
+    profileUrl: oauthSignupContext?.profile?.profile_url || "",
+  }));
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
@@ -121,6 +149,9 @@ function SignupInformPage() {
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [phoneCodeSent, setPhoneCodeSent] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
+  const [phoneVerificationToken, setPhoneVerificationToken] = useState("");
+  const [isSendingPhoneCode, setIsSendingPhoneCode] = useState(false);
+  const [isVerifyingPhoneCode, setIsVerifyingPhoneCode] = useState(false);
   const [verificationTimeLeft, setVerificationTimeLeft] = useState(
     VERIFICATION_TIME_LIMIT,
   );
@@ -137,14 +168,15 @@ function SignupInformPage() {
       form.name.trim() &&
       form.email.trim() &&
       emailChecked &&
-      form.password.length >= 8 &&
-      passwordsMatch &&
+      (isOAuthSignup || (form.password.length >= 8 && passwordsMatch)) &&
       form.phoneNumber.trim().length === 8 &&
+      phoneVerified &&
+      phoneVerificationToken &&
       form.role &&
       form.univ &&
       form.major.trim() &&
       form.memberIdNumber.trim(),
-    [emailChecked, form, passwordsMatch],
+    [emailChecked, form, isOAuthSignup, passwordsMatch, phoneVerificationToken, phoneVerified],
   );
 
   useEffect(() => {
@@ -177,6 +209,7 @@ function SignupInformPage() {
 
     if (name === "phoneNumber") {
       setPhoneVerified(false);
+      setPhoneVerificationToken("");
       setPhoneCodeSent(false);
       setVerificationTimeLeft(VERIFICATION_TIME_LIMIT);
       setPhoneErrorMessage("");
@@ -218,7 +251,7 @@ function SignupInformPage() {
     }
   };
 
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     const phoneNumber = form.phoneNumber.trim();
 
     if (!phoneNumber) {
@@ -231,35 +264,83 @@ function SignupInformPage() {
       return;
     }
 
-    setPhoneCodeSent(true);
-    setPhoneVerified(false);
-    setVerificationTimeLeft(VERIFICATION_TIME_LIMIT);
-    setForm((prev) => ({ ...prev, verificationCode: "" }));
+    const formattedPhoneNumber = formatPhoneNumber(form.phonePrefix, phoneNumber);
+    setIsSendingPhoneCode(true);
     setPhoneErrorMessage("");
-    setErrorMessage("");
+
+    try {
+      const { data } = await checkPhoneDuplicate(formattedPhoneNumber);
+      const isDuplicated = data === true || data?.duplicated === true || data?.exists === true || data?.available === false;
+
+      if (isDuplicated) {
+        setPhoneErrorMessage("이미 가입된 휴대폰 번호입니다.");
+        return;
+      }
+
+      await sendPhoneVerification(formattedPhoneNumber);
+      setPhoneCodeSent(true);
+      setPhoneVerified(false);
+      setPhoneVerificationToken("");
+      setVerificationTimeLeft(VERIFICATION_TIME_LIMIT);
+      setForm((prev) => ({ ...prev, verificationCode: "" }));
+      setErrorMessage("");
+    } catch (error) {
+      const code = getApiErrorCode(error);
+      const messages = {
+        PHONE_NUMBER_ALREADY_REGISTERED: "이미 가입된 휴대폰 번호입니다.",
+        PHONE_VERIFICATION_RESEND_LIMITED: "잠시 후 인증번호를 다시 요청해주세요.",
+        PHONE_VERIFICATION_RATE_LIMITED: "인증번호 발송 횟수를 초과했습니다.",
+        SMS_DELIVERY_UNAVAILABLE: "인증번호를 발송하지 못했습니다.",
+      };
+      setPhoneErrorMessage(messages[code] || error.response?.data?.message || "인증번호 발송에 실패했습니다.");
+    } finally {
+      setIsSendingPhoneCode(false);
+    }
   };
 
   const handleExtendTime = () => {
-    setVerificationTimeLeft(VERIFICATION_TIME_LIMIT);
+    void handleSendCode();
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     if (!form.verificationCode.trim()) {
       setErrorMessage("인증번호를 입력해주세요.");
       return;
     }
 
-    if (
-      verificationTimeLeft <= 0 ||
-      form.verificationCode.trim() !== DEVELOPMENT_VERIFICATION_CODE
-    ) {
-      window.alert("인증번호가 틀렸습니다.");
-      setPhoneVerified(false);
+    if (verificationTimeLeft <= 0) {
+      setPhoneErrorMessage("인증번호 입력 시간이 만료되었습니다.");
       return;
     }
 
-    setPhoneVerified(true);
-    setErrorMessage("");
+    setIsVerifyingPhoneCode(true);
+    setPhoneErrorMessage("");
+
+    try {
+      const phoneNumber = formatPhoneNumber(form.phonePrefix, form.phoneNumber);
+      const { data } = await confirmPhoneVerification(phoneNumber, form.verificationCode.trim());
+      const token = data?.verification_token;
+
+      if (!token) {
+        throw new Error("휴대폰 인증 토큰이 없습니다.");
+      }
+
+      setPhoneVerificationToken(token);
+      setPhoneVerified(true);
+      setErrorMessage("");
+    } catch (error) {
+      const code = getApiErrorCode(error);
+      const messages = {
+        PHONE_VERIFICATION_CODE_MISMATCH: "인증번호가 일치하지 않습니다.",
+        PHONE_VERIFICATION_CODE_EXPIRED: "인증번호가 만료되었습니다.",
+        PHONE_VERIFICATION_ATTEMPTS_EXCEEDED: "인증 시도 횟수를 초과했습니다.",
+      };
+      setPhoneVerified(false);
+      setPhoneVerificationToken("");
+      setPhoneErrorMessage(messages[code] || error.response?.data?.message || error.message || "인증번호 확인에 실패했습니다.");
+    } finally {
+      setIsVerifyingPhoneCode(false);
+    }
   };
 
   const handleProfileImageChange = (event) => {
@@ -308,32 +389,37 @@ function SignupInformPage() {
     setErrorMessage("");
 
     try {
-      let profileImageKeyToSend = null;
       let profileUrlToShow = form.profileUrl;
 
-      if (selectedProfileFile) {
-        const uploadResult = await createProfileImage(selectedProfileFile);
-
-        profileImageKeyToSend = uploadResult.objectKey;
-        profileUrlToShow = uploadResult.profileUrl || form.profileUrl;
-      }
-
-      const payload = {
+      const commonPayload = {
         email: form.email.trim(),
-        password: form.password,
         name: form.name.trim(),
         univ: form.univ,
         major: form.major.trim(),
-        role: form.role,
-        phoneNumber: formatPhoneNumber(form.phonePrefix, form.phoneNumber),
-        memberIdNumber: form.memberIdNumber.trim(),
+        phone_number: formatPhoneNumber(form.phonePrefix, form.phoneNumber),
+        phone_verification_token: phoneVerificationToken,
+        account_type: form.role,
+        member_id_number: form.memberIdNumber.trim(),
       };
 
-      if (profileImageKeyToSend) {
-        payload.profile_image_key = profileImageKeyToSend;
-      }
-
-      await signup(payload);
+      const { data } = isOAuthSignup
+        ? await oauthSignup({
+            signup_token: oauthSignupContext.signupToken,
+            ...commonPayload,
+          }, selectedProfileFile)
+        : await signup({
+            email: commonPayload.email,
+            password: form.password,
+            name: commonPayload.name,
+            phone_number: commonPayload.phone_number,
+            phone_verification_token: commonPayload.phone_verification_token,
+            account_type: commonPayload.account_type,
+            univ: commonPayload.univ,
+            major: commonPayload.major,
+            member_id_number: commonPayload.member_id_number,
+          }, selectedProfileFile);
+      profileUrlToShow = data?.profile_url || profileUrlToShow;
+      sessionStorage.removeItem("tikitaka_oauth_signup");
 
       navigate("/signup-complete", {
         replace: true,
@@ -409,7 +495,7 @@ function SignupInformPage() {
             )}
           </label>
 
-          <label className="signup-inform-field">
+          {!isOAuthSignup && <label className="signup-inform-field">
             <span>비밀번호</span>
             <div className="signup-inform-password">
               <input
@@ -435,9 +521,9 @@ function SignupInformPage() {
                 비밀번호는 8자리 이상으로 입력해주세요.
               </p>
             )}
-          </label>
+          </label>}
 
-          <label className="signup-inform-field">
+          {!isOAuthSignup && <label className="signup-inform-field">
             <span>비밀번호 확인</span>
             <div className="signup-inform-password">
               <input
@@ -467,7 +553,7 @@ function SignupInformPage() {
                 비밀번호가 일치하지 않습니다.
               </p>
             )}
-          </label>
+          </label>}
 
           <div className="signup-inform-field">
             <span>휴대폰 번호</span>
@@ -493,9 +579,10 @@ function SignupInformPage() {
                   phoneCodeSent ? "is-done" : ""
                 }`}
                 type="button"
+                disabled={isSendingPhoneCode}
                 onClick={handleSendCode}
               >
-                {phoneCodeSent ? "인증번호 재전송" : "인증번호 전송"}
+                {isSendingPhoneCode ? "전송 중" : phoneCodeSent ? "인증번호 재전송" : "인증번호 전송"}
               </button>
             </div>
             {phoneErrorMessage && (
@@ -517,9 +604,10 @@ function SignupInformPage() {
                       phoneVerified ? "is-done" : ""
                     }`}
                     type="button"
+                    disabled={isVerifyingPhoneCode || phoneVerified}
                     onClick={handleVerifyCode}
                   >
-                    {phoneVerified ? "인증 완료" : "인증번호 확인"}
+                    {isVerifyingPhoneCode ? "확인 중" : phoneVerified ? "인증 완료" : "인증번호 확인"}
                   </button>
                 </div>
                 <div className="signup-inform-code-meta">
@@ -529,7 +617,7 @@ function SignupInformPage() {
                       {formatVerificationTime(verificationTimeLeft)}
                     </strong>
                   </span>
-                  <button type="button" onClick={handleExtendTime}>
+                  <button type="button" disabled={isSendingPhoneCode} onClick={handleExtendTime}>
                     시간연장
                   </button>
                 </div>

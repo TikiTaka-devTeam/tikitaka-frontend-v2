@@ -5,6 +5,13 @@ import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
   define: { global: "globalThis" },
+  envPrefix: [
+    "VITE_",
+    "GOOGLE_OAUTH_CLIENT_ID",
+    "GOOGLE_OAUTH_REDIRECT_URI",
+    "KAKAO_OAUTH_CLIENT_ID",
+    "KAKAO_OAUTH_REDIRECT_URI",
+  ],
   plugins: [
     react(),
     svgr({ include: "**/*.svg?react" }),

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import LoginPage from "../features/auth/pages/LoginPage.jsx";
+import OAuthCallbackPage from "../features/auth/pages/OAuthCallbackPage.jsx";
 import SignupCompletePage from "../features/auth/pages/SignupCompletePage.jsx";
 import SignupInformPage from "../features/auth/pages/SignupInformPage.jsx";
 import SignupTermsPage from "../features/auth/pages/SignupTermsPage.jsx";
@@ -39,6 +40,8 @@ function App() {
           )
         }
       />
+
+      <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
 
       <Route
         path="/signup-terms"

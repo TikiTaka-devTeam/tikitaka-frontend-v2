@@ -1,132 +1,85 @@
 import { apiClient } from "../../../lib/api/client";
 
-export const login = (payload) => apiClient.post("/auth/login", payload);
+export const login = (payload) =>
+  apiClient.post("/auth/login", payload, { skipAuth: true });
+
+export const oauthLogin = (provider, authorizationCode) =>
+  apiClient.post(`/auth/oauth/${provider}`, {
+    authorization_code: authorizationCode,
+  }, { skipAuth: true });
 
 export const checkEmailDuplicate = (email) => 
     apiClient.get("/auth/email/check", { params: { email }, skipAuth: true });
 
-export const signup = (payload) =>
-  apiClient.post("/auth/signup", payload);
+export const checkPhoneDuplicate = (phoneNumber) =>
+  apiClient.get("/auth/phone/check", {
+    params: { phone_number: phoneNumber },
+    skipAuth: true,
+  });
+
+export const sendPhoneVerification = (phoneNumber) =>
+  apiClient.post("/auth/phone/verification", {
+    phone_number: phoneNumber,
+  }, { skipAuth: true });
+
+export const confirmPhoneVerification = (phoneNumber, verificationCode) =>
+  apiClient.post("/auth/phone/verification/confirm", {
+    phone_number: phoneNumber,
+    verification_code: verificationCode,
+  }, { skipAuth: true });
+
+export const signup = (signupData, profileImage = null) => {
+  const formData = new FormData();
+  formData.append(
+    "signup_data",
+    new Blob([JSON.stringify(signupData)], { type: "application/json" }),
+  );
+
+  if (profileImage) {
+    formData.append("profile_image", profileImage);
+  }
+
+  return apiClient.post("/auth/signup", formData, { skipAuth: true });
+};
+
+export const oauthSignup = (signupData, profileImage = null) => {
+  const formData = new FormData();
+  formData.append(
+    "signup_data",
+    new Blob([JSON.stringify(signupData)], { type: "application/json" }),
+  );
+
+  if (profileImage) {
+    formData.append("profile_image", profileImage);
+  }
+
+  return apiClient.post("/auth/oauth/signup", formData, { skipAuth: true });
+};
 
 export const getCurrentUser = () => apiClient.get("/users/me");
 
 export const changePassword = (payload) =>
   apiClient.patch("/users/me/password", payload);
 
-export const updateMyProfileImage = (payload) =>
-  apiClient.patch("/users/me/profile-image", payload);
-
 export const createInquiry = (payload) =>
   apiClient.post("/inquiries", payload);
 
-export const getProfileImageUploadUrl = (payload) =>
-  apiClient.post("/auth/create-profile-image", payload, { skipAuth: true });
+export const updateProfileImage = async (file = null, shouldDelete = false) => {
+  const formData = new FormData();
 
-export const createProfileImage = async (file) => {
-  const { data } = await getProfileImageUploadUrl({
-    original_filename: file.name,
-    content_type: file.type,
-  });
-
-  const uploadUrl = data.upload_url;
-  const objectKey = data.object_key;
-  const profileUrl = data.profile_url;
-
-  if (!uploadUrl || !objectKey) {
-    throw new Error("프로필 이미지 업로드 URL을 가져오지 못했습니다.");
+  if (file) {
+    formData.append("profile_image", file);
   }
 
-  await fetch(uploadUrl, {
-    method: "PUT",
-    body: file,
-    headers: {
-      "Content-Type": file.type,
-    },
-    credentials: "omit",
-  });
+  formData.append("delete", String(shouldDelete));
 
-  // S3 PUT with one retry and detailed logging
-  let lastError = null;
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const resp = await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type,
-        },
-        credentials: "omit",
-      });
-
-      if (resp.ok) {
-        // success
-        lastError = null;
-        break;
-      }
-
-      const respText = await resp.text().catch(() => "");
-      lastError = new Error(
-        `S3 업로드 실패: ${resp.status} ${resp.statusText}${
-          respText ? ` - ${respText}` : ""
-        }`,
-      );
-      console.warn(`createProfileImage: attempt ${attempt} failed:`, lastError);
-    } catch (err) {
-      lastError = err;
-      console.warn(`createProfileImage: attempt ${attempt} fetch error:`, err);
-    }
-
-    if (attempt < 2) {
-      // backoff before retry
-      await new Promise((r) => setTimeout(r, 500 * attempt));
-    }
-  }
-
-  if (lastError) {
-    throw lastError;
-  }
-
-  return { objectKey, profileUrl };
-};
-
-export const getProfileImagePresignedUrl = (payload) =>
-  apiClient.post("/auth/profile-image/presigned-url", payload);
-
-export const confirmProfileImage = (payload) =>
-  apiClient.post("/auth/profile-image", payload);
-
-export const updateProfileImage = async (file) => {
-  const { data: presigned } = await getProfileImagePresignedUrl({
-    original_filename: file.name,
-    content_type: file.type,
-  });
-
-  const uploadUrl = presigned.upload_url;
-  const objectKey = presigned.object_key;
-
-  if (!uploadUrl || !objectKey) {
-    throw new Error("프로필 이미지 업로드 URL을 가져오지 못했습니다.");
-  }
-
-  const uploadResponse = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type,
-    },
-    body: file,
-    credentials: "omit",
-  });
-
-  if (!uploadResponse.ok) {
-    throw new Error("프로필 이미지를 업로드하지 못했습니다.");
-  }
-
-  const { data } = await confirmProfileImage({
-    object_key: objectKey,
-  });
+  const { data } = await apiClient.patch(
+    "/users/me/profile-image",
+    formData,
+  );
 
   return {
-    profileUrl: data.profile_url || presigned.profile_url || "",
+    profileUrl: data?.profile_url || "",
   };
 };
 
