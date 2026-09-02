@@ -1,0 +1,103 @@
+.join-space-modal {
+  width: min(480px, calc(100vw - 32px));
+  height: 300px;
+
+  padding: 32px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  overflow: hidden;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+  color: #141c2e;
+
+  box-shadow:
+    0 18px 42px rgba(10, 26, 56, 0.22);
+}
+
+.join-space-modal__header {
+  width: 100%;
+  height: 60px;
+
+  flex: 0 0 60px;
+}
+
+.join-space-modal__title {
+  margin: 3.5px 0 0;
+
+  color: #141c2e;
+
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 29px;
+}
+
+.join-space-modal__description {
+  margin: 10px 0 0 1px;
+
+  color: #758094;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 17px;
+}
+
+.join-space-modal__body {
+  width: 100%;
+
+  min-height: 0;
+
+  flex: 1;
+}
+
+.join-space-modal__input {
+  width: 100%;
+  height: 48px;
+
+  margin-top: 7px;
+  padding: 0 14px;
+
+  border: 1px solid #d6deeb;
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #ffffff;
+  color: #292e3d;
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+
+  transition: border-color 0.15s ease;
+}
+
+.join-space-modal__input::placeholder {
+  color: #94a1b8;
+  opacity: 1;
+}
+
+.join-space-modal__input:focus,
+.join-space-modal__input.has-value {
+  border-color: #2e6bff;
+}
+
+.join-space-modal__footer {
+  width: 100%;
+  height: 48px;
+
+  flex: 0 0 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.join-space-modal__actions {
+  gap: 10px;
+}
