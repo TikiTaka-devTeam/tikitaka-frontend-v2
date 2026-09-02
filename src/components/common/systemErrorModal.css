@@ -1,0 +1,57 @@
+.system-error-modal {
+  gap: 0;
+}
+
+.system-error-modal__icon-box {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f6f6f6;
+  margin-bottom: 24px;
+}
+
+.system-error-modal__icon-box img {
+  width: 26px;
+  height: 26px;
+}
+
+.system-error-modal__text {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.system-error-modal__text h2,
+.system-error-modal__text p {
+  margin: 0;
+}
+
+.system-error-modal__text h2 {
+  color: #25283c;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 19px;
+}
+
+.system-error-modal__text p {
+  color: #7d8194;
+  font-size: 14px;
+  line-height: 17px;
+}
+
+.system-error-modal__actions {
+  margin-top: auto;
+  gap: 12px;
+}
+
+.system-error-modal__actions .modal-actions__confirm {
+  background: #b2b8c4;
+}
