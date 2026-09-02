@@ -153,6 +153,7 @@ export function AppToolbars({
   items,
   onNotifications,
   onProfile,
+  showBottomNavigation = true,
   ...utilityProps
 }) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -198,7 +199,7 @@ export function AppToolbars({
           onProfileUpdated={setProfileImage}
         />
       ) : null}
-      <BottomNavigation items={items} />
+      {showBottomNavigation ? <BottomNavigation items={items} /> : null}
     </>
   );
 }
