@@ -7,10 +7,15 @@ import "../styles/login.css";
 function LoginPage() {
   const navigate = useNavigate();
 
+  const handleSignUp = () => {
+    sessionStorage.removeItem("tikitaka_oauth_signup");
+    navigate("/signup-terms");
+  };
+
   return (
     <main className="login-page">
-      <AuthBrandPanel onSignUp={() => navigate("/signup-terms")} />
-      <LoginForm onSignUp={() => navigate("/signup-terms")} />
+      <AuthBrandPanel onSignUp={handleSignUp} />
+      <LoginForm onSignUp={handleSignUp} />
     </main>
   );
 }
