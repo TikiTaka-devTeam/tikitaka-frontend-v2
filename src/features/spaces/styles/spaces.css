@@ -102,8 +102,23 @@
 }
 
 .spaces-tab--selected {
-  background: #ffffff;
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.18) 38%,
+      rgba(225, 232, 247, 0.34) 62%,
+      rgba(255, 255, 255, 0.12) 100%
+    ),
+    rgba(232, 232, 237, 0.42);
   color: #487eff;
+  box-shadow:
+    inset 1px 1px 1px rgba(255, 255, 255, 0.78),
+    inset -1px -1px 1px rgba(91, 129, 255, 0.18),
+    inset 1px -1px 1px rgba(255, 116, 198, 0.12),
+    0 5px 12px rgba(38, 56, 92, 0.14);
+  -webkit-backdrop-filter: blur(4px) saturate(1.12);
+  backdrop-filter: blur(4px) saturate(1.12);
 }
 
 .add-space-button {
@@ -144,6 +159,15 @@
   border: 1px solid #dee5f2;
   border-radius: 17px;
   overflow: visible;
+}
+
+.space-card--openable {
+  cursor: pointer;
+}
+
+.space-card--openable:focus-visible {
+  outline: 2px solid #2e6bff;
+  outline-offset: 3px;
 }
 
 .space-card__semester {

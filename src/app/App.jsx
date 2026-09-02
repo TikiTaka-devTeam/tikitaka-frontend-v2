@@ -8,6 +8,7 @@ import SignupTermsPage from "../features/auth/pages/SignupTermsPage.jsx";
 
 import DashboardPage from "../features/dashboard/pages/DashboardPage.jsx";
 import SearchPage from "../features/search/pages/SearchPage.jsx";
+import SpaceLecturePage from "../features/spaces/pages/SpaceLecturePage.jsx";
 import SpacesPage from "../features/spaces/pages/SpacesPage.jsx";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/spaces" element={<SpacesPage />} />
+      <Route path="/spaces/:spaceId" element={<SpaceLecturePage />} />
 
       <Route
         path="/login"

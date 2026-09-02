@@ -772,6 +772,16 @@ function SpacesPage() {
     console.log("알림");
   };
 
+  const handleOpenSpace = (space) => {
+    if (space.isPending || selectedTab !== "active") {
+      return;
+    }
+
+    navigate(`/spaces/${space.id}`, {
+      state: { spaceName: space.name },
+    });
+  };
+
   return (
     <main className="spaces-page">
       <div className="spaces-background" aria-hidden="true">
@@ -859,6 +869,9 @@ function SpacesPage() {
                   onActivate={handleActivate}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onOpen={
+                    selectedTab === "active" ? handleOpenSpace : undefined
+                  }
                 />
               ))}
             </div>

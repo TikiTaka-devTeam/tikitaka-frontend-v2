@@ -104,6 +104,7 @@ function SpaceCard({
   onActivate,
   onEdit,
   onDelete,
+  onOpen,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -157,8 +158,29 @@ function SpaceCard({
     setIsMenuOpen(false);
   };
 
+  const handleOpen = () => {
+    if (!isPending && onOpen) {
+      onOpen?.(space);
+    }
+  };
+
+  const handleCardKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleOpen();
+    }
+  };
+
   return (
-    <article className="space-card">
+    <article
+      className={`space-card ${
+        !isPending && onOpen ? "space-card--openable" : ""
+      }`}
+      role={!isPending && onOpen ? "link" : undefined}
+      tabIndex={!isPending && onOpen ? 0 : undefined}
+      onClick={handleOpen}
+      onKeyDown={handleCardKeyDown}
+    >
       <div
         className="space-card__semester"
         style={

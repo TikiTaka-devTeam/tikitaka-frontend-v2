@@ -1,0 +1,92 @@
+.space-toolbar {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 10;
+  width: 405px;
+  height: 66px;
+  padding: 6px 12px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  transform: translateX(-50%);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 8px 24px rgba(36, 59, 102, 0.16),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px);
+}
+
+.space-toolbar__item {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: 54px;
+  padding: 4px 0 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-radius: 25px;
+  background: transparent;
+  color: #09172e;
+  font: inherit;
+  cursor: default;
+}
+
+.space-toolbar__item--active {
+  background: transparent;
+  color: #2e6bff;
+}
+
+.space-toolbar__item--active::before {
+  position: absolute;
+  top: calc(50% - 1px);
+  left: 50%;
+  z-index: -1;
+  width: 96px;
+  height: 62px;
+  border-radius: 30px;
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.18) 38%,
+      rgba(225, 232, 247, 0.34) 62%,
+      rgba(255, 255, 255, 0.12) 100%
+    ),
+    rgba(232, 232, 237, 0.42);
+  box-shadow:
+    inset 1px 1px 1px rgba(255, 255, 255, 0.78),
+    inset -1px -1px 1px rgba(91, 129, 255, 0.18),
+    inset 1px -1px 1px rgba(255, 116, 198, 0.12),
+    0 5px 12px rgba(38, 56, 92, 0.14);
+  -webkit-backdrop-filter: blur(4px) saturate(1.12);
+  backdrop-filter: blur(4px) saturate(1.12);
+  transform: translate(-50%, -50%);
+  content: "";
+}
+
+.space-toolbar__item img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.space-toolbar__item span {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .space-toolbar {
+    bottom: 12px;
+    width: min(405px, calc(100% - 24px));
+    padding-inline: 8px;
+  }
+}
