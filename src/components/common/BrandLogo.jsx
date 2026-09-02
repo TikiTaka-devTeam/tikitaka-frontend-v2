@@ -8,9 +8,24 @@ const LOGO_SOURCES = {
   white: logoWhiteSrc,
 };
 
-function BrandLogo({ variant = "blue", className = "", imageClassName = "" }) {
+function BrandLogo({ variant = "blue", className = "", imageClassName = "", interactive = true }) {
   const navigate = useNavigate();
   const logoSrc = LOGO_SOURCES[variant] ?? LOGO_SOURCES.blue;
+  const logoImage = (
+    <img
+      className={imageClassName || undefined}
+      src={logoSrc}
+      alt="tikitaka"
+    />
+  );
+
+  if (!interactive) {
+    return (
+      <span className={`brand-logo brand-logo--static${className ? ` ${className}` : ""}`}>
+        {logoImage}
+      </span>
+    );
+  }
 
   return (
     <button
@@ -19,11 +34,7 @@ function BrandLogo({ variant = "blue", className = "", imageClassName = "" }) {
       aria-label="대시보드로 이동"
       onClick={() => navigate("/dashboard")}
     >
-      <img
-        className={imageClassName || undefined}
-        src={logoSrc}
-        alt="tikitaka"
-      />
+      {logoImage}
     </button>
   );
 }
