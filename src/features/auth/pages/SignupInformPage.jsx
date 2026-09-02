@@ -319,7 +319,7 @@ function SignupInformPage() {
     try {
       const phoneNumber = formatPhoneNumber(form.phonePrefix, form.phoneNumber);
       const { data } = await confirmPhoneVerification(phoneNumber, form.verificationCode.trim());
-      const token = data?.phone_verification_token;
+      const token = data?.verification_token;
 
       if (!token) {
         throw new Error("휴대폰 인증 토큰이 없습니다.");
