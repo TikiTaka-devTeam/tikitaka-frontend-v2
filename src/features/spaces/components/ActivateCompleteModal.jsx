@@ -5,9 +5,7 @@ import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 
 import "../styles/activateStatusModal.css";
 
-function ActivateCompleteModal({
-  onConfirm,
-}) {
+function ActivateCompleteModal({ onConfirm }) {
   return (
     <CompactModal
       onClose={onConfirm}
@@ -15,10 +13,7 @@ function ActivateCompleteModal({
       describedBy="activate-complete-modal-description"
       className="activate-status-modal"
     >
-      <div
-        className="activate-status-modal__icon-box"
-        aria-hidden="true"
-      >
+      <div className="activate-status-modal__icon-box" aria-hidden="true">
         <span
           className="activate-status-modal__check-icon"
           style={{

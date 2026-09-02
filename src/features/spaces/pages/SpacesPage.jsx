@@ -1,19 +1,10 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 import BrandLogo from "../../../components/common/BrandLogo.jsx";
-import {
-  AppToolbars,
-} from "../../../components/common/AppToolbars.jsx";
-import {
-  COURSES,
-  WEEK_DAYS,
-} from "../../dashboard/data/dashboard.js";
+import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
+import { COURSES, WEEK_DAYS } from "../../dashboard/data/dashboard.js";
 
 import ActivateCompleteModal from "../components/ActivateCompleteModal.jsx";
 import ActivateConfirmModal from "../components/ActivateConfirmModal.jsx";
@@ -70,41 +61,32 @@ const MOCK_PROFESSORS = {
   "embedded-system": "한유진",
 };
 
-const ACTIVE_SPACE_MOCKS =
-  COURSES.map((course) => {
-    const day =
-      WEEK_DAYS[course.day];
+const ACTIVE_SPACE_MOCKS = COURSES.map((course) => {
+  const day = WEEK_DAYS[course.day];
 
-    return {
-      id: `mock-${course.spaceId}`,
-      name: course.title,
-      semester: "2026-1",
-      professor:
-        MOCK_PROFESSORS[
-          course.spaceId
-        ] ?? "",
-      schedule: `${day} ${course.start} - ${course.end}`,
-      room: course.room,
-      classroom: course.room,
-      schedules: [
-        {
-          day:
-            DAY_API_VALUES[day],
-          start_time:
-            course.start,
-          end_time: course.end,
-        },
-      ],
-      color:
-        course.color.toUpperCase(),
-      status: "ACTIVE",
-      archived: false,
-      participationStatus:
-        "APPROVED",
-      isPending: false,
-      isMock: true,
-    };
-  });
+  return {
+    id: `mock-${course.spaceId}`,
+    name: course.title,
+    semester: "2026-1",
+    professor: MOCK_PROFESSORS[course.spaceId] ?? "",
+    schedule: `${day} ${course.start} - ${course.end}`,
+    room: course.room,
+    classroom: course.room,
+    schedules: [
+      {
+        day: DAY_API_VALUES[day],
+        start_time: course.start,
+        end_time: course.end,
+      },
+    ],
+    color: course.color.toUpperCase(),
+    status: "ACTIVE",
+    archived: false,
+    participationStatus: "APPROVED",
+    isPending: false,
+    isMock: true,
+  };
+});
 
 function readUserRole() {
   const getRoleFromUser = (user) => {
@@ -123,25 +105,19 @@ function readUserRole() {
     );
   };
 
-  const userStorageKeys = [
-    "tikitaka_user",
-    "user",
-  ];
+  const userStorageKeys = ["tikitaka_user", "user"];
 
   for (const key of userStorageKeys) {
-    const rawUser =
-      localStorage.getItem(key);
+    const rawUser = localStorage.getItem(key);
 
     if (!rawUser) {
       continue;
     }
 
     try {
-      const parsedUser =
-        JSON.parse(rawUser);
+      const parsedUser = JSON.parse(rawUser);
 
-      const role =
-        getRoleFromUser(parsedUser);
+      const role = getRoleFromUser(parsedUser);
 
       if (role) {
         return String(role).toUpperCase();
@@ -152,46 +128,28 @@ function readUserRole() {
   }
 
   const directRole =
-    localStorage.getItem(
-      "tikitaka_account_type",
-    ) ??
-    localStorage.getItem(
-      "account_type",
-    ) ??
-    localStorage.getItem(
-      "role",
-    ) ??
+    localStorage.getItem("tikitaka_account_type") ??
+    localStorage.getItem("account_type") ??
+    localStorage.getItem("role") ??
     "";
 
-  return String(
-    directRole,
-  ).toUpperCase();
+  return String(directRole).toUpperCase();
 }
 
-function formatSchedules(
-  schedules = [],
-) {
+function formatSchedules(schedules = []) {
   if (!Array.isArray(schedules)) {
     return "";
   }
 
   return schedules
     .map((schedule) => {
-      const day =
-        DAY_LABELS[schedule.day] ??
-        schedule.day ??
-        "";
+      const day = DAY_LABELS[schedule.day] ?? schedule.day ?? "";
 
-      const startTime =
-        schedule.start_time ?? "";
+      const startTime = schedule.start_time ?? "";
 
-      const endTime =
-        schedule.end_time ?? "";
+      const endTime = schedule.end_time ?? "";
 
-      if (
-        startTime &&
-        endTime
-      ) {
+      if (startTime && endTime) {
         return `${day} ${startTime} - ${endTime}`;
       }
 
@@ -205,158 +163,94 @@ function formatSchedules(
     .join(" / ");
 }
 
-function normalizeApprovedSpace(
-  space,
-  requestedStatus,
-) {
+function normalizeApprovedSpace(space, requestedStatus) {
   const semester =
-    space.year &&
-    space.semester
+    space.year && space.semester
       ? `${space.year}-${space.semester}`
-      : space.semester ?? "";
+      : (space.semester ?? "");
 
   return {
     id: space.space_id,
 
-    name:
-      space.space_name ?? "",
+    name: space.space_name ?? "",
 
     semester,
 
-    professor:
-      space.professor_name ?? "",
+    professor: space.professor_name ?? "",
 
-    schedule:
-      formatSchedules(
-        space.schedules,
-      ),
+    schedule: formatSchedules(space.schedules),
 
-    room:
-      space.classroom ?? "",
+    room: space.classroom ?? "",
 
-    classroom:
-      space.classroom ?? "",
+    classroom: space.classroom ?? "",
 
-    schedules:
-      space.schedules ?? [],
+    schedules: space.schedules ?? [],
 
-    color:
-      space.color_key ??
-      "COLOR_1",
+    color: space.color_key ?? "COLOR_1",
 
-    spaceCode:
-      space.space_code ?? null,
+    spaceCode: space.space_code ?? null,
 
-    status:
-      space.status ??
-      requestedStatus,
+    status: space.status ?? requestedStatus,
 
-    archived:
-      (space.status ??
-        requestedStatus) ===
-      "ARCHIVED",
+    archived: (space.status ?? requestedStatus) === "ARCHIVED",
 
-    participationStatus:
-      "APPROVED",
+    participationStatus: "APPROVED",
 
     isPending: false,
   };
 }
 
-function normalizePendingSpace(
-  space,
-) {
+function normalizePendingSpace(space) {
   return {
     id: space.space_id,
 
-    spaceMemberId:
-      space.space_member_id,
+    spaceMemberId: space.space_member_id,
 
-    name:
-      space.space_name ?? "",
+    name: space.space_name ?? "",
 
     semester: "",
 
-    professor:
-      space.professor_name ?? "",
+    professor: space.professor_name ?? "",
 
-    schedule:
-      formatSchedules(
-        space.schedules,
-      ),
+    schedule: formatSchedules(space.schedules),
 
-    room:
-      space.classroom ?? "",
+    room: space.classroom ?? "",
 
-    classroom:
-      space.classroom ?? "",
+    classroom: space.classroom ?? "",
 
-    schedules:
-      space.schedules ?? [],
+    schedules: space.schedules ?? [],
 
-    color:
-      space.color_key ??
-      "COLOR_1",
+    color: space.color_key ?? "COLOR_1",
 
     status: "ACTIVE",
 
     archived: false,
 
-    participationStatus:
-      space.status ??
-      "PENDING",
+    participationStatus: space.status ?? "PENDING",
 
-    requestedAt:
-      space.requested_at ?? null,
+    requestedAt: space.requested_at ?? null,
 
     isPending: true,
   };
 }
 
-function normalizeSpacesResponse(
-  data,
-  status,
-) {
-  const approvedSpaces =
-    (
-      data?.spaces ?? []
-    ).map((space) =>
-      normalizeApprovedSpace(
-        space,
-        status,
-      ),
-    );
+function normalizeSpacesResponse(data, status) {
+  const approvedSpaces = (data?.spaces ?? []).map((space) =>
+    normalizeApprovedSpace(space, status),
+  );
 
   const pendingSpaces =
     status === "ACTIVE"
-      ? (
-          data?.pending_spaces ??
-          []
-        ).map(
-          normalizePendingSpace,
-        )
+      ? (data?.pending_spaces ?? []).map(normalizePendingSpace)
       : [];
 
-  return [
-    ...approvedSpaces,
-    ...pendingSpaces,
-  ];
+  return [...approvedSpaces, ...pendingSpaces];
 }
 
-function getSpaceList(
-  data,
-  status,
-) {
-  const normalizedSpaces =
-    normalizeSpacesResponse(
-      data,
-      status,
-    );
+function getSpaceList(data, status) {
+  const normalizedSpaces = normalizeSpacesResponse(data, status);
 
-  if (
-    status === "ACTIVE" &&
-    normalizedSpaces.length === 0
-  ) {
+  if (status === "ACTIVE" && normalizedSpaces.length === 0) {
     return ACTIVE_SPACE_MOCKS;
   }
 
@@ -364,277 +258,130 @@ function getSpaceList(
 }
 
 function getFallbackSpaces(status) {
-  return status === "ACTIVE"
-    ? ACTIVE_SPACE_MOCKS
-    : [];
+  return status === "ACTIVE" ? ACTIVE_SPACE_MOCKS : [];
 }
 
-function convertTo24Hour(
-  time,
-  period,
-) {
-  const digits =
-    String(time)
-      .replace(/\D/g, "")
-      .slice(0, 4);
+function convertTo24Hour(time, period) {
+  const digits = String(time).replace(/\D/g, "").slice(0, 4);
 
-  const hourText =
-    digits.slice(0, 2);
+  const hourText = digits.slice(0, 2);
 
-  const minute =
-    digits.slice(2, 4);
+  const minute = digits.slice(2, 4);
 
-  let hour =
-    Number(hourText);
+  let hour = Number(hourText);
 
-  if (
-    period === "AM" &&
-    hour === 12
-  ) {
+  if (period === "AM" && hour === 12) {
     hour = 0;
   }
 
-  if (
-    period === "PM" &&
-    hour !== 12
-  ) {
+  if (period === "PM" && hour !== 12) {
     hour += 12;
   }
 
-  return `${String(hour).padStart(
-    2,
-    "0",
-  )}:${minute}`;
+  return `${String(hour).padStart(2, "0")}:${minute}`;
 }
 
-function createSpaceRequestData(
-  formData,
-) {
-  const schedules =
-    (
-      formData?.schedules ??
-      []
-    ).flatMap(
-      (schedule) => {
-        const startTime =
-          convertTo24Hour(
-            schedule.startTime,
-            schedule.startPeriod,
-          );
+function createSpaceRequestData(formData) {
+  const schedules = (formData?.schedules ?? []).flatMap((schedule) => {
+    const startTime = convertTo24Hour(schedule.startTime, schedule.startPeriod);
 
-        const endTime =
-          convertTo24Hour(
-            schedule.endTime,
-            schedule.endPeriod,
-          );
+    const endTime = convertTo24Hour(schedule.endTime, schedule.endPeriod);
 
-        return (
-          schedule.days ?? []
-        )
-          .map((day) => ({
-            day:
-              DAY_API_VALUES[day],
-            start_time:
-              startTime,
-            end_time:
-              endTime,
-          }))
-          .filter(
-            (scheduleItem) =>
-              Boolean(
-                scheduleItem.day,
-              ),
-          );
-      },
-    );
+    return (schedule.days ?? [])
+      .map((day) => ({
+        day: DAY_API_VALUES[day],
+        start_time: startTime,
+        end_time: endTime,
+      }))
+      .filter((scheduleItem) => Boolean(scheduleItem.day));
+  });
 
   return {
-    space_name:
-      formData?.name?.trim() ??
-      "",
+    space_name: formData?.name?.trim() ?? "",
 
-    classroom:
-      formData?.classroom?.trim() ??
-      "",
+    classroom: formData?.classroom?.trim() ?? "",
 
     schedules,
   };
 }
 
-function getApiErrorMessage(
-  error,
-  fallback,
-) {
+function getApiErrorMessage(error, fallback) {
   return (
-    error?.response?.data
-      ?.message ??
-    error?.response?.data
-      ?.error ??
-    fallback
+    error?.response?.data?.message ?? error?.response?.data?.error ?? fallback
   );
 }
 
 function SpacesPage() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const userRole =
-    readUserRole();
+  const userRole = readUserRole();
 
-  const isProfessor =
-    userRole === "PROFESSOR";
+  const isProfessor = userRole === "PROFESSOR";
 
-  const isStudent =
-    userRole === "STUDENT";
+  const isStudent = userRole === "STUDENT";
 
-  const [
-    selectedTab,
-    setSelectedTab,
-  ] = useState("active");
+  const [selectedTab, setSelectedTab] = useState("active");
 
-  const [
-    spaces,
-    setSpaces,
-  ] = useState([]);
+  const [spaces, setSpaces] = useState([]);
 
-  const [
-    isSpacesLoading,
-    setIsSpacesLoading,
-  ] = useState(true);
+  const [isSpacesLoading, setIsSpacesLoading] = useState(true);
 
-  const [
-    spaceModalStep,
-    setSpaceModalStep,
-  ] = useState(null);
+  const [spaceModalStep, setSpaceModalStep] = useState(null);
 
-  const [
-    spaceModalMode,
-    setSpaceModalMode,
-  ] = useState("create");
+  const [spaceModalMode, setSpaceModalMode] = useState("create");
 
-  const [
-    pendingSpaceData,
-    setPendingSpaceData,
-  ] = useState(null);
+  const [pendingSpaceData, setPendingSpaceData] = useState(null);
 
-  const [
-    editingSpaceId,
-    setEditingSpaceId,
-  ] = useState(null);
+  const [editingSpaceId, setEditingSpaceId] = useState(null);
 
-  const [
-    isSaving,
-    setIsSaving,
-  ] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [
-    archiveModalStep,
-    setArchiveModalStep,
-  ] = useState(null);
+  const [archiveModalStep, setArchiveModalStep] = useState(null);
 
-  const [
-    archivingSpaceId,
-    setArchivingSpaceId,
-  ] = useState(null);
+  const [archivingSpaceId, setArchivingSpaceId] = useState(null);
 
-  const [
-    isArchiving,
-    setIsArchiving,
-  ] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
 
-  const [
-    activateModalStep,
-    setActivateModalStep,
-  ] = useState(null);
+  const [activateModalStep, setActivateModalStep] = useState(null);
 
-  const [
-    activatingSpaceId,
-    setActivatingSpaceId,
-  ] = useState(null);
+  const [activatingSpaceId, setActivatingSpaceId] = useState(null);
 
-  const [
-    isActivating,
-    setIsActivating,
-  ] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
 
-  const [
-    deleteModalStep,
-    setDeleteModalStep,
-  ] = useState(null);
+  const [deleteModalStep, setDeleteModalStep] = useState(null);
 
-  const [
-    deletingSpaceId,
-    setDeletingSpaceId,
-  ] = useState(null);
+  const [deletingSpaceId, setDeletingSpaceId] = useState(null);
 
-  const [
-    isDeleting,
-    setIsDeleting,
-  ] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const [
-    joinModalStep,
-    setJoinModalStep,
-  ] = useState(null);
+  const [joinModalStep, setJoinModalStep] = useState(null);
 
-  const [
-    isJoining,
-    setIsJoining,
-  ] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
 
-  const loadSpaces =
-    useCallback(
-      async (
-        statusOverride = null,
-      ) => {
-        const status =
-          statusOverride ??
-          (selectedTab ===
-          "active"
-            ? "ACTIVE"
-            : "ARCHIVED");
+  const loadSpaces = useCallback(
+    async (statusOverride = null) => {
+      const status =
+        statusOverride ?? (selectedTab === "active" ? "ACTIVE" : "ARCHIVED");
 
-        try {
-          const data =
-            await getSpaces(
-              status,
-            );
+      try {
+        const data = await getSpaces(status);
 
-          setSpaces(
-            getSpaceList(
-              data,
-              status,
-            ),
-          );
-        } catch (error) {
-          console.error(
-            "Space 목록 조회 실패:",
-            error,
-          );
+        setSpaces(getSpaceList(data, status));
+      } catch (error) {
+        console.error("Space 목록 조회 실패:", error);
 
-          setSpaces(
-            getFallbackSpaces(
-              status,
-            ),
-          );
-        } finally {
-          setIsSpacesLoading(
-            false,
-          );
-        }
-      },
-      [selectedTab],
-    );
+        setSpaces(getFallbackSpaces(status));
+      } finally {
+        setIsSpacesLoading(false);
+      }
+    },
+    [selectedTab],
+  );
 
   useEffect(() => {
-    let isCancelled =
-      false;
+    let isCancelled = false;
 
-    const status =
-      selectedTab ===
-      "active"
-        ? "ACTIVE"
-        : "ARCHIVED";
+    const status = selectedTab === "active" ? "ACTIVE" : "ARCHIVED";
 
     getSpaces(status)
       .then((data) => {
@@ -642,37 +389,23 @@ function SpacesPage() {
           return;
         }
 
-        setSpaces(
-          getSpaceList(
-            data,
-            status,
-          ),
-        );
+        setSpaces(getSpaceList(data, status));
       })
       .catch((error) => {
         if (isCancelled) {
           return;
         }
 
-        console.error(
-          "Space 목록 조회 실패:",
-          error,
-        );
+        console.error("Space 목록 조회 실패:", error);
 
-        setSpaces(
-          getFallbackSpaces(
-            status,
-          ),
-        );
+        setSpaces(getFallbackSpaces(status));
       })
       .finally(() => {
         if (isCancelled) {
           return;
         }
 
-        setIsSpacesLoading(
-          false,
-        );
+        setIsSpacesLoading(false);
       });
 
     return () => {
@@ -680,664 +413,384 @@ function SpacesPage() {
     };
   }, [selectedTab]);
 
-  const handleActiveTab =
-    () => {
-      if (
-        selectedTab ===
-        "active"
-      ) {
-        return;
+  const handleActiveTab = () => {
+    if (selectedTab === "active") {
+      return;
+    }
+
+    setIsSpacesLoading(true);
+
+    setSelectedTab("active");
+  };
+
+  const handleArchivedTab = () => {
+    if (selectedTab === "archived") {
+      return;
+    }
+
+    setIsSpacesLoading(true);
+
+    setSelectedTab("archived");
+  };
+
+  const handleAddSpace = () => {
+    if (!isProfessor) {
+      return;
+    }
+
+    setSpaceModalMode("create");
+
+    setPendingSpaceData(null);
+
+    setEditingSpaceId(null);
+
+    setSpaceModalStep("create");
+  };
+
+  const handleJoinSpace = () => {
+    if (!isStudent) {
+      return;
+    }
+
+    setJoinModalStep("join");
+  };
+
+  const handleCloseJoinSpace = () => {
+    if (isJoining) {
+      return;
+    }
+
+    setJoinModalStep(null);
+  };
+
+  const handleJoinSpaceSubmit = async (spaceCode) => {
+    if (!isStudent || isJoining) {
+      return;
+    }
+
+    setIsJoining(true);
+
+    try {
+      await joinSpace(spaceCode);
+
+      setSelectedTab("active");
+
+      setIsSpacesLoading(true);
+
+      await loadSpaces("ACTIVE");
+
+      setJoinModalStep("complete");
+    } catch (error) {
+      console.error("Space 참여 신청 실패:", error);
+
+      window.alert(
+        getApiErrorMessage(error, "Space 참여 신청에 실패했습니다."),
+      );
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const handleJoinCompleteConfirm = () => {
+    setJoinModalStep(null);
+  };
+
+  const handleCloseCreateModal = () => {
+    setSpaceModalStep(null);
+
+    setSpaceModalMode("create");
+
+    setPendingSpaceData(null);
+
+    setEditingSpaceId(null);
+  };
+
+  const handleCreateSpaceSave = (spaceData) => {
+    if (!isProfessor) {
+      return;
+    }
+
+    setPendingSpaceData(spaceData);
+
+    setSpaceModalStep("confirm");
+  };
+
+  const handleConfirmCancel = () => {
+    if (isSaving) {
+      return;
+    }
+
+    setSpaceModalStep("create");
+  };
+
+  const handleConfirmSave = async () => {
+    if (!isProfessor || isSaving || !pendingSpaceData) {
+      return;
+    }
+
+    if (spaceModalMode === "edit" && !editingSpaceId) {
+      return;
+    }
+
+    const requestData = createSpaceRequestData(pendingSpaceData);
+
+    setIsSaving(true);
+
+    try {
+      if (spaceModalMode === "edit") {
+        await updateSpace(editingSpaceId, requestData);
+
+        setIsSpacesLoading(true);
+
+        await loadSpaces(selectedTab === "active" ? "ACTIVE" : "ARCHIVED");
+      } else {
+        await createSpace(requestData);
+
+        setSelectedTab("active");
+
+        setIsSpacesLoading(true);
+
+        await loadSpaces("ACTIVE");
       }
 
-      setIsSpacesLoading(
-        true,
+      setSpaceModalStep("complete");
+    } catch (error) {
+      console.error(
+        spaceModalMode === "edit" ? "Space 수정 실패:" : "Space 생성 실패:",
+        error,
       );
 
-      setSelectedTab(
-        "active",
-      );
-    };
-
-  const handleArchivedTab =
-    () => {
-      if (
-        selectedTab ===
-        "archived"
-      ) {
-        return;
-      }
-
-      setIsSpacesLoading(
-        true,
-      );
-
-      setSelectedTab(
-        "archived",
-      );
-    };
-
-  const handleAddSpace =
-    () => {
-      if (!isProfessor) {
-        return;
-      }
-
-      setSpaceModalMode(
-        "create",
-      );
-
-      setPendingSpaceData(
-        null,
-      );
-
-      setEditingSpaceId(
-        null,
-      );
-
-      setSpaceModalStep(
-        "create",
-      );
-    };
-
-  const handleJoinSpace =
-    () => {
-      if (!isStudent) {
-        return;
-      }
-
-      setJoinModalStep(
-        "join",
-      );
-    };
-
-  const handleCloseJoinSpace =
-    () => {
-      if (isJoining) {
-        return;
-      }
-
-      setJoinModalStep(
-        null,
-      );
-    };
-
-  const handleJoinSpaceSubmit =
-    async (spaceCode) => {
-      if (
-        !isStudent ||
-        isJoining
-      ) {
-        return;
-      }
-
-      setIsJoining(true);
-
-      try {
-        await joinSpace(
-          spaceCode,
-        );
-
-        setSelectedTab(
-          "active",
-        );
-
-        setIsSpacesLoading(
-          true,
-        );
-
-        await loadSpaces(
-          "ACTIVE",
-        );
-
-        setJoinModalStep(
-          "complete",
-        );
-      } catch (error) {
-        console.error(
-          "Space 참여 신청 실패:",
+      window.alert(
+        getApiErrorMessage(
           error,
-        );
-
-        window.alert(
-          getApiErrorMessage(
-            error,
-            "Space 참여 신청에 실패했습니다.",
-          ),
-        );
-      } finally {
-        setIsJoining(
-          false,
-        );
-      }
-    };
-
-  const handleJoinCompleteConfirm =
-    () => {
-      setJoinModalStep(
-        null,
+          spaceModalMode === "edit"
+            ? "Space 수정에 실패했습니다."
+            : "Space 생성에 실패했습니다.",
+        ),
       );
-    };
-
-  const handleCloseCreateModal =
-    () => {
-      setSpaceModalStep(
-        null,
-      );
-
-      setSpaceModalMode(
-        "create",
-      );
-
-      setPendingSpaceData(
-        null,
-      );
-
-      setEditingSpaceId(
-        null,
-      );
-    };
-
-  const handleCreateSpaceSave =
-    (spaceData) => {
-      if (!isProfessor) {
-        return;
-      }
-
-      setPendingSpaceData(
-        spaceData,
-      );
-
-      setSpaceModalStep(
-        "confirm",
-      );
-    };
-
-  const handleConfirmCancel =
-    () => {
-      if (isSaving) {
-        return;
-      }
-
-      setSpaceModalStep(
-        "create",
-      );
-    };
-
-  const handleConfirmSave =
-    async () => {
-      if (
-        !isProfessor ||
-        isSaving ||
-        !pendingSpaceData
-      ) {
-        return;
-      }
-
-      if (
-        spaceModalMode ===
-          "edit" &&
-        !editingSpaceId
-      ) {
-        return;
-      }
-
-      const requestData =
-        createSpaceRequestData(
-          pendingSpaceData,
-        );
-
-      setIsSaving(true);
-
-      try {
-        if (
-          spaceModalMode ===
-          "edit"
-        ) {
-          await updateSpace(
-            editingSpaceId,
-            requestData,
-          );
-
-          setIsSpacesLoading(
-            true,
-          );
-
-          await loadSpaces(
-            selectedTab ===
-              "active"
-              ? "ACTIVE"
-              : "ARCHIVED",
-          );
-        } else {
-          await createSpace(
-            requestData,
-          );
-
-          setSelectedTab(
-            "active",
-          );
-
-          setIsSpacesLoading(
-            true,
-          );
-
-          await loadSpaces(
-            "ACTIVE",
-          );
-        }
-
-        setSpaceModalStep(
-          "complete",
-        );
-      } catch (error) {
-        console.error(
-          spaceModalMode ===
-            "edit"
-            ? "Space 수정 실패:"
-            : "Space 생성 실패:",
-          error,
-        );
-
-        window.alert(
-          getApiErrorMessage(
-            error,
-            spaceModalMode ===
-              "edit"
-              ? "Space 수정에 실패했습니다."
-              : "Space 생성에 실패했습니다.",
-          ),
-        );
-      } finally {
-        setIsSaving(
-          false,
-        );
-      }
-    };
-
-  const handleCompleteConfirm =
-    () => {
-      setSpaceModalStep(
-        null,
-      );
-
-      setSpaceModalMode(
-        "create",
-      );
-
-      setPendingSpaceData(
-        null,
-      );
-
-      setEditingSpaceId(
-        null,
-      );
-    };
-
-  const handleArchive =
-    (spaceId) => {
-      if (!isProfessor) {
-        return;
-      }
-
-      setArchivingSpaceId(
-        spaceId,
-      );
-
-      setArchiveModalStep(
-        "confirm",
-      );
-    };
-
-  const handleArchiveCancel =
-    () => {
-      if (isArchiving) {
-        return;
-      }
-
-      setArchivingSpaceId(
-        null,
-      );
-
-      setArchiveModalStep(
-        null,
-      );
-    };
-
-  const handleArchiveConfirm =
-    async () => {
-      if (
-        !isProfessor ||
-        !archivingSpaceId ||
-        isArchiving
-      ) {
-        return;
-      }
-
-      setIsArchiving(
-        true,
-      );
-
-      try {
-        await archiveSpace(
-          archivingSpaceId,
-        );
-
-        setIsSpacesLoading(
-          true,
-        );
-
-        await loadSpaces(
-          "ACTIVE",
-        );
-
-        setArchiveModalStep(
-          "complete",
-        );
-      } catch (error) {
-        console.error(
-          "Space 보관 실패:",
-          error,
-        );
-
-        window.alert(
-          getApiErrorMessage(
-            error,
-            "Space 보관에 실패했습니다.",
-          ),
-        );
-      } finally {
-        setIsArchiving(
-          false,
-        );
-      }
-    };
-
-  const handleArchiveComplete =
-    () => {
-      setArchivingSpaceId(
-        null,
-      );
-
-      setArchiveModalStep(
-        null,
-      );
-    };
-
-  const handleActivate =
-    (spaceId) => {
-      if (!isProfessor) {
-        return;
-      }
-
-      setActivatingSpaceId(
-        spaceId,
-      );
-
-      setActivateModalStep(
-        "confirm",
-      );
-    };
-
-  const handleActivateCancel =
-    () => {
-      if (isActivating) {
-        return;
-      }
-
-      setActivatingSpaceId(
-        null,
-      );
-
-      setActivateModalStep(
-        null,
-      );
-    };
-
-  const handleActivateConfirm =
-    async () => {
-      if (
-        !isProfessor ||
-        !activatingSpaceId ||
-        isActivating
-      ) {
-        return;
-      }
-
-      setIsActivating(
-        true,
-      );
-
-      try {
-        await restoreSpace(
-          activatingSpaceId,
-        );
-
-        setIsSpacesLoading(
-          true,
-        );
-
-        await loadSpaces(
-          "ARCHIVED",
-        );
-
-        setActivateModalStep(
-          "complete",
-        );
-      } catch (error) {
-        console.error(
-          "Space 활성화 실패:",
-          error,
-        );
-
-        window.alert(
-          getApiErrorMessage(
-            error,
-            "Space 활성화에 실패했습니다.",
-          ),
-        );
-      } finally {
-        setIsActivating(
-          false,
-        );
-      }
-    };
-
-  const handleActivateComplete =
-    () => {
-      setActivatingSpaceId(
-        null,
-      );
-
-      setActivateModalStep(
-        null,
-      );
-    };
-
-  const handleEdit =
-    (spaceOrId) => {
-      if (!isProfessor) {
-        return;
-      }
-
-      const selectedSpace =
-        typeof spaceOrId ===
-        "object"
-          ? spaceOrId
-          : spaces.find(
-              (space) =>
-                space.id ===
-                spaceOrId,
-            );
-
-      if (!selectedSpace) {
-        return;
-      }
-
-      setSpaceModalMode(
-        "edit",
-      );
-
-      setEditingSpaceId(
-        selectedSpace.id,
-      );
-
-      setPendingSpaceData({
-        name:
-          selectedSpace.name ??
-          "",
-
-        classroom:
-          selectedSpace.classroom ??
-          selectedSpace.room ??
-          "",
-
-        schedules:
-          Array.isArray(
-            selectedSpace.schedules,
-          )
-            ? selectedSpace.schedules
-            : [],
-      });
-
-      setSpaceModalStep(
-        "create",
-      );
-    };
-
-  const handleDelete =
-    (spaceId) => {
-      if (!isProfessor) {
-        return;
-      }
-
-      setDeletingSpaceId(
-        spaceId,
-      );
-
-      setDeleteModalStep(
-        "confirm",
-      );
-    };
-
-  const handleDeleteCancel =
-    () => {
-      if (isDeleting) {
-        return;
-      }
-
-      setDeletingSpaceId(
-        null,
-      );
-
-      setDeleteModalStep(
-        null,
-      );
-    };
-
-  const handleDeleteConfirm =
-    async () => {
-      if (
-        !isProfessor ||
-        !deletingSpaceId ||
-        isDeleting
-      ) {
-        return;
-      }
-
-      setIsDeleting(
-        true,
-      );
-
-      try {
-        await deleteSpace(
-          deletingSpaceId,
-        );
-
-        setIsSpacesLoading(
-          true,
-        );
-
-        await loadSpaces(
-          selectedTab ===
-            "active"
-            ? "ACTIVE"
-            : "ARCHIVED",
-        );
-
-        setDeleteModalStep(
-          "complete",
-        );
-      } catch (error) {
-        console.error(
-          "Space 삭제 실패:",
-          error,
-        );
-
-        window.alert(
-          getApiErrorMessage(
-            error,
-            "Space 삭제에 실패했습니다.",
-          ),
-        );
-      } finally {
-        setIsDeleting(
-          false,
-        );
-      }
-    };
-
-  const handleDeleteComplete =
-    () => {
-      setDeletingSpaceId(
-        null,
-      );
-
-      setDeleteModalStep(
-        null,
-      );
-    };
-
-  const handleSearch =
-    () => {
-      navigate("/search");
-    };
-
-  const handleNotifications =
-    () => {
-      console.log("알림");
-    };
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCompleteConfirm = () => {
+    setSpaceModalStep(null);
+
+    setSpaceModalMode("create");
+
+    setPendingSpaceData(null);
+
+    setEditingSpaceId(null);
+  };
+
+  const handleArchive = (spaceId) => {
+    if (!isProfessor) {
+      return;
+    }
+
+    setArchivingSpaceId(spaceId);
+
+    setArchiveModalStep("confirm");
+  };
+
+  const handleArchiveCancel = () => {
+    if (isArchiving) {
+      return;
+    }
+
+    setArchivingSpaceId(null);
+
+    setArchiveModalStep(null);
+  };
+
+  const handleArchiveConfirm = async () => {
+    if (!isProfessor || !archivingSpaceId || isArchiving) {
+      return;
+    }
+
+    setIsArchiving(true);
+
+    try {
+      await archiveSpace(archivingSpaceId);
+
+      setIsSpacesLoading(true);
+
+      await loadSpaces("ACTIVE");
+
+      setArchiveModalStep("complete");
+    } catch (error) {
+      console.error("Space 보관 실패:", error);
+
+      window.alert(getApiErrorMessage(error, "Space 보관에 실패했습니다."));
+    } finally {
+      setIsArchiving(false);
+    }
+  };
+
+  const handleArchiveComplete = () => {
+    setArchivingSpaceId(null);
+
+    setArchiveModalStep(null);
+  };
+
+  const handleActivate = (spaceId) => {
+    if (!isProfessor) {
+      return;
+    }
+
+    setActivatingSpaceId(spaceId);
+
+    setActivateModalStep("confirm");
+  };
+
+  const handleActivateCancel = () => {
+    if (isActivating) {
+      return;
+    }
+
+    setActivatingSpaceId(null);
+
+    setActivateModalStep(null);
+  };
+
+  const handleActivateConfirm = async () => {
+    if (!isProfessor || !activatingSpaceId || isActivating) {
+      return;
+    }
+
+    setIsActivating(true);
+
+    try {
+      await restoreSpace(activatingSpaceId);
+
+      setIsSpacesLoading(true);
+
+      await loadSpaces("ARCHIVED");
+
+      setActivateModalStep("complete");
+    } catch (error) {
+      console.error("Space 활성화 실패:", error);
+
+      window.alert(getApiErrorMessage(error, "Space 활성화에 실패했습니다."));
+    } finally {
+      setIsActivating(false);
+    }
+  };
+
+  const handleActivateComplete = () => {
+    setActivatingSpaceId(null);
+
+    setActivateModalStep(null);
+  };
+
+  const handleEdit = (spaceOrId) => {
+    if (!isProfessor) {
+      return;
+    }
+
+    const selectedSpace =
+      typeof spaceOrId === "object"
+        ? spaceOrId
+        : spaces.find((space) => space.id === spaceOrId);
+
+    if (!selectedSpace) {
+      return;
+    }
+
+    setSpaceModalMode("edit");
+
+    setEditingSpaceId(selectedSpace.id);
+
+    setPendingSpaceData({
+      name: selectedSpace.name ?? "",
+
+      classroom: selectedSpace.classroom ?? selectedSpace.room ?? "",
+
+      schedules: Array.isArray(selectedSpace.schedules)
+        ? selectedSpace.schedules
+        : [],
+    });
+
+    setSpaceModalStep("create");
+  };
+
+  const handleDelete = (spaceId) => {
+    if (!isProfessor) {
+      return;
+    }
+
+    setDeletingSpaceId(spaceId);
+
+    setDeleteModalStep("confirm");
+  };
+
+  const handleDeleteCancel = () => {
+    if (isDeleting) {
+      return;
+    }
+
+    setDeletingSpaceId(null);
+
+    setDeleteModalStep(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!isProfessor || !deletingSpaceId || isDeleting) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await deleteSpace(deletingSpaceId);
+
+      setIsSpacesLoading(true);
+
+      await loadSpaces(selectedTab === "active" ? "ACTIVE" : "ARCHIVED");
+
+      setDeleteModalStep("complete");
+    } catch (error) {
+      console.error("Space 삭제 실패:", error);
+
+      window.alert(getApiErrorMessage(error, "Space 삭제에 실패했습니다."));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteComplete = () => {
+    setDeletingSpaceId(null);
+
+    setDeleteModalStep(null);
+  };
+
+  const handleSearch = () => {
+    navigate("/search");
+  };
+
+  const handleNotifications = () => {
+    console.log("알림");
+  };
 
   return (
     <main className="spaces-page">
-      <div
-        className="spaces-background"
-        aria-hidden="true"
-      >
+      <div className="spaces-background" aria-hidden="true">
         <div className="spaces-page__orb spaces-page__orb--left" />
         <div className="spaces-page__orb spaces-page__orb--right" />
       </div>
 
       <div className="app-frame spaces-frame">
-        <BrandLogo
-          variant="blue"
-          className="app-brand"
-        />
+        <BrandLogo variant="blue" className="app-brand" />
 
         <AppToolbars
-          onSearch={
-            handleSearch
-          }
-          onNotifications={
-            handleNotifications
-          }
+          onSearch={handleSearch}
+          onNotifications={handleNotifications}
         />
 
         <div className="app-container spaces-container">
           <div className="spaces-header">
             <div className="spaces-header__left">
-              <h1 className="spaces-title">
-                Space 목록
-              </h1>
+              <h1 className="spaces-title">Space 목록</h1>
 
               <div
                 className="spaces-tabs"
@@ -1347,19 +800,11 @@ function SpacesPage() {
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={
-                    selectedTab ===
-                    "active"
-                  }
+                  aria-selected={selectedTab === "active"}
                   className={`spaces-tab ${
-                    selectedTab ===
-                    "active"
-                      ? "spaces-tab--selected"
-                      : ""
+                    selectedTab === "active" ? "spaces-tab--selected" : ""
                   }`}
-                  onClick={
-                    handleActiveTab
-                  }
+                  onClick={handleActiveTab}
                 >
                   활성화
                 </button>
@@ -1367,19 +812,11 @@ function SpacesPage() {
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={
-                    selectedTab ===
-                    "archived"
-                  }
+                  aria-selected={selectedTab === "archived"}
                   className={`spaces-tab ${
-                    selectedTab ===
-                    "archived"
-                      ? "spaces-tab--selected"
-                      : ""
+                    selectedTab === "archived" ? "spaces-tab--selected" : ""
                   }`}
-                  onClick={
-                    handleArchivedTab
-                  }
+                  onClick={handleArchivedTab}
                 >
                   보관됨
                 </button>
@@ -1390,9 +827,7 @@ function SpacesPage() {
               <button
                 type="button"
                 className="add-space-button"
-                onClick={
-                  handleAddSpace
-                }
+                onClick={handleAddSpace}
               >
                 Add Space
               </button>
@@ -1402,197 +837,104 @@ function SpacesPage() {
               <button
                 type="button"
                 className="add-space-button"
-                onClick={
-                  handleJoinSpace
-                }
+                onClick={handleJoinSpace}
               >
                 Join Space
               </button>
             )}
           </div>
 
-          {!isSpacesLoading &&
-            spaces.length > 0 && (
-              <div className="space-grid">
-                {spaces.map(
-                  (space) => (
-                    <SpaceCard
-                      key={
-                        space.isPending
-                          ? `pending-${space.spaceMemberId}`
-                          : space.id
-                      }
-                      space={
-                        space
-                      }
-                      canManage={
-                        isProfessor &&
-                        !space.isMock
-                      }
-                      onArchive={
-                        handleArchive
-                      }
-                      onActivate={
-                        handleActivate
-                      }
-                      onEdit={
-                        handleEdit
-                      }
-                      onDelete={
-                        handleDelete
-                      }
-                    />
-                  ),
-                )}
-              </div>
-            )}
+          {!isSpacesLoading && spaces.length > 0 && (
+            <div className="space-grid">
+              {spaces.map((space) => (
+                <SpaceCard
+                  key={
+                    space.isPending
+                      ? `pending-${space.spaceMemberId}`
+                      : space.id
+                  }
+                  space={space}
+                  canManage={isProfessor && !space.isMock}
+                  onArchive={handleArchive}
+                  onActivate={handleActivate}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {!isSpacesLoading &&
-          spaces.length === 0 && (
-            <SpaceEmptyState />
-          )}
+        {!isSpacesLoading && spaces.length === 0 && <SpaceEmptyState />}
       </div>
 
-      {isProfessor &&
-        spaceModalStep ===
-          "create" && (
-          <CreateSpaceModal
-            initialData={
-              pendingSpaceData
-            }
-            onClose={
-              handleCloseCreateModal
-            }
-            onSave={
-              handleCreateSpaceSave
-            }
-          />
-        )}
+      {isProfessor && spaceModalStep === "create" && (
+        <CreateSpaceModal
+          initialData={pendingSpaceData}
+          onClose={handleCloseCreateModal}
+          onSave={handleCreateSpaceSave}
+        />
+      )}
 
-      {isProfessor &&
-        spaceModalStep ===
-          "confirm" && (
-          <SaveConfirmModal
-            mode={
-              spaceModalMode
-            }
-            onCancel={
-              handleConfirmCancel
-            }
-            onConfirm={
-              handleConfirmSave
-            }
-          />
-        )}
+      {isProfessor && spaceModalStep === "confirm" && (
+        <SaveConfirmModal
+          mode={spaceModalMode}
+          onCancel={handleConfirmCancel}
+          onConfirm={handleConfirmSave}
+        />
+      )}
 
-      {isProfessor &&
-        spaceModalStep ===
-          "complete" && (
-          <SaveCompleteModal
-            mode={
-              spaceModalMode
-            }
-            onConfirm={
-              handleCompleteConfirm
-            }
-          />
-        )}
+      {isProfessor && spaceModalStep === "complete" && (
+        <SaveCompleteModal
+          mode={spaceModalMode}
+          onConfirm={handleCompleteConfirm}
+        />
+      )}
 
-      {isProfessor &&
-        archiveModalStep ===
-          "confirm" && (
-          <ArchiveConfirmModal
-            onCancel={
-              handleArchiveCancel
-            }
-            onConfirm={
-              handleArchiveConfirm
-            }
-          />
-        )}
+      {isProfessor && archiveModalStep === "confirm" && (
+        <ArchiveConfirmModal
+          onCancel={handleArchiveCancel}
+          onConfirm={handleArchiveConfirm}
+        />
+      )}
 
-      {isProfessor &&
-        archiveModalStep ===
-          "complete" && (
-          <ArchiveCompleteModal
-            onConfirm={
-              handleArchiveComplete
-            }
-          />
-        )}
+      {isProfessor && archiveModalStep === "complete" && (
+        <ArchiveCompleteModal onConfirm={handleArchiveComplete} />
+      )}
 
-      {isProfessor &&
-        activateModalStep ===
-          "confirm" && (
-          <ActivateConfirmModal
-            onCancel={
-              handleActivateCancel
-            }
-            onConfirm={
-              handleActivateConfirm
-            }
-          />
-        )}
+      {isProfessor && activateModalStep === "confirm" && (
+        <ActivateConfirmModal
+          onCancel={handleActivateCancel}
+          onConfirm={handleActivateConfirm}
+        />
+      )}
 
-      {isProfessor &&
-        activateModalStep ===
-          "complete" && (
-          <ActivateCompleteModal
-            onConfirm={
-              handleActivateComplete
-            }
-          />
-        )}
+      {isProfessor && activateModalStep === "complete" && (
+        <ActivateCompleteModal onConfirm={handleActivateComplete} />
+      )}
 
-      {isProfessor &&
-        deleteModalStep ===
-          "confirm" && (
-          <DeleteConfirmModal
-            onCancel={
-              handleDeleteCancel
-            }
-            onConfirm={
-              handleDeleteConfirm
-            }
-          />
-        )}
+      {isProfessor && deleteModalStep === "confirm" && (
+        <DeleteConfirmModal
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
+      )}
 
-      {isProfessor &&
-        deleteModalStep ===
-          "complete" && (
-          <DeleteCompleteModal
-            onConfirm={
-              handleDeleteComplete
-            }
-          />
-        )}
+      {isProfessor && deleteModalStep === "complete" && (
+        <DeleteCompleteModal onConfirm={handleDeleteComplete} />
+      )}
 
-      {isStudent &&
-        joinModalStep ===
-          "join" && (
-          <JoinSpaceModal
-            onClose={
-              handleCloseJoinSpace
-            }
-            onJoin={
-              handleJoinSpaceSubmit
-            }
-            isSubmitting={
-              isJoining
-            }
-          />
-        )}
+      {isStudent && joinModalStep === "join" && (
+        <JoinSpaceModal
+          onClose={handleCloseJoinSpace}
+          onJoin={handleJoinSpaceSubmit}
+          isSubmitting={isJoining}
+        />
+      )}
 
-      {isStudent &&
-        joinModalStep ===
-          "complete" && (
-          <JoinCompleteModal
-            onConfirm={
-              handleJoinCompleteConfirm
-            }
-          />
-        )}
+      {isStudent && joinModalStep === "complete" && (
+        <JoinCompleteModal onConfirm={handleJoinCompleteConfirm} />
+      )}
     </main>
   );
 }

@@ -28,10 +28,7 @@ function ModalBackdrop({
   }, [closeOnEscape, onClose]);
 
   const handleBackdropMouseDown = (event) => {
-    if (
-      closeOnBackdrop &&
-      event.target === event.currentTarget
-    ) {
+    if (closeOnBackdrop && event.target === event.currentTarget) {
       onClose?.();
     }
   };

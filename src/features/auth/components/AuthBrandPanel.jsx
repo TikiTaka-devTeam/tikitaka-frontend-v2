@@ -4,9 +4,15 @@ function AuthBrandPanel({ onSignUp }) {
   return (
     <section className="auth-brand-panel" aria-label="tikitaka service intro">
       <div className="auth-brand-panel__nav">
-        <BrandLogo variant="white" imageClassName="auth-brand-panel__logo" interactive={false} />
+        <BrandLogo
+          variant="white"
+          imageClassName="auth-brand-panel__logo"
+          interactive={false}
+        />
         <div className="auth-brand-panel__links">
-          <button type="button" onClick={onSignUp}>Sign Up</button>
+          <button type="button" onClick={onSignUp}>
+            Sign Up
+          </button>
           <button type="button" className="auth-brand-panel__contact">
             Contact Us
           </button>

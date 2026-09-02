@@ -18,11 +18,7 @@ function App() {
       <Route
         path="/"
         element={
-          accessToken ? (
-            <DashboardPage />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          accessToken ? <DashboardPage /> : <Navigate to="/login" replace />
         }
       />
 
@@ -33,11 +29,7 @@ function App() {
       <Route
         path="/login"
         element={
-          accessToken ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <LoginPage />
-          )
+          accessToken ? <Navigate to="/dashboard" replace /> : <LoginPage />
         }
       />
 

@@ -5,9 +5,7 @@ import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 
 import "../styles/deleteStatusModal.css";
 
-function DeleteCompleteModal({
-  onConfirm,
-}) {
+function DeleteCompleteModal({ onConfirm }) {
   return (
     <CompactModal
       onClose={onConfirm}
@@ -15,10 +13,7 @@ function DeleteCompleteModal({
       describedBy="delete-complete-modal-description"
       className="delete-status-modal"
     >
-      <div
-        className="delete-status-modal__icon-box"
-        aria-hidden="true"
-      >
+      <div className="delete-status-modal__icon-box" aria-hidden="true">
         <span
           className="delete-status-modal__check-icon"
           style={{

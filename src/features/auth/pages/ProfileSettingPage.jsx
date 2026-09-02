@@ -33,7 +33,13 @@ function getUserValue(user, keys, fallback = "") {
   return fallback;
 }
 
-function SettingRow({ label, value, isAction = false, disabled = false, onClick }) {
+function SettingRow({
+  label,
+  value,
+  isAction = false,
+  disabled = false,
+  onClick,
+}) {
   if (isAction) {
     return (
       <button
@@ -43,7 +49,9 @@ function SettingRow({ label, value, isAction = false, disabled = false, onClick 
         onClick={onClick}
       >
         <span>{label}</span>
-        {value ? <span className="profile-setting-row__value">{value}</span> : null}
+        {value ? (
+          <span className="profile-setting-row__value">{value}</span>
+        ) : null}
       </button>
     );
   }
@@ -51,7 +59,9 @@ function SettingRow({ label, value, isAction = false, disabled = false, onClick 
   return (
     <div className="profile-setting-row">
       <span>{label}</span>
-      {value ? <span className="profile-setting-row__value">{value}</span> : null}
+      {value ? (
+        <span className="profile-setting-row__value">{value}</span>
+      ) : null}
     </div>
   );
 }
@@ -96,18 +106,24 @@ function ProfileSettingPage() {
     };
   }, []);
 
-  const displayName = getUserValue(profile, ["name", "user_name", "username"], "사용자");
+  const displayName = getUserValue(
+    profile,
+    ["name", "user_name", "username"],
+    "사용자",
+  );
   const email = getUserValue(profile, ["email"], "");
   const phoneNumber = getUserValue(
     profile,
     ["phone_number", "phoneNumber", "phone"],
     "",
   );
-  const profileImage = String(getUserValue(
-    profile,
-    ["profile_url", "profileUrl", "profile_image_url", "profileImageUrl"],
-    "",
-  )).trim();
+  const profileImage = String(
+    getUserValue(
+      profile,
+      ["profile_url", "profileUrl", "profile_image_url", "profileImageUrl"],
+      "",
+    ),
+  ).trim();
 
   const handleLogout = async () => {
     if (isLoggingOut) {
@@ -162,7 +178,9 @@ function ProfileSettingPage() {
       !file.type.startsWith("image/") ||
       !PROFILE_IMAGE_EXTENSIONS.includes(extension)
     ) {
-      setProfileImageError("jpg, jpeg, png, gif, webp 이미지만 업로드할 수 있습니다.");
+      setProfileImageError(
+        "jpg, jpeg, png, gif, webp 이미지만 업로드할 수 있습니다.",
+      );
       return;
     }
 
@@ -261,7 +279,9 @@ function ProfileSettingPage() {
           <SettingRow label="다크모드" value="시스템 기본값" />
           <SettingRow label="알림 설정" />
           <SettingRow
-            label={isSendingTestPush ? "테스트 알림 발송 중" : "테스트 알림 보내기"}
+            label={
+              isSendingTestPush ? "테스트 알림 발송 중" : "테스트 알림 보내기"
+            }
             isAction
             disabled={isSendingTestPush}
             onClick={handleSendTestPush}

@@ -40,11 +40,18 @@ function readStoredUser() {
 
 function ProfileEditDialog({ file, message, onCancel, onFileChange, onSave }) {
   const profile = readStoredUser();
-  const name = profile.name || profile.user_name || profile.username || "사용자";
-  const storedImage = profile.profile_url || profile.profileUrl || profile.profile_image_url || profile.profileImageUrl || "";
-  const previewUrl = useMemo(() => (
-    file ? URL.createObjectURL(file) : ""
-  ), [file]);
+  const name =
+    profile.name || profile.user_name || profile.username || "사용자";
+  const storedImage =
+    profile.profile_url ||
+    profile.profileUrl ||
+    profile.profile_image_url ||
+    profile.profileImageUrl ||
+    "";
+  const previewUrl = useMemo(
+    () => (file ? URL.createObjectURL(file) : ""),
+    [file],
+  );
 
   useEffect(() => {
     return () => {
@@ -52,12 +59,102 @@ function ProfileEditDialog({ file, message, onCancel, onFileChange, onSave }) {
     };
   }, [previewUrl]);
 
-  return <ModalBackdrop onClose={onCancel} className="modal-backdrop--light"><section className="profile-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-edit-title" aria-describedby="profile-edit-description"><header><h2 id="profile-edit-title">프로필 관리</h2><p id="profile-edit-description">프로필 이미지를 변경합니다</p></header><div className="profile-edit-dialog__divider" /><div className="profile-edit-dialog__body"><label className="profile-edit-dialog__avatar" aria-label="프로필 이미지 파일 선택"><img src={previewUrl || storedImage || profileAvatar} alt={`${name} 프로필`} /><span><img src={profileEditPencilIcon} alt="" /></span><input type="file" accept="image/*" onChange={onFileChange} /></label><div className={`profile-edit-dialog__filename ${file ? "has-file" : ""}`}>{file?.name || "파일명"}</div>{message ? <p className="profile-edit-dialog__message" role="alert">{message}</p> : null}</div><ModalActions className="profile-edit-dialog__actions" onCancel={onCancel} onConfirm={onSave} confirmDisabled={!file} cancelText="취소" confirmText="저장" /></section></ModalBackdrop>;
+  return (
+    <ModalBackdrop onClose={onCancel} className="modal-backdrop--light">
+      <section
+        className="profile-edit-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-edit-title"
+        aria-describedby="profile-edit-description"
+      >
+        <header>
+          <h2 id="profile-edit-title">프로필 관리</h2>
+          <p id="profile-edit-description">프로필 이미지를 변경합니다</p>
+        </header>
+        <div className="profile-edit-dialog__divider" />
+        <div className="profile-edit-dialog__body">
+          <label
+            className="profile-edit-dialog__avatar"
+            aria-label="프로필 이미지 파일 선택"
+          >
+            <img
+              src={previewUrl || storedImage || profileAvatar}
+              alt={`${name} 프로필`}
+            />
+            <span>
+              <img src={profileEditPencilIcon} alt="" />
+            </span>
+            <input type="file" accept="image/*" onChange={onFileChange} />
+          </label>
+          <div
+            className={`profile-edit-dialog__filename ${file ? "has-file" : ""}`}
+          >
+            {file?.name || "파일명"}
+          </div>
+          {message ? (
+            <p className="profile-edit-dialog__message" role="alert">
+              {message}
+            </p>
+          ) : null}
+        </div>
+        <ModalActions
+          className="profile-edit-dialog__actions"
+          onCancel={onCancel}
+          onConfirm={onSave}
+          confirmDisabled={!file}
+          cancelText="취소"
+          confirmText="저장"
+        />
+      </section>
+    </ModalBackdrop>
+  );
 }
 
 function ProfileSaveStatusModal({ stage, isSaving, onCancel, onConfirm }) {
   const isComplete = stage === "complete";
-  return <CompactModal onClose={isComplete ? onConfirm : onCancel} backdropClassName="modal-backdrop--light" labelledBy={`profile-save-${stage}-title`} describedBy={`profile-save-${stage}-description`} className="profile-save-status-modal"><div className="save-status-modal__icon-box" aria-hidden="true"><img src={confirmCheckIcon} alt="" /></div><div className="save-status-modal__text"><h2 id={`profile-save-${stage}-title`} className="save-status-modal__title">{isComplete ? "저장되었습니다" : "저장하시겠습니까?"}</h2><p id={`profile-save-${stage}-description`} className="save-status-modal__description">{isComplete ? "프로필 이미지가 변경되었습니다" : "변경한 프로필 정보를 저장합니다"}</p></div><ModalActions className={isComplete ? "profile-save-complete__actions" : "profile-save-confirm__actions"} onCancel={onCancel} onConfirm={onConfirm} cancelText="취소" confirmText={isComplete ? "확인" : isSaving ? "변경 중" : "변경"} confirmDisabled={isSaving} showCancel={!isComplete} /></CompactModal>;
+  return (
+    <CompactModal
+      onClose={isComplete ? onConfirm : onCancel}
+      backdropClassName="modal-backdrop--light"
+      labelledBy={`profile-save-${stage}-title`}
+      describedBy={`profile-save-${stage}-description`}
+      className="profile-save-status-modal"
+    >
+      <div className="save-status-modal__icon-box" aria-hidden="true">
+        <img src={confirmCheckIcon} alt="" />
+      </div>
+      <div className="save-status-modal__text">
+        <h2
+          id={`profile-save-${stage}-title`}
+          className="save-status-modal__title"
+        >
+          {isComplete ? "저장되었습니다" : "저장하시겠습니까?"}
+        </h2>
+        <p
+          id={`profile-save-${stage}-description`}
+          className="save-status-modal__description"
+        >
+          {isComplete
+            ? "프로필 이미지가 변경되었습니다"
+            : "변경한 프로필 정보를 저장합니다"}
+        </p>
+      </div>
+      <ModalActions
+        className={
+          isComplete
+            ? "profile-save-complete__actions"
+            : "profile-save-confirm__actions"
+        }
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelText="취소"
+        confirmText={isComplete ? "확인" : isSaving ? "변경 중" : "변경"}
+        confirmDisabled={isSaving}
+        showCancel={!isComplete}
+      />
+    </CompactModal>
+  );
 }
 
 function ProfileEditFlow({ onClose, onProfileUpdated }) {
@@ -98,17 +195,47 @@ function ProfileEditFlow({ onClose, onProfileUpdated }) {
     }
   };
 
-  if (stage === "edit") return <ProfileEditDialog file={file} message={message} onCancel={onClose} onFileChange={handleImageChange} onSave={() => setStage("confirm")} />;
-  if (stage === "error") return <SystemErrorModal onInquiry={() => setStage("inquiry")} onClose={() => window.location.assign("/dashboard")} />;
+  if (stage === "edit")
+    return (
+      <ProfileEditDialog
+        file={file}
+        message={message}
+        onCancel={onClose}
+        onFileChange={handleImageChange}
+        onSave={() => setStage("confirm")}
+      />
+    );
+  if (stage === "error")
+    return (
+      <SystemErrorModal
+        onInquiry={() => setStage("inquiry")}
+        onClose={() => window.location.assign("/dashboard")}
+      />
+    );
   if (stage === "inquiry") return <InquiryContent onClose={onClose} />;
-  return <ProfileSaveStatusModal stage={stage} isSaving={isSaving} onCancel={() => setStage("edit")} onConfirm={stage === "confirm" ? handleConfirm : onClose} />;
+  return (
+    <ProfileSaveStatusModal
+      stage={stage}
+      isSaving={isSaving}
+      onCancel={() => setStage("edit")}
+      onConfirm={stage === "confirm" ? handleConfirm : onClose}
+    />
+  );
 }
 
 function PasswordContent({ onClose }) {
   const [stage, setStage] = useState("edit");
-  const [values, setValues] = useState({ currentPassword: "", nextPassword: "", confirmation: "" });
+  const [values, setValues] = useState({
+    currentPassword: "",
+    nextPassword: "",
+    confirmation: "",
+  });
   const [errors, setErrors] = useState({});
-  const [visibility, setVisibility] = useState({ currentPassword: false, nextPassword: false, confirmation: false });
+  const [visibility, setVisibility] = useState({
+    currentPassword: false,
+    nextPassword: false,
+    confirmation: false,
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   const handleChange = (event) => {
@@ -121,18 +248,17 @@ function PasswordContent({ onClose }) {
     setVisibility((current) => ({ ...current, [name]: !current[name] }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const nextErrors = {};
-    if (!values.currentPassword) nextErrors.currentPassword = "현재 비밀번호를 입력해주세요.";
-    if (values.nextPassword.length < 8) nextErrors.nextPassword = "비밀번호는 8자리 이상으로 입력해주세요.";
-    if (values.nextPassword !== values.confirmation) nextErrors.confirmation = "비밀번호가 일치하지 않습니다.";
+    if (!values.currentPassword)
+      nextErrors.currentPassword = "현재 비밀번호를 입력해주세요.";
+    if (values.nextPassword.length < 8)
+      nextErrors.nextPassword = "비밀번호는 8자리 이상으로 입력해주세요.";
+    if (values.nextPassword !== values.confirmation)
+      nextErrors.confirmation = "비밀번호가 일치하지 않습니다.";
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) setStage("confirm");
-  };
-
-  const handleConfirm = async () => {
-    if (isSaving) return;
+    if (Object.keys(nextErrors).length > 0 || isSaving) return;
     setIsSaving(true);
 
     try {
@@ -143,8 +269,11 @@ function PasswordContent({ onClose }) {
       setStage("complete");
     } catch (error) {
       if (error.response?.status === 400 || error.response?.status === 401) {
-        setErrors({ currentPassword: error.response?.data?.message || "현재 비밀번호가 일치하지 않습니다." });
-        setStage("edit");
+        setErrors({
+          currentPassword:
+            error.response?.data?.message ||
+            "현재 비밀번호가 일치하지 않습니다.",
+        });
       } else {
         setStage("error");
       }
@@ -160,24 +289,139 @@ function PasswordContent({ onClose }) {
     window.location.replace("/login");
   };
 
-  if (stage === "confirm") {
-    return <CompactModal onClose={() => setStage("edit")} backdropClassName="modal-backdrop--light" labelledBy="password-confirm-modal-title" describedBy="password-confirm-modal-description" className="delete-status-modal"><div className="delete-status-modal__icon-box" aria-hidden="true"><img className="password-status-modal__icon" src={passwordAccessIcon} alt="" /></div><div className="delete-status-modal__text"><h2 id="password-confirm-modal-title" className="delete-status-modal__title">변경하시겠습니까?</h2><p id="password-confirm-modal-description" className="delete-status-modal__description">새 비밀번호로 계정 정보를 변경합니다</p></div><ModalActions className="delete-confirm-modal__actions" onCancel={() => setStage("edit")} onConfirm={handleConfirm} cancelText="취소" confirmText={isSaving ? "변경 중" : "변경"} confirmDisabled={isSaving} /></CompactModal>;
-  }
-
-  if (stage === "error") return <SystemErrorModal onInquiry={() => setStage("inquiry")} onClose={() => window.location.assign("/dashboard")} />;
+  if (stage === "error")
+    return (
+      <SystemErrorModal
+        onInquiry={() => setStage("inquiry")}
+        onClose={() => window.location.assign("/dashboard")}
+      />
+    );
   if (stage === "inquiry") return <InquiryContent onClose={onClose} />;
 
   if (stage === "complete") {
-    return <CompactModal onClose={handleComplete} backdropClassName="modal-backdrop--light" labelledBy="password-complete-modal-title" describedBy="password-complete-modal-description" className="delete-status-modal"><div className="delete-status-modal__icon-box" aria-hidden="true"><img className="password-status-modal__icon" src={passwordAccessIcon} alt="" /></div><div className="delete-status-modal__text"><h2 id="password-complete-modal-title" className="delete-status-modal__title">변경되었습니다</h2><p id="password-complete-modal-description" className="delete-status-modal__description">비밀번호가 변경되어 재로그인이 필요합니다</p></div><ModalActions className="delete-complete-modal__actions" onConfirm={handleComplete} confirmText="확인" showCancel={false} /></CompactModal>;
+    return (
+      <CompactModal
+        onClose={handleComplete}
+        backdropClassName="modal-backdrop--light"
+        labelledBy="password-complete-modal-title"
+        describedBy="password-complete-modal-description"
+        className="delete-status-modal"
+      >
+        <div className="delete-status-modal__icon-box" aria-hidden="true">
+          <img
+            className="password-status-modal__icon"
+            src={passwordAccessIcon}
+            alt=""
+          />
+        </div>
+        <div className="delete-status-modal__text">
+          <h2
+            id="password-complete-modal-title"
+            className="delete-status-modal__title"
+          >
+            변경되었습니다
+          </h2>
+          <p
+            id="password-complete-modal-description"
+            className="delete-status-modal__description"
+          >
+            비밀번호가 변경되어 재로그인이 필요합니다
+          </p>
+        </div>
+        <ModalActions
+          className="delete-complete-modal__actions"
+          onConfirm={handleComplete}
+          confirmText="확인"
+          showCancel={false}
+        />
+      </CompactModal>
+    );
   }
 
   const fields = [
-    { name: "currentPassword", label: "현재 비밀번호", placeholder: "현재 비밀번호 확인" },
+    {
+      name: "currentPassword",
+      label: "현재 비밀번호",
+      placeholder: "현재 비밀번호 확인",
+    },
     { name: "nextPassword", label: "새 비밀번호", placeholder: "8자 이상" },
-    { name: "confirmation", label: "새 비밀번호 확인", placeholder: "새 비밀번호 확인" },
+    {
+      name: "confirmation",
+      label: "새 비밀번호 확인",
+      placeholder: "새 비밀번호 확인",
+    },
   ];
 
-  return <ModalBackdrop onClose={onClose} className="modal-backdrop--light"><form className="password-change-dialog" aria-labelledby="password-change-title" aria-describedby="password-change-description" onSubmit={handleSubmit}><header><h2 id="password-change-title">비밀번호 변경</h2><p id="password-change-description">계정 보호를 위해 새로운 비밀번호를 설정합니다</p></header><div className="password-change-dialog__divider" /><div className="password-change-dialog__body">{fields.map((field) => <label className="password-change-control" key={field.name}><span>{field.label}</span><span className={`password-change-control__input ${errors[field.name] ? "has-error" : ""}`}><input name={field.name} type={visibility[field.name] ? "text" : "password"} value={values[field.name]} placeholder={field.placeholder} autoComplete={field.name === "currentPassword" ? "current-password" : "new-password"} onChange={handleChange} /><button type="button" aria-label={visibility[field.name] ? `${field.label} 숨기기` : `${field.label} 보기`} onClick={() => toggleVisibility(field.name)}><img src={visibility[field.name] ? watchPasswordIcon : hidePasswordIcon} alt="" /></button></span>{errors[field.name] ? <small role="alert">* {errors[field.name]}</small> : null}</label>)}</div><ModalActions className="password-change-dialog__actions" onCancel={onClose} cancelText="취소" confirmText="변경" confirmType="submit" /></form></ModalBackdrop>;
+  return (
+    <ModalBackdrop onClose={onClose} className="modal-backdrop--light">
+      <form
+        className="password-change-dialog"
+        aria-labelledby="password-change-title"
+        aria-describedby="password-change-description"
+        onSubmit={handleSubmit}
+      >
+        <header>
+          <h2 id="password-change-title">비밀번호 변경</h2>
+          <p id="password-change-description">
+            계정 보호를 위해 새로운 비밀번호를 설정합니다
+          </p>
+        </header>
+        <div className="password-change-dialog__divider" />
+        <div className="password-change-dialog__body">
+          {fields.map((field) => (
+            <label className="password-change-control" key={field.name}>
+              <span>{field.label}</span>
+              <span
+                className={`password-change-control__input ${errors[field.name] ? "has-error" : ""}`}
+              >
+                <input
+                  name={field.name}
+                  type={visibility[field.name] ? "text" : "password"}
+                  value={values[field.name]}
+                  placeholder={field.placeholder}
+                  autoComplete={
+                    field.name === "currentPassword"
+                      ? "current-password"
+                      : "new-password"
+                  }
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  aria-label={
+                    visibility[field.name]
+                      ? `${field.label} 숨기기`
+                      : `${field.label} 보기`
+                  }
+                  onClick={() => toggleVisibility(field.name)}
+                >
+                  <img
+                    src={
+                      visibility[field.name]
+                        ? watchPasswordIcon
+                        : hidePasswordIcon
+                    }
+                    alt=""
+                  />
+                </button>
+              </span>
+              {errors[field.name] ? (
+                <small role="alert">* {errors[field.name]}</small>
+              ) : null}
+            </label>
+          ))}
+        </div>
+        <ModalActions
+          className="password-change-dialog__actions"
+          onCancel={onClose}
+          cancelText="취소"
+          confirmText={isSaving ? "변경 중" : "변경"}
+          confirmType="submit"
+          confirmDisabled={isSaving}
+        />
+      </form>
+    </ModalBackdrop>
+  );
 }
 
 function NoticesContent({ onClose }) {
@@ -186,17 +430,23 @@ function NoticesContent({ onClose }) {
 
   useEffect(() => {
     let isMounted = true;
-    getSystemNotices().then(({ data }) => {
-      if (!isMounted) return;
-      const systemNotices = Array.isArray(data) ? data : [];
-      setNotices(systemNotices.length > 0 ? systemNotices : [MOCK_SYSTEM_NOTICE]);
-      setStatus("success");
-    }).catch(() => {
-      if (!isMounted) return;
-      setNotices([MOCK_SYSTEM_NOTICE]);
-      setStatus("success");
-    });
-    return () => { isMounted = false; };
+    getSystemNotices()
+      .then(({ data }) => {
+        if (!isMounted) return;
+        const systemNotices = Array.isArray(data) ? data : [];
+        setNotices(
+          systemNotices.length > 0 ? systemNotices : [MOCK_SYSTEM_NOTICE],
+        );
+        setStatus("success");
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setNotices([MOCK_SYSTEM_NOTICE]);
+        setStatus("success");
+      });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const formatNoticeDate = (value) => {
@@ -208,7 +458,62 @@ function NoticesContent({ onClose }) {
     return `${year}.${month}.${day}`;
   };
 
-  return <ModalBackdrop onClose={onClose} className="modal-backdrop--light"><section className="profile-notices-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-notices-title" aria-describedby="profile-notices-description"><header><h2 id="profile-notices-title">공지사항</h2><p id="profile-notices-description">tikitaka의 업데이트와 서비스 안내를 확인합니다.</p></header><div className="profile-notices-dialog__divider" /><div className="profile-notices-dialog__body">{status === "loading" ? <p className="profile-notices-dialog__status">공지사항을 불러오는 중입니다.</p> : null}{status === "error" ? <p className="profile-notices-dialog__status" role="alert">공지사항을 불러오지 못했습니다.</p> : null}{status === "success" && notices.length === 0 ? <p className="profile-notices-dialog__status">등록된 공지사항이 없습니다.</p> : null}{notices.map((notice) => <article className="profile-notice-card" key={notice.system_notice_id}><h3>{notice.title}</h3>{notice.created_at ? <time dateTime={notice.created_at}>{formatNoticeDate(notice.created_at)}</time> : null}<p>{notice.content}</p></article>)}</div><ModalActions className="profile-notices-dialog__actions" onConfirm={onClose} confirmText="닫기" showCancel={false} /></section></ModalBackdrop>;
+  return (
+    <ModalBackdrop onClose={onClose} className="modal-backdrop--light">
+      <section
+        className="profile-notices-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-notices-title"
+        aria-describedby="profile-notices-description"
+      >
+        <header>
+          <h2 id="profile-notices-title">공지사항</h2>
+          <p id="profile-notices-description">
+            tikitaka의 업데이트와 서비스 안내를 확인합니다.
+          </p>
+        </header>
+        <div className="profile-notices-dialog__divider" />
+        <div className="profile-notices-dialog__body">
+          {status === "loading" ? (
+            <p className="profile-notices-dialog__status">
+              공지사항을 불러오는 중입니다.
+            </p>
+          ) : null}
+          {status === "error" ? (
+            <p className="profile-notices-dialog__status" role="alert">
+              공지사항을 불러오지 못했습니다.
+            </p>
+          ) : null}
+          {status === "success" && notices.length === 0 ? (
+            <p className="profile-notices-dialog__status">
+              등록된 공지사항이 없습니다.
+            </p>
+          ) : null}
+          {notices.map((notice) => (
+            <article
+              className="profile-notice-card"
+              key={notice.system_notice_id}
+            >
+              <h3>{notice.title}</h3>
+              {notice.created_at ? (
+                <time dateTime={notice.created_at}>
+                  {formatNoticeDate(notice.created_at)}
+                </time>
+              ) : null}
+              <p>{notice.content}</p>
+            </article>
+          ))}
+        </div>
+        <ModalActions
+          className="profile-notices-dialog__actions"
+          onConfirm={onClose}
+          confirmText="닫기"
+          showCancel={false}
+        />
+      </section>
+    </ModalBackdrop>
+  );
 }
 
 function InquiryContent({ onClose }) {
@@ -241,17 +546,146 @@ function InquiryContent({ onClose }) {
     }
   };
 
-  if (hasError) return <SystemErrorModal onInquiry={() => setHasError(false)} onClose={() => window.location.assign("/dashboard")} />;
+  if (hasError)
+    return (
+      <SystemErrorModal
+        onInquiry={() => setHasError(false)}
+        onClose={() => window.location.assign("/dashboard")}
+      />
+    );
 
   if (isComplete) {
-    return <CompactModal onClose={onClose} backdropClassName="modal-backdrop--light" labelledBy="inquiry-complete-modal-title" describedBy="inquiry-complete-modal-description" className="save-status-modal"><div className="save-status-modal__icon-box" aria-hidden="true"><img className="inquiry-confirm-modal__icon" src={questionSubmitIcon} alt="" /></div><div className="save-status-modal__text"><h2 id="inquiry-complete-modal-title" className="save-status-modal__title">등록 완료되었습니다</h2><p id="inquiry-complete-modal-description" className="save-status-modal__description">확인 후 메일로 연락드리겠습니다. 감사합니다.</p></div><ModalActions className="save-complete-modal__actions" onConfirm={onClose} confirmText="확인" showCancel={false} /></CompactModal>;
+    return (
+      <CompactModal
+        onClose={onClose}
+        backdropClassName="modal-backdrop--light"
+        labelledBy="inquiry-complete-modal-title"
+        describedBy="inquiry-complete-modal-description"
+        className="save-status-modal"
+      >
+        <div className="save-status-modal__icon-box" aria-hidden="true">
+          <img
+            className="inquiry-confirm-modal__icon"
+            src={questionSubmitIcon}
+            alt=""
+          />
+        </div>
+        <div className="save-status-modal__text">
+          <h2
+            id="inquiry-complete-modal-title"
+            className="save-status-modal__title"
+          >
+            등록 완료되었습니다
+          </h2>
+          <p
+            id="inquiry-complete-modal-description"
+            className="save-status-modal__description"
+          >
+            확인 후 메일로 연락드리겠습니다. 감사합니다.
+          </p>
+        </div>
+        <ModalActions
+          className="save-complete-modal__actions"
+          onConfirm={onClose}
+          confirmText="확인"
+          showCancel={false}
+        />
+      </CompactModal>
+    );
   }
 
   if (requestBody) {
-    return <CompactModal onClose={() => setRequestBody(null)} backdropClassName="modal-backdrop--light" labelledBy="inquiry-confirm-modal-title" describedBy="inquiry-confirm-modal-description" className="save-status-modal"><div className="save-status-modal__icon-box" aria-hidden="true"><img className="inquiry-confirm-modal__icon" src={questionSubmitIcon} alt="" /></div><div className="save-status-modal__text"><h2 id="inquiry-confirm-modal-title" className="save-status-modal__title">해당 내용으로 등록하시겠습니까?</h2><p id="inquiry-confirm-modal-description" className="save-status-modal__description">등록한 문의는 수정할 수 없습니다</p></div><ModalActions className="save-confirm-modal__actions" onCancel={() => setRequestBody(null)} onConfirm={handleConfirm} cancelText="취소" confirmText={isSubmitting ? "등록 중" : "등록"} confirmDisabled={isSubmitting} /></CompactModal>;
+    return (
+      <CompactModal
+        onClose={() => setRequestBody(null)}
+        backdropClassName="modal-backdrop--light"
+        labelledBy="inquiry-confirm-modal-title"
+        describedBy="inquiry-confirm-modal-description"
+        className="save-status-modal"
+      >
+        <div className="save-status-modal__icon-box" aria-hidden="true">
+          <img
+            className="inquiry-confirm-modal__icon"
+            src={questionSubmitIcon}
+            alt=""
+          />
+        </div>
+        <div className="save-status-modal__text">
+          <h2
+            id="inquiry-confirm-modal-title"
+            className="save-status-modal__title"
+          >
+            해당 내용으로 등록하시겠습니까?
+          </h2>
+          <p
+            id="inquiry-confirm-modal-description"
+            className="save-status-modal__description"
+          >
+            등록한 문의는 수정할 수 없습니다
+          </p>
+        </div>
+        <ModalActions
+          className="save-confirm-modal__actions"
+          onCancel={() => setRequestBody(null)}
+          onConfirm={handleConfirm}
+          cancelText="취소"
+          confirmText={isSubmitting ? "등록 중" : "등록"}
+          confirmDisabled={isSubmitting}
+        />
+      </CompactModal>
+    );
   }
 
-  return <ModalBackdrop onClose={onClose} className="modal-backdrop--light"><form className="profile-inquiry-dialog" aria-labelledby="profile-inquiry-title" aria-describedby="profile-inquiry-description" onSubmit={handleSubmit}><header><h2 id="profile-inquiry-title">문의하기</h2><p id="profile-inquiry-description">오류 제보, 기능 제안 또는 서비스 이용 문의를 남겨주세요</p></header><div className="profile-inquiry-dialog__divider" /><div className="profile-inquiry-dialog__body"><label className="profile-inquiry-control"><span>분류</span><span className="profile-inquiry-control__select"><select name="category" defaultValue="ERROR_REPORT"><option value="ERROR_REPORT">오류 제보</option><option value="SUGGESTION_OTHER">기능 제안</option><option value="ACCOUNT_USAGE">서비스 이용 문의</option></select><img src={inquiryChevronIcon} alt="" /></span></label><label className="profile-inquiry-control"><span>제목</span><input name="title" placeholder="문의 제목을 적어주세요" required /></label><label className="profile-inquiry-control"><span>문의 내용</span><textarea name="content" placeholder="문의 내용을 적어주세요" required /></label></div><ModalActions className="profile-inquiry-dialog__actions" onCancel={onClose} cancelText="취소" confirmText="등록" confirmType="submit" /></form></ModalBackdrop>;
+  return (
+    <ModalBackdrop onClose={onClose} className="modal-backdrop--light">
+      <form
+        className="profile-inquiry-dialog"
+        aria-labelledby="profile-inquiry-title"
+        aria-describedby="profile-inquiry-description"
+        onSubmit={handleSubmit}
+      >
+        <header>
+          <h2 id="profile-inquiry-title">문의하기</h2>
+          <p id="profile-inquiry-description">
+            오류 제보, 기능 제안 또는 서비스 이용 문의를 남겨주세요
+          </p>
+        </header>
+        <div className="profile-inquiry-dialog__divider" />
+        <div className="profile-inquiry-dialog__body">
+          <label className="profile-inquiry-control">
+            <span>분류</span>
+            <span className="profile-inquiry-control__select">
+              <select name="category" defaultValue="ERROR_REPORT">
+                <option value="ERROR_REPORT">오류 제보</option>
+                <option value="SUGGESTION_OTHER">기능 제안</option>
+                <option value="ACCOUNT_USAGE">서비스 이용 문의</option>
+              </select>
+              <img src={inquiryChevronIcon} alt="" />
+            </span>
+          </label>
+          <label className="profile-inquiry-control">
+            <span>제목</span>
+            <input name="title" placeholder="문의 제목을 적어주세요" required />
+          </label>
+          <label className="profile-inquiry-control">
+            <span>문의 내용</span>
+            <textarea
+              name="content"
+              placeholder="문의 내용을 적어주세요"
+              required
+            />
+          </label>
+        </div>
+        <ModalActions
+          className="profile-inquiry-dialog__actions"
+          onCancel={onClose}
+          cancelText="취소"
+          confirmText="등록"
+          confirmType="submit"
+        />
+      </form>
+    </ModalBackdrop>
+  );
 }
 
 function LogoutContent({ onClose }) {
@@ -261,7 +695,11 @@ function LogoutContent({ onClose }) {
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
-    try { await logout(); } catch { /* Local credentials still need to be cleared. */ }
+    try {
+      await logout();
+    } catch {
+      /* Local credentials still need to be cleared. */
+    }
     localStorage.removeItem("tikitaka_access_token");
     localStorage.removeItem("tikitaka_refresh_token");
     localStorage.removeItem("tikitaka_user");
@@ -274,15 +712,83 @@ function LogoutContent({ onClose }) {
   };
 
   if (isComplete) {
-    return <CompactModal onClose={handleMoveToLogin} backdropClassName="modal-backdrop--light" labelledBy="logout-complete-modal-title" describedBy="logout-complete-modal-description" className="delete-status-modal"><div className="delete-status-modal__icon-box" aria-hidden="true"><img className="logout-status-modal__icon" src={logoutIcon} alt="" /></div><div className="delete-status-modal__text"><h2 id="logout-complete-modal-title" className="delete-status-modal__title">로그아웃되었습니다</h2><p id="logout-complete-modal-description" className="delete-status-modal__description">로그인 화면으로 이동합니다</p></div><ModalActions className="delete-complete-modal__actions" onConfirm={handleMoveToLogin} confirmText="확인" showCancel={false} /></CompactModal>;
+    return (
+      <CompactModal
+        onClose={handleMoveToLogin}
+        backdropClassName="modal-backdrop--light"
+        labelledBy="logout-complete-modal-title"
+        describedBy="logout-complete-modal-description"
+        className="delete-status-modal"
+      >
+        <div className="delete-status-modal__icon-box" aria-hidden="true">
+          <img className="logout-status-modal__icon" src={logoutIcon} alt="" />
+        </div>
+        <div className="delete-status-modal__text">
+          <h2
+            id="logout-complete-modal-title"
+            className="delete-status-modal__title"
+          >
+            로그아웃되었습니다
+          </h2>
+          <p
+            id="logout-complete-modal-description"
+            className="delete-status-modal__description"
+          >
+            로그인 화면으로 이동합니다
+          </p>
+        </div>
+        <ModalActions
+          className="delete-complete-modal__actions"
+          onConfirm={handleMoveToLogin}
+          confirmText="확인"
+          showCancel={false}
+        />
+      </CompactModal>
+    );
   }
 
-  return <CompactModal onClose={onClose} backdropClassName="modal-backdrop--light" labelledBy="logout-confirm-modal-title" describedBy="logout-confirm-modal-description" className="delete-status-modal"><div className="delete-status-modal__icon-box" aria-hidden="true"><img className="logout-status-modal__icon" src={logoutIcon} alt="" /></div><div className="delete-status-modal__text"><h2 id="logout-confirm-modal-title" className="delete-status-modal__title">로그아웃하시겠습니까?</h2><p id="logout-confirm-modal-description" className="delete-status-modal__description">다시 이용하려면 로그인이 필요합니다</p></div><ModalActions className="delete-confirm-modal__actions" onCancel={onClose} onConfirm={handleLogout} cancelText="취소" confirmText={isLoggingOut ? "로그아웃 중" : "로그아웃"} confirmDisabled={isLoggingOut} /></CompactModal>;
+  return (
+    <CompactModal
+      onClose={onClose}
+      backdropClassName="modal-backdrop--light"
+      labelledBy="logout-confirm-modal-title"
+      describedBy="logout-confirm-modal-description"
+      className="delete-status-modal"
+    >
+      <div className="delete-status-modal__icon-box" aria-hidden="true">
+        <img className="logout-status-modal__icon" src={logoutIcon} alt="" />
+      </div>
+      <div className="delete-status-modal__text">
+        <h2
+          id="logout-confirm-modal-title"
+          className="delete-status-modal__title"
+        >
+          로그아웃하시겠습니까?
+        </h2>
+        <p
+          id="logout-confirm-modal-description"
+          className="delete-status-modal__description"
+        >
+          다시 이용하려면 로그인이 필요합니다
+        </p>
+      </div>
+      <ModalActions
+        className="delete-confirm-modal__actions"
+        onCancel={onClose}
+        onConfirm={handleLogout}
+        cancelText="취소"
+        confirmText={isLoggingOut ? "로그아웃 중" : "로그아웃"}
+        confirmDisabled={isLoggingOut}
+      />
+    </CompactModal>
+  );
 }
 
 function ProfileActionModal({ action, onClose, onProfileUpdated }) {
   if (action === "profile") {
-    return <ProfileEditFlow onClose={onClose} onProfileUpdated={onProfileUpdated} />;
+    return (
+      <ProfileEditFlow onClose={onClose} onProfileUpdated={onProfileUpdated} />
+    );
   }
 
   if (action === "password") {
