@@ -4,7 +4,7 @@
   bottom: 16px;
   z-index: 10;
   width: 405px;
-  height: 66px;
+  height: 70px;
   padding: 6px 12px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -44,11 +44,11 @@
 
 .space-toolbar__item--active::before {
   position: absolute;
-  top: calc(50% - 1px);
+  top: calc(50% + 1px);
   left: 50%;
   z-index: -1;
   width: 96px;
-  height: 62px;
+  height: 66px;
   border-radius: 30px;
   background:
     linear-gradient(
