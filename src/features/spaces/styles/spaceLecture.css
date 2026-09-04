@@ -138,7 +138,7 @@
   color: #1b2436;
   font: inherit;
   text-align: left;
-  cursor: default;
+  cursor: pointer;
 }
 
 .lecture-material-card__upload {

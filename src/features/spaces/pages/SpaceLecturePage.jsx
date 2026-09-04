@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import backIcon from "../../../assets/icons/space/space-back.svg";
@@ -5,6 +6,9 @@ import listIcon from "../../../assets/icons/space/space-list.svg";
 import moreIcon from "../../../assets/icons/space/space-more.svg";
 import uploadIcon from "../../../assets/icons/space/space-upload.svg";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
+import MaterialSaveCompleteModal from "../components/MaterialSaveCompleteModal.jsx";
+import MaterialSaveConfirmModal from "../components/MaterialSaveConfirmModal.jsx";
+import MaterialUploadModal from "../components/MaterialUploadModal.jsx";
 import SpaceToolbar from "../components/SpaceToolbar.jsx";
 
 import "../styles/spaceLecture.css";
@@ -36,6 +40,23 @@ function SpaceLecturePage() {
   const { spaceId } = useParams();
   const isProfessor = readUserRole() === "PROFESSOR";
   const spaceName = location.state?.spaceName || "실무중심산학협력프로젝트1";
+  const [materialModalStep, setMaterialModalStep] = useState(null);
+  const [pendingMaterial, setPendingMaterial] = useState(null);
+
+  const closeMaterialModal = () => {
+    setMaterialModalStep(null);
+    setPendingMaterial(null);
+  };
+
+  const handleConfirmMaterialSave = () => {
+    if (!pendingMaterial) return;
+
+    console.log({
+      title: pendingMaterial.title,
+      file: pendingMaterial.file,
+    });
+    setMaterialModalStep("complete");
+  };
 
   return (
     <main className="space-lecture-page">
@@ -73,7 +94,11 @@ function SpaceLecturePage() {
           data-space-id={spaceId}
         >
           {isProfessor ? (
-            <button type="button" className="lecture-material-card">
+            <button
+              type="button"
+              className="lecture-material-card"
+              onClick={() => setMaterialModalStep("form")}
+            >
               <span className="lecture-material-card__upload">
                 <img src={uploadIcon} alt="" />
               </span>
@@ -93,6 +118,28 @@ function SpaceLecturePage() {
         <div className="space-lecture-bottom-safe-area" aria-hidden="true" />
         <SpaceToolbar activeItem="lecture" />
       </div>
+
+      {isProfessor && materialModalStep === "form" && (
+        <MaterialUploadModal
+          initialMaterial={pendingMaterial}
+          onClose={closeMaterialModal}
+          onSave={(material) => {
+            setPendingMaterial(material);
+            setMaterialModalStep("confirm");
+          }}
+        />
+      )}
+
+      {isProfessor && materialModalStep === "confirm" && pendingMaterial && (
+        <MaterialSaveConfirmModal
+          onCancel={() => setMaterialModalStep("form")}
+          onConfirm={handleConfirmMaterialSave}
+        />
+      )}
+
+      {isProfessor && materialModalStep === "complete" && (
+        <MaterialSaveCompleteModal onConfirm={closeMaterialModal} />
+      )}
     </main>
   );
 }
