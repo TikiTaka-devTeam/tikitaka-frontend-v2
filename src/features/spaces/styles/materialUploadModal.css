@@ -1,0 +1,240 @@
+.material-upload-modal {
+  width: min(520px, calc(100vw - 32px));
+  height: min(650px, calc(100dvh - 32px));
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #141c2e;
+  box-shadow: 0 18px 42px rgba(10, 26, 56, 0.22);
+}
+
+.material-upload-modal__header {
+  height: 60px;
+  flex: 0 0 60px;
+}
+
+.material-upload-modal__header h2,
+.material-upload-modal__header p {
+  margin: 0;
+}
+
+.material-upload-modal__header h2 {
+  margin-top: 3px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 29px;
+}
+
+.material-upload-modal__header p {
+  margin-top: 8px;
+  margin-left: 1px;
+  color: #758094;
+  font-size: 14px;
+  line-height: 17px;
+}
+
+.material-upload-modal__divider {
+  height: 1px;
+  flex: 0 0 1px;
+  background: #e0e5f2;
+}
+
+.material-upload-modal__body {
+  min-height: 0;
+  padding-top: 20px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 17px;
+  overflow-y: auto;
+}
+
+.material-upload-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #292e3d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.material-upload-modal__input-wrap {
+  position: relative;
+  display: block;
+}
+
+.material-upload-modal__input-wrap input {
+  width: 100%;
+  height: 48px;
+  padding: 0 42px 0 13px;
+  border: 1px solid #d6deeb;
+  border-radius: 10px;
+  outline: none;
+  color: #292e3d;
+  font: inherit;
+  font-weight: 400;
+}
+
+.material-upload-modal__input-wrap input:focus {
+  border-color: #2e6bff;
+}
+
+.material-upload-modal__input-wrap button,
+.material-upload-modal__file > button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.material-upload-modal__input-wrap button {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+}
+
+.material-upload-modal__input-wrap button img,
+.material-upload-modal__file > button img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.material-upload-modal__dropzone {
+  width: 100%;
+  height: 145px;
+  padding: 0;
+  display: flex;
+  flex: 0 0 145px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d6deea;
+  border-radius: 12px;
+  background: #fbfcfe;
+  cursor: pointer;
+}
+
+.material-upload-modal__dropzone.is-dragging {
+  border-color: #386eeb;
+  background: #f5f8ff;
+}
+
+.material-upload-modal__dropzone > img {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 1px;
+}
+
+.material-upload-modal__dropzone strong {
+  color: #386eeb;
+  font-size: 12px;
+  line-height: 15px;
+}
+
+.material-upload-modal__dropzone strong + small {
+  margin-top: 6px;
+}
+
+.material-upload-modal__dropzone small {
+  color: #98a2b3;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 14px;
+}
+
+.material-upload-modal__file-input {
+  display: none;
+}
+
+.material-upload-modal__error {
+  margin: -4px 0 0;
+  color: #e5484d;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.material-upload-modal__file {
+  min-height: 52px;
+  padding: 0 14px 0 20px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1dbed;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.material-upload-modal__file > img {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+}
+
+.material-upload-modal__file > img.is-pdf {
+  width: 21.5px;
+  height: 23.5px;
+  margin-inline: 2.25px;
+}
+
+.material-upload-modal__file > span {
+  min-width: 0;
+  margin-left: 13px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.material-upload-modal__file strong,
+.material-upload-modal__file small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.material-upload-modal__file strong {
+  color: #263244;
+  font-size: 12px;
+  line-height: 15px;
+}
+
+.material-upload-modal__file small {
+  color: #8a96a8;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 12px;
+}
+
+.material-upload-modal__file > button {
+  width: 16px;
+  height: 16px;
+  margin-left: 12px;
+}
+
+.material-upload-modal__file--empty {
+  justify-content: center;
+  color: #98a2b3;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.material-upload-modal__footer {
+  height: 48px;
+  display: flex;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 520px) {
+  .material-upload-modal {
+    height: min(650px, calc(100dvh - 24px));
+    padding: 24px;
+  }
+}
