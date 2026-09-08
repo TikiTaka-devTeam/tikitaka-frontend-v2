@@ -10,8 +10,8 @@ import ModalBackdrop from "../../../components/common/ModalBackdrop.jsx";
 import "../styles/materialUploadModal.css";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
-const ACCEPTED_FILE_TYPES = ".pdf,.docx,.ppt,.pptx,.png,.zip";
-const ACCEPTED_FILE_EXTENSIONS = ["pdf", "docx", "ppt", "pptx", "png", "zip"];
+const ACCEPTED_FILE_TYPES = ".pdf,application/pdf";
+const ACCEPTED_FILE_EXTENSIONS = ["pdf"];
 
 function getFileExtension(fileName) {
   return fileName.split(".").pop()?.toLowerCase() || "";
@@ -30,6 +30,7 @@ function formatFileSize(size) {
 }
 
 function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
+  const isEditing = Boolean(initialMaterial);
   const fileInputRef = useRef(null);
   const initialFileTitle = initialMaterial?.file
     ? getFileNameWithoutExtension(initialMaterial.file.name)
@@ -49,7 +50,7 @@ function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
 
     if (!ACCEPTED_FILE_EXTENSIONS.includes(extension)) {
       setFile(null);
-      setFileError("PDF, DOCX, PPT, PPTX, PNG, ZIP 파일만 업로드할 수 있습니다.");
+      setFileError("PDF 파일만 업로드할 수 있습니다.");
       return;
     }
 
@@ -86,9 +87,13 @@ function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
         onSubmit={handleSubmit}
       >
         <header className="material-upload-modal__header">
-          <h2 id="material-upload-modal-title">강의자료 추가</h2>
+          <h2 id="material-upload-modal-title">
+            강의자료 {isEditing ? "수정" : "추가"}
+          </h2>
           <p id="material-upload-modal-description">
-            새로운 강의자료를 업로드 해주세요!
+            {isEditing
+              ? "강의자료 정보와 첨부파일을 수정해 주세요."
+              : "새로운 강의자료를 업로드 해주세요!"}
           </p>
         </header>
 
@@ -145,7 +150,7 @@ function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
               <img src={cloudUploadIcon} alt="" />
               <strong>파일 추가</strong>
               <small>파일을 선택하거나 드래그하세요</small>
-              <small>PDF, PPT, PPTX (최대 20MB)</small>
+              <small>PDF (최대 20MB)</small>
             </button>
             <input
               ref={fileInputRef}
@@ -202,7 +207,7 @@ function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
         <footer className="material-upload-modal__footer">
           <ModalActions
             onCancel={onClose}
-            confirmText="저장"
+            confirmText={isEditing ? "수정" : "저장"}
             confirmType="submit"
             confirmDisabled={!title.trim() || !file}
           />

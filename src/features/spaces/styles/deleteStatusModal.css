@@ -21,6 +21,11 @@
   color: #e24b63;
 }
 
+.material-delete-confirm-modal .delete-status-modal__delete-icon {
+  width: 26px;
+  height: 26px;
+}
+
 .delete-status-modal__check-icon {
   display: block;
 
@@ -79,6 +84,20 @@
 
 .delete-status-modal__description--danger {
   color: #e24b63;
+}
+
+.delete-status-modal__error {
+  margin: 0;
+  color: #e24b63;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 15px;
+  text-align: center;
+}
+
+.delete-status-modal--error {
+  height: auto;
+  min-height: 237px;
 }
 
 .delete-confirm-modal__actions {

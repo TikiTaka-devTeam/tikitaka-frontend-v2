@@ -5,7 +5,10 @@ import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 
 import "../styles/deleteStatusModal.css";
 
-function DeleteCompleteModal({ onConfirm }) {
+function DeleteCompleteModal({
+  description = "삭제한 Space는 다시 복구할 수 없습니다",
+  onConfirm,
+}) {
   return (
     <CompactModal
       onClose={onConfirm}
@@ -35,7 +38,7 @@ function DeleteCompleteModal({ onConfirm }) {
           id="delete-complete-modal-description"
           className="delete-status-modal__description"
         >
-          삭제한 Space는 다시 복구할 수 없습니다
+          {description}
         </p>
       </div>
 
