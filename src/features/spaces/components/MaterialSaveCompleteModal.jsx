@@ -4,7 +4,7 @@ import ModalActions from "../../../components/common/ModalActions.jsx";
 
 import "../styles/saveStatusModal.css";
 
-function MaterialSaveCompleteModal({ onConfirm }) {
+function MaterialSaveCompleteModal({ isEditing = false, onConfirm }) {
   return (
     <CompactModal
       onClose={onConfirm}
@@ -21,13 +21,13 @@ function MaterialSaveCompleteModal({ onConfirm }) {
           id="material-save-complete-modal-title"
           className="save-status-modal__title"
         >
-          등록되었습니다
+          {isEditing ? "수정되었습니다" : "등록되었습니다"}
         </h2>
         <p
           id="material-save-complete-modal-description"
           className="save-status-modal__description"
         >
-          새로운 강의자료가 등록되었습니다.
+          강의자료가 {isEditing ? "수정" : "등록"}되었습니다.
         </p>
       </div>
 

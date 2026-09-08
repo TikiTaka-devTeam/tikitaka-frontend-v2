@@ -1,17 +1,38 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import backIcon from "../../../assets/icons/space/space-back.svg";
+import materialThumbnail from "../../../assets/images/ci-cd-pipeline-notes.png";
 import listIcon from "../../../assets/icons/space/space-list.svg";
 import moreIcon from "../../../assets/icons/space/space-more.svg";
 import uploadIcon from "../../../assets/icons/space/space-upload.svg";
+import DeleteIcon from "../../../assets/icons/delete.svg?react";
+import PencilEditIcon from "../../../assets/icons/pencil-edit.svg?react";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
+import DeleteCompleteModal from "../components/DeleteCompleteModal.jsx";
+import MaterialDeleteConfirmModal from "../components/MaterialDeleteConfirmModal.jsx";
 import MaterialSaveCompleteModal from "../components/MaterialSaveCompleteModal.jsx";
 import MaterialSaveConfirmModal from "../components/MaterialSaveConfirmModal.jsx";
 import MaterialUploadModal from "../components/MaterialUploadModal.jsx";
 import SpaceToolbar from "../components/SpaceToolbar.jsx";
+import {
+  deleteDocument,
+  getDocuments,
+  uploadDocument,
+} from "../api/documentsApi.js";
 
 import "../styles/spaceLecture.css";
+
+function normalizeDocument(document, fileName) {
+  return {
+    id: document.document_id,
+    title: document.title,
+    fileName: fileName || `${document.title}.pdf`,
+    thumbnailUrl: document.thumbnail_url,
+    pageCount: document.page_count,
+    uploadedAt: document.uploaded_at,
+  };
+}
 
 function readUserRole() {
   try {
@@ -42,20 +63,192 @@ function SpaceLecturePage() {
   const spaceName = location.state?.spaceName || "실무중심산학협력프로젝트1";
   const [materialModalStep, setMaterialModalStep] = useState(null);
   const [pendingMaterial, setPendingMaterial] = useState(null);
+  const [materialSaveError, setMaterialSaveError] = useState("");
+  const [isUploadingMaterial, setIsUploadingMaterial] = useState(false);
+  const [materials, setMaterials] = useState([]);
+  const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
+  const [materialsLoadError, setMaterialsLoadError] = useState("");
+  const [openMaterialMenuId, setOpenMaterialMenuId] = useState(null);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [deleteModalStep, setDeleteModalStep] = useState(null);
+  const [deleteMaterialError, setDeleteMaterialError] = useState("");
+  const [isDeletingMaterial, setIsDeletingMaterial] = useState(false);
+  const [isScrollIndicatorVisible, setIsScrollIndicatorVisible] =
+    useState(false);
+  const scrollIndicatorTimerRef = useRef(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadDocuments = async () => {
+      setIsLoadingMaterials(true);
+      setMaterialsLoadError("");
+
+      try {
+        const documents = await getDocuments(spaceId, {
+          signal: controller.signal,
+        });
+        setMaterials(
+          Array.isArray(documents) ? documents.map(normalizeDocument) : [],
+        );
+      } catch (error) {
+        if (error.code !== "ERR_CANCELED") {
+          setMaterialsLoadError(
+            error.response?.data?.message ||
+              error.response?.data?.detail ||
+              "강의자료를 불러오지 못했습니다.",
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoadingMaterials(false);
+      }
+    };
+
+    loadDocuments();
+
+    return () => controller.abort();
+  }, [spaceId]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrollIndicatorVisible(true);
+      window.clearTimeout(scrollIndicatorTimerRef.current);
+      scrollIndicatorTimerRef.current = window.setTimeout(() => {
+        setIsScrollIndicatorVisible(false);
+      }, 700);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.clearTimeout(scrollIndicatorTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const closeMenu = (event) => {
+      if (!event.target.closest(".lecture-material-card__menu-wrapper")) {
+        setOpenMaterialMenuId(null);
+      }
+    };
+    const closeMenuWithEscape = (event) => {
+      if (event.key === "Escape") setOpenMaterialMenuId(null);
+    };
+
+    document.addEventListener("mousedown", closeMenu);
+    document.addEventListener("keydown", closeMenuWithEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", closeMenu);
+      document.removeEventListener("keydown", closeMenuWithEscape);
+    };
+  }, []);
 
   const closeMaterialModal = () => {
     setMaterialModalStep(null);
     setPendingMaterial(null);
+    setSelectedMaterial(null);
+    setMaterialSaveError("");
   };
 
-  const handleConfirmMaterialSave = () => {
-    if (!pendingMaterial) return;
+  const handleConfirmMaterialSave = async () => {
+    if (!pendingMaterial || isUploadingMaterial) return;
 
-    console.log({
-      title: pendingMaterial.title,
-      file: pendingMaterial.file,
+    setMaterialSaveError("");
+
+    if (selectedMaterial) {
+      setMaterials((currentMaterials) =>
+        currentMaterials.map((material) =>
+          material.id === selectedMaterial.id
+            ? {
+                ...material,
+                title: pendingMaterial.title,
+                fileName: pendingMaterial.file.name,
+              }
+            : material,
+        ),
+      );
+      setMaterialModalStep("complete");
+      return;
+    }
+
+    try {
+      setIsUploadingMaterial(true);
+      const uploadedDocument = await uploadDocument(spaceId, pendingMaterial);
+
+      setMaterials((currentMaterials) => [
+        ...currentMaterials,
+        normalizeDocument(uploadedDocument, pendingMaterial.file.name),
+      ]);
+      setMaterialModalStep("complete");
+    } catch (error) {
+      setMaterialSaveError(
+        error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "강의자료 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      );
+    } finally {
+      setIsUploadingMaterial(false);
+    }
+  };
+
+  const formatUploadedDate = (uploadedAt) => {
+    if (!uploadedAt) return "-";
+
+    const date = new Date(uploadedAt);
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return new Intl.DateTimeFormat("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+      .format(date)
+      .replaceAll(". ", ".")
+      .replace(/\.$/, "");
+  };
+
+  const openEditModal = (material) => {
+    setSelectedMaterial(material);
+    setPendingMaterial({
+      title: material.title,
+      file: { name: material.fileName, size: 32 * 1024 },
     });
-    setMaterialModalStep("complete");
+    setOpenMaterialMenuId(null);
+    setMaterialModalStep("form");
+  };
+
+  const openDeleteModal = (material) => {
+    setSelectedMaterial(material);
+    setOpenMaterialMenuId(null);
+    setDeleteMaterialError("");
+    setDeleteModalStep("confirm");
+  };
+
+  const handleConfirmMaterialDelete = async () => {
+    if (!selectedMaterial || isDeletingMaterial) return;
+
+    setDeleteMaterialError("");
+
+    try {
+      setIsDeletingMaterial(true);
+      await deleteDocument(selectedMaterial.id);
+      setMaterials((currentMaterials) =>
+        currentMaterials.filter(
+          (material) => material.id !== selectedMaterial.id,
+        ),
+      );
+      setDeleteModalStep("complete");
+    } catch (error) {
+      setDeleteMaterialError(
+        error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "강의자료 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      );
+    } finally {
+      setIsDeletingMaterial(false);
+    }
   };
 
   return (
@@ -85,7 +278,7 @@ function SpaceLecturePage() {
 
         <div className="space-lecture-list-indicator" aria-hidden="true">
           <img src={listIcon} alt="" />
-          <span />
+          <span className={isScrollIndicatorVisible ? "is-visible" : ""} />
         </div>
 
         <section
@@ -93,11 +286,15 @@ function SpaceLecturePage() {
           aria-label={`${spaceName} 강의자료`}
           data-space-id={spaceId}
         >
-          {isProfessor ? (
+          {isProfessor && (
             <button
               type="button"
               className="lecture-material-card"
-              onClick={() => setMaterialModalStep("form")}
+              onClick={() => {
+                setSelectedMaterial(null);
+                setPendingMaterial(null);
+                setMaterialModalStep("form");
+              }}
             >
               <span className="lecture-material-card__upload">
                 <img src={uploadIcon} alt="" />
@@ -105,14 +302,86 @@ function SpaceLecturePage() {
               <span className="lecture-material-card__details">
                 <strong>강의자료 추가</strong>
                 <small>PDF, 이미지 또는 문서를 업로드하세요.</small>
-                <img src={moreIcon} alt="" />
               </span>
             </button>
-          ) : (
-            <p className="space-lecture-empty">
-              강의자료가 아직 존재하지 않습니다.
+          )}
+
+          {isLoadingMaterials && (
+            <p className="space-lecture-status" role="status">
+              강의자료를 불러오는 중입니다.
             </p>
           )}
+
+          {!isLoadingMaterials && materialsLoadError && (
+            <p className="space-lecture-status space-lecture-status--error" role="alert">
+              {materialsLoadError}
+            </p>
+          )}
+
+          {!isLoadingMaterials && !materialsLoadError && materials.map((material) => (
+            <article
+              key={material.id}
+              className="lecture-material-card lecture-material-card--document"
+            >
+              <div className="lecture-material-card__preview">
+                <img
+                  src={material.thumbnailUrl || materialThumbnail}
+                  alt={`${material.title} 첫 페이지`}
+                />
+              </div>
+              <div className="lecture-material-card__details">
+                <strong>{material.title}</strong>
+                <small>
+                  {formatUploadedDate(material.uploadedAt)} · {material.pageCount ?? 0}페이지
+                </small>
+                {isProfessor && (
+                  <div className="lecture-material-card__menu-wrapper">
+                    <button
+                      type="button"
+                      className={`lecture-material-card__more-button ${
+                        openMaterialMenuId === material.id ? "is-active" : ""
+                      }`}
+                      aria-label={`${material.title} 관리 메뉴`}
+                      aria-expanded={openMaterialMenuId === material.id}
+                      onClick={() =>
+                        setOpenMaterialMenuId((currentId) =>
+                          currentId === material.id ? null : material.id,
+                        )
+                      }
+                    >
+                      <img src={moreIcon} alt="" />
+                    </button>
+
+                    {openMaterialMenuId === material.id && (
+                      <div className="lecture-material-menu">
+                        <button type="button" onClick={() => openEditModal(material)}>
+                          <PencilEditIcon aria-hidden="true" />
+                          <span>수정</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="lecture-material-menu__delete"
+                          onClick={() => openDeleteModal(material)}
+                        >
+                          <DeleteIcon aria-hidden="true" />
+                          <span>삭제</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+
+          {!isProfessor &&
+            !isLoadingMaterials &&
+            !materialsLoadError &&
+            materials.length === 0 && (
+              <p className="space-lecture-empty">
+                강의자료가 아직 존재하지 않습니다.
+              </p>
+            )}
         </section>
 
         <div className="space-lecture-bottom-safe-area" aria-hidden="true" />
@@ -124,6 +393,7 @@ function SpaceLecturePage() {
           initialMaterial={pendingMaterial}
           onClose={closeMaterialModal}
           onSave={(material) => {
+            setMaterialSaveError("");
             setPendingMaterial(material);
             setMaterialModalStep("confirm");
           }}
@@ -132,13 +402,48 @@ function SpaceLecturePage() {
 
       {isProfessor && materialModalStep === "confirm" && pendingMaterial && (
         <MaterialSaveConfirmModal
-          onCancel={() => setMaterialModalStep("form")}
+          error={materialSaveError}
+          isEditing={Boolean(selectedMaterial)}
+          isSubmitting={isUploadingMaterial}
+          onCancel={() => {
+            if (isUploadingMaterial) return;
+            setMaterialSaveError("");
+            setMaterialModalStep("form");
+          }}
           onConfirm={handleConfirmMaterialSave}
         />
       )}
 
       {isProfessor && materialModalStep === "complete" && (
-        <MaterialSaveCompleteModal onConfirm={closeMaterialModal} />
+        <MaterialSaveCompleteModal
+          isEditing={Boolean(selectedMaterial)}
+          onConfirm={closeMaterialModal}
+        />
+      )}
+
+      {isProfessor && deleteModalStep === "confirm" && selectedMaterial && (
+        <MaterialDeleteConfirmModal
+          error={deleteMaterialError}
+          isDeleting={isDeletingMaterial}
+          onCancel={() => {
+            if (isDeletingMaterial) return;
+            setDeleteModalStep(null);
+            setSelectedMaterial(null);
+            setDeleteMaterialError("");
+          }}
+          onConfirm={handleConfirmMaterialDelete}
+        />
+      )}
+
+      {isProfessor && deleteModalStep === "complete" && (
+        <DeleteCompleteModal
+          description="삭제한 강의자료는 다시 복구할 수 없습니다"
+          onConfirm={() => {
+            setDeleteModalStep(null);
+            setSelectedMaterial(null);
+            setDeleteMaterialError("");
+          }}
+        />
       )}
     </main>
   );

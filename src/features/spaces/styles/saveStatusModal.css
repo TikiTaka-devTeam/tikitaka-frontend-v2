@@ -60,6 +60,20 @@
   text-align: center;
 }
 
+.save-status-modal__error {
+  margin: 0;
+  color: #e24b63;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 15px;
+  text-align: center;
+}
+
+.save-status-modal--error {
+  height: auto;
+  min-height: 237px;
+}
+
 .save-confirm-modal__actions {
   gap: 12px;
 }
