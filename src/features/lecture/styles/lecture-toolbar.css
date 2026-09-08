@@ -1,0 +1,181 @@
+.lecture-toolbar.lecture-toolbar--figma {
+  width: 100%;
+  height: 55px;
+
+  display: flex;
+  align-items: center;
+
+  border: 1px solid #dee3ed;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow: 0 10px 26px rgba(20, 36, 71, 0.07);
+
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__inner {
+  height: 35px;
+  margin-left: 121px;
+
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__slot {
+  position: relative;
+
+  width: 25px;
+  height: 35px;
+  flex: 0 0 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button:hover,
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button.is-active {
+  background: transparent;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__icon {
+  position: relative;
+
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__icon img {
+  width: 25px;
+  height: 25px;
+
+  display: block;
+  object-fit: contain;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+/*
+  question.svg는 파일 전체 영역 안에서 실제 아이콘이 중앙 일부만 차지하므로
+  SVG 파일은 그대로 두고 25×25 영역에서 실제 아이콘 부분만 보여준다.
+*/
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button[data-tool="Q_POINT"]
+  .lecture-toolbar__icon {
+  overflow: hidden;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button[data-tool="Q_POINT"]
+  .lecture-toolbar__icon img {
+  position: absolute;
+
+  width: 77px;
+  height: 77px;
+
+  left: -26px;
+  top: -16px;
+
+  max-width: none;
+  max-height: none;
+
+  object-fit: initial;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__end-divider {
+  width: 1px;
+  height: 35px;
+  flex: 0 0 1px;
+
+  margin-left: 12px;
+
+  background: #d7dce5;
+}
+
+.lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+  .lecture-toolbar__inner {
+  margin-left: 39px;
+}
+
+@media (max-width: 1100px) {
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__inner,
+  .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+    .lecture-toolbar__inner {
+    margin-left: 40px;
+    gap: clamp(16px, 2.2vw, 30px);
+  }
+}
+
+@media (max-width: 980px) {
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__inner,
+  .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+    .lecture-toolbar__inner {
+    margin-left: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .lecture-toolbar.lecture-toolbar--figma {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__inner,
+  .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+    .lecture-toolbar__inner {
+    min-width: max-content;
+    margin-left: 14px;
+    margin-right: 18px;
+    gap: 22px;
+  }
+}
+
+@media (max-width: 520px) {
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__inner,
+  .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+    .lecture-toolbar__inner {
+    gap: 18px;
+  }
+}
