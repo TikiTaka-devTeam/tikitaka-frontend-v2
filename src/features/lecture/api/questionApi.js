@@ -1,4 +1,4 @@
-import { apiClient } from "./http";
+﻿import { apiClient } from "../../../lib/api/client.js";
 
 export async function getDocumentQuestions(
   documentId,
