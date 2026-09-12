@@ -17,6 +17,81 @@ const SPACE_TOOLBAR_ITEMS = [
 function SpaceToolbar({ activeItem = "lecture" }) {
   return (
     <nav className="space-toolbar" aria-label="Space 메뉴">
+      <svg
+        width="0"
+        height="0"
+        aria-hidden="true"
+        style={{ position: "absolute" }}
+      >
+        <defs>
+          <filter id="space-toolbar-icon-inactive">
+            <feColorMatrix
+              in="SourceGraphic"
+              type="luminanceToAlpha"
+              result="luminance"
+            />
+
+            <feComponentTransfer in="luminance" result="darkPixels">
+              <feFuncA
+                type="table"
+                tableValues="1 1 1 1 0"
+              />
+            </feComponentTransfer>
+
+            <feComposite
+              in="darkPixels"
+              in2="SourceAlpha"
+              operator="in"
+              result="shape"
+            />
+
+            <feFlood
+              floodColor="#131A29"
+              result="color"
+            />
+
+            <feComposite
+              in="color"
+              in2="shape"
+              operator="in"
+            />
+          </filter>
+
+          <filter id="space-toolbar-icon-active">
+            <feColorMatrix
+              in="SourceGraphic"
+              type="luminanceToAlpha"
+              result="luminance"
+            />
+
+            <feComponentTransfer in="luminance" result="darkPixels">
+              <feFuncA
+                type="table"
+                tableValues="1 1 1 1 0"
+              />
+            </feComponentTransfer>
+
+            <feComposite
+              in="darkPixels"
+              in2="SourceAlpha"
+              operator="in"
+              result="shape"
+            />
+
+            <feFlood
+              floodColor="#2E6BFF"
+              result="color"
+            />
+
+            <feComposite
+              in="color"
+              in2="shape"
+              operator="in"
+            />
+          </filter>
+        </defs>
+      </svg>
+
       {SPACE_TOOLBAR_ITEMS.map((item) => {
         const isActive = item.id === activeItem;
 
@@ -29,7 +104,16 @@ function SpaceToolbar({ activeItem = "lecture" }) {
             }`}
             aria-current={isActive ? "page" : undefined}
           >
-            <img src={item.icon} alt="" />
+            <img
+              src={item.icon}
+              alt=""
+              style={{
+                filter: isActive
+                  ? "url(#space-toolbar-icon-active)"
+                  : "url(#space-toolbar-icon-inactive)",
+              }}
+            />
+
             <span>{item.label}</span>
           </button>
         );
