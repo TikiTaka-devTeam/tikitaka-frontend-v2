@@ -2,7 +2,7 @@
 
 export async function getPrivateStrokes(slideId) {
   const response = await apiClient.get(
-    `/api/v1/slides/${slideId}/private-strokes`,
+    `/slides/${slideId}/private-strokes`,
   );
 
   return response.data;
@@ -13,7 +13,7 @@ export async function syncPrivateStrokes(
   payload,
 ) {
   const response = await apiClient.post(
-    `/api/v1/slides/${slideId}/private-strokes/sync`,
+    `/slides/${slideId}/private-strokes/sync`,
     payload,
   );
 
@@ -22,7 +22,7 @@ export async function syncPrivateStrokes(
 
 export async function getSharedStrokes(slideId) {
   const response = await apiClient.get(
-    `/api/v1/slides/${slideId}/shared-strokes`,
+    `/slides/${slideId}/shared-strokes`,
   );
 
   return response.data;
@@ -33,7 +33,7 @@ export async function syncSharedStrokes(
   payload,
 ) {
   const response = await apiClient.post(
-    `/api/v1/slides/${slideId}/shared-strokes/sync`,
+    `/slides/${slideId}/shared-strokes/sync`,
     payload,
   );
 
@@ -45,7 +45,7 @@ export async function createFixer(
   payload,
 ) {
   const response = await apiClient.post(
-    `/api/v1/slides/${slideId}/fixers`,
+    `/slides/${slideId}/fixers`,
     payload,
   );
 
@@ -54,7 +54,7 @@ export async function createFixer(
 
 export async function getFixers(slideId) {
   const response = await apiClient.get(
-    `/api/v1/slides/${slideId}/fixers`,
+    `/slides/${slideId}/fixers`,
   );
 
   return response.data;
@@ -62,7 +62,7 @@ export async function getFixers(slideId) {
 
 export async function checkFixer(fixerId) {
   const response = await apiClient.patch(
-    `/api/v1/fixers/${fixerId}/check`,
+    `/fixers/${fixerId}/check`,
   );
 
   return response.data;

@@ -123,7 +123,11 @@ export function BottomNavigation({ items = DEFAULT_NAV_ITEMS }) {
   return (
     <nav className="dashboard-bottom-nav" aria-label="주요 메뉴">
       {items.map(({ label, path, icon, activeIcon, inactiveIcon }) => {
+        const isDashboardRoot =
+          path === "/dashboard" && location.pathname === "/";
+
         const isActive =
+          isDashboardRoot ||
           location.pathname === path ||
           location.pathname.startsWith(`${path}/`);
 

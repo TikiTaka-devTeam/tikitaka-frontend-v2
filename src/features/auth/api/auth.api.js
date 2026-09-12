@@ -80,9 +80,9 @@ export const updateProfileImage = async (file = null, shouldDelete = false) => {
 
   if (file) {
     formData.append("profile_image", file);
+  } else if (shouldDelete) {
+    formData.append("delete", "true");
   }
-
-  formData.append("delete", String(shouldDelete));
 
   const { data } = await apiClient.patch("/users/me/profile-image", formData);
 
@@ -91,4 +91,7 @@ export const updateProfileImage = async (file = null, shouldDelete = false) => {
   };
 };
 
-export const logout = () => apiClient.post("/auth/logout");
+export const logout = () =>
+  apiClient.post("/auth/logout", {
+    refresh_token: localStorage.getItem("tikitaka_refresh_token"),
+  });
