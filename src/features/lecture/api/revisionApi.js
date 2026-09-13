@@ -4,7 +4,7 @@ export async function createDocumentRevision(
   documentId,
 ) {
   const response = await apiClient.post(
-    `/api/v1/documents/${documentId}/revisions`,
+    `/documents/${documentId}/revisions`,
   );
 
   return response.data;
@@ -19,7 +19,7 @@ export async function uploadRevisionSourcePdf(
   formData.append("file", file);
 
   const response = await apiClient.post(
-    `/api/v1/documents/${documentId}/revisions/${revisionId}/source-pdf`,
+    `/documents/${documentId}/revisions/${revisionId}/source-pdf`,
     formData,
   );
 
@@ -31,7 +31,7 @@ export async function getDocumentRevision(
   revisionId,
 ) {
   const response = await apiClient.get(
-    `/api/v1/documents/${documentId}/revisions/${revisionId}`,
+    `/documents/${documentId}/revisions/${revisionId}`,
   );
 
   return response.data;
@@ -43,7 +43,7 @@ export async function createRevisionOperation(
   payload,
 ) {
   const response = await apiClient.post(
-    `/api/v1/documents/${documentId}/revisions/${revisionId}/operations`,
+    `/documents/${documentId}/revisions/${revisionId}/operations`,
     payload,
   );
 
@@ -55,7 +55,7 @@ export async function undoRevision(
   revisionId,
 ) {
   const response = await apiClient.post(
-    `/api/v1/documents/${documentId}/revisions/${revisionId}/undo`,
+    `/documents/${documentId}/revisions/${revisionId}/undo`,
   );
 
   return response.data;
@@ -66,7 +66,7 @@ export async function redoRevision(
   revisionId,
 ) {
   const response = await apiClient.post(
-    `/api/v1/documents/${documentId}/revisions/${revisionId}/redo`,
+    `/documents/${documentId}/revisions/${revisionId}/redo`,
   );
 
   return response.data;
@@ -77,7 +77,7 @@ export async function completeRevision(
   revisionId,
 ) {
   const response = await apiClient.post(
-    `/api/v1/documents/${documentId}/revisions/${revisionId}/complete`,
+    `/documents/${documentId}/revisions/${revisionId}/complete`,
   );
 
   return response.data;
@@ -88,7 +88,7 @@ export async function cancelRevision(
   revisionId,
 ) {
   const response = await apiClient.delete(
-    `/api/v1/documents/${documentId}/revisions/${revisionId}`,
+    `/documents/${documentId}/revisions/${revisionId}`,
   );
 
   return response.data;

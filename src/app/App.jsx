@@ -1,4 +1,3 @@
-import SpaceNoticePage from "../features/notices/pages/SpaceNoticePage.jsx";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import LoginPage from "../features/auth/pages/LoginPage.jsx";

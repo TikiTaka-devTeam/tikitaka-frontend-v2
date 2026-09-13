@@ -5,7 +5,7 @@ export async function getDocumentQuestions(
   params = {},
 ) {
   const response = await apiClient.get(
-    `/api/v1/documents/${documentId}/questions`,
+    `/documents/${documentId}/questions`,
     {
       params,
     },
@@ -16,7 +16,7 @@ export async function getDocumentQuestions(
 
 export async function getQuestionDetail(questionId) {
   const response = await apiClient.get(
-    `/api/v1/questions/${questionId}`,
+    `/questions/${questionId}`,
   );
 
   return response.data;
@@ -27,7 +27,7 @@ export async function createSlideQuestion(
   payload,
 ) {
   const response = await apiClient.post(
-    `/api/v1/slides/${slideId}/questions`,
+    `/slides/${slideId}/questions`,
     payload,
   );
 
@@ -39,7 +39,7 @@ export async function getSimilarQuestions(
   payload,
 ) {
   const response = await apiClient.post(
-    `/api/v1/spaces/${spaceId}/questions/similar`,
+    `/spaces/${spaceId}/questions/similar`,
     payload,
   );
 
@@ -51,7 +51,7 @@ export async function createAnswer(
   payload,
 ) {
   const response = await apiClient.post(
-    `/api/v1/questions/${questionId}/answers`,
+    `/questions/${questionId}/answers`,
     payload,
   );
 
@@ -63,7 +63,7 @@ export async function updateAnswer(
   payload,
 ) {
   const response = await apiClient.patch(
-    `/api/v1/answers/${answerId}`,
+    `/answers/${answerId}`,
     payload,
   );
 
@@ -72,7 +72,7 @@ export async function updateAnswer(
 
 export async function deleteAnswer(answerId) {
   const response = await apiClient.delete(
-    `/api/v1/answers/${answerId}`,
+    `/answers/${answerId}`,
   );
 
   return response.data;
@@ -80,7 +80,7 @@ export async function deleteAnswer(answerId) {
 
 export async function likeQuestion(questionId) {
   const response = await apiClient.post(
-    `/api/v1/questions/${questionId}/likes`,
+    `/questions/${questionId}/likes`,
   );
 
   return response.data;
@@ -88,7 +88,7 @@ export async function likeQuestion(questionId) {
 
 export async function unlikeQuestion(questionId) {
   const response = await apiClient.delete(
-    `/api/v1/questions/${questionId}/likes`,
+    `/questions/${questionId}/likes`,
   );
 
   return response.data;
