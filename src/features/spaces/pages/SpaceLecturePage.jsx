@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/space/space-back.svg";
+import backIcon from "../../../assets/icons/go-back.svg";
 import materialThumbnail from "../../../assets/images/ci-cd-pipeline-notes.png";
 import listIcon from "../../../assets/icons/space/space-list.svg";
 import moreIcon from "../../../assets/icons/space/space-more.svg";
 import uploadIcon from "../../../assets/icons/space/space-upload.svg";
+import sortSelectedIcon from "../../../assets/icons/square-arrow-down-02.svg";
 import DeleteIcon from "../../../assets/icons/delete.svg?react";
 import PencilEditIcon from "../../../assets/icons/pencil-edit.svg?react";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
@@ -75,6 +76,8 @@ function SpaceLecturePage() {
   const [isDeletingMaterial, setIsDeletingMaterial] = useState(false);
   const [isScrollIndicatorVisible, setIsScrollIndicatorVisible] =
     useState(false);
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState("latest");
   const scrollIndicatorTimerRef = useRef(null);
 
   useEffect(() => {
@@ -127,6 +130,28 @@ function SpaceLecturePage() {
   }, []);
 
   useEffect(() => {
+    const closeSortModal = (event) => {
+      if (!event.target.closest(".space-lecture-sort")) {
+        setIsSortModalOpen(false);
+      }
+    };
+
+    const closeSortModalWithEscape = (event) => {
+      if (event.key === "Escape") {
+        setIsSortModalOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeSortModal);
+    document.addEventListener("keydown", closeSortModalWithEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", closeSortModal);
+      document.removeEventListener("keydown", closeSortModalWithEscape);
+    };
+  }, []);
+
+  useEffect(() => {
     const closeMenu = (event) => {
       if (!event.target.closest(".lecture-material-card__menu-wrapper")) {
         setOpenMaterialMenuId(null);
@@ -156,22 +181,6 @@ function SpaceLecturePage() {
     if (!pendingMaterial || isUploadingMaterial) return;
 
     setMaterialSaveError("");
-
-    if (selectedMaterial) {
-      setMaterials((currentMaterials) =>
-        currentMaterials.map((material) =>
-          material.id === selectedMaterial.id
-            ? {
-                ...material,
-                title: pendingMaterial.title,
-                fileName: pendingMaterial.file.name,
-              }
-            : material,
-        ),
-      );
-      setMaterialModalStep("complete");
-      return;
-    }
 
     try {
       setIsUploadingMaterial(true);
@@ -209,14 +218,32 @@ function SpaceLecturePage() {
       .replace(/\.$/, "");
   };
 
-  const openEditModal = (material) => {
-    setSelectedMaterial(material);
-    setPendingMaterial({
-      title: material.title,
-      file: { name: material.fileName, size: 32 * 1024 },
+  const sortedMaterials = useMemo(() => {
+    return [...materials].sort((first, second) => {
+      if (sortOrder === "name") {
+        return String(first.title ?? "").localeCompare(
+          String(second.title ?? ""),
+          "ko-KR",
+        );
+      }
+
+      return new Date(second.uploadedAt).getTime() - new Date(first.uploadedAt).getTime();
     });
+  }, [materials, sortOrder]);
+
+  const selectSortOrder = (nextSortOrder) => {
+    setSortOrder(nextSortOrder);
+    setIsSortModalOpen(false);
+  };
+
+  const openEditModal = (material) => {
     setOpenMaterialMenuId(null);
-    setMaterialModalStep("form");
+    navigate(`/spaces/${spaceId}/documents/${material.id}/modify`, {
+      state: {
+        material,
+        spaceName,
+      },
+    });
   };
 
   const openDeleteModal = (material) => {
@@ -276,9 +303,50 @@ function SpaceLecturePage() {
           onSearch={() => navigate("/search")}
         />
 
-        <div className="space-lecture-list-indicator" aria-hidden="true">
-          <img src={listIcon} alt="" />
-          <span className={isScrollIndicatorVisible ? "is-visible" : ""} />
+        <div className="space-lecture-sort">
+          <button
+            type="button"
+            className="space-lecture-sort__trigger"
+            aria-label="강의자료 정렬 기준"
+            aria-expanded={isSortModalOpen}
+            aria-haspopup="dialog"
+            onClick={() => setIsSortModalOpen((isOpen) => !isOpen)}
+          >
+            <img
+              src={listIcon}
+              alt=""
+              className={isSortModalOpen ? "is-active" : undefined}
+            />
+          </button>
+
+          <span
+            className={`space-lecture-sort__scroll-indicator${
+              isScrollIndicatorVisible ? " is-visible" : ""
+            }`}
+            aria-hidden="true"
+          />
+
+          {isSortModalOpen && (
+            <div className="space-lecture-sort__modal" role="dialog" aria-label="정렬 기준">
+              <strong>정렬 기준</strong>
+              <button
+                type="button"
+                className={sortOrder === "latest" ? "is-selected" : undefined}
+                onClick={() => selectSortOrder("latest")}
+              >
+                <span>최신순</span>
+                {sortOrder === "latest" && <img src={sortSelectedIcon} alt="" />}
+              </button>
+              <button
+                type="button"
+                className={sortOrder === "name" ? "is-selected" : undefined}
+                onClick={() => selectSortOrder("name")}
+              >
+                <span>이름순</span>
+                {sortOrder === "name" && <img src={sortSelectedIcon} alt="" />}
+              </button>
+            </div>
+          )}
         </div>
 
         <section
@@ -286,7 +354,7 @@ function SpaceLecturePage() {
           aria-label={`${spaceName} 강의자료`}
           data-space-id={spaceId}
         >
-          {isProfessor && (
+          {isProfessor && !isLoadingMaterials && !materialsLoadError && (
             <button
               type="button"
               className="lecture-material-card"
@@ -307,7 +375,10 @@ function SpaceLecturePage() {
           )}
 
           {isLoadingMaterials && (
-            <p className="space-lecture-status" role="status">
+            <p
+              className="space-lecture-status space-lecture-status--loading"
+              role="status"
+            >
               강의자료를 불러오는 중입니다.
             </p>
           )}
@@ -318,7 +389,7 @@ function SpaceLecturePage() {
             </p>
           )}
 
-          {!isLoadingMaterials && !materialsLoadError && materials.map((material) => (
+          {!isLoadingMaterials && !materialsLoadError && sortedMaterials.map((material) => (
             <article
               key={material.id}
               className="lecture-material-card lecture-material-card--document"
@@ -403,7 +474,7 @@ function SpaceLecturePage() {
       {isProfessor && materialModalStep === "confirm" && pendingMaterial && (
         <MaterialSaveConfirmModal
           error={materialSaveError}
-          isEditing={Boolean(selectedMaterial)}
+          isEditing={false}
           isSubmitting={isUploadingMaterial}
           onCancel={() => {
             if (isUploadingMaterial) return;

@@ -7,6 +7,7 @@ import SignupInformPage from "../features/auth/pages/SignupInformPage.jsx";
 import SignupTermsPage from "../features/auth/pages/SignupTermsPage.jsx";
 
 import DashboardPage from "../features/dashboard/pages/DashboardPage.jsx";
+import DocumentModifyPage from "../features/documents/pages/DocumentModifyPage.jsx";
 import SearchPage from "../features/search/pages/SearchPage.jsx";
 import SpaceLecturePage from "../features/spaces/pages/SpaceLecturePage.jsx";
 import SpacesPage from "../features/spaces/pages/SpacesPage.jsx";
@@ -32,6 +33,10 @@ function App() {
       <Route path="/search" element={<SearchPage />} />
       <Route path="/spaces" element={<SpacesPage />} />
       <Route path="/spaces/:spaceId" element={<SpaceLecturePage />} />
+      <Route
+        path="/spaces/:spaceId/documents/:documentId/modify"
+        element={<DocumentModifyPage />}
+      />
 
       <Route
         path="/spaces/:spaceId/notices"
