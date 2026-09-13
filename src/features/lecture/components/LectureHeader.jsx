@@ -1,4 +1,4 @@
-import BackIcon from "../../../assets/icons/back.svg";
+import BackIcon from "../../../assets/icons/go-back.svg";
 import UndoIcon from "../../../assets/icons/undo.svg";
 import RedoIcon from "../../../assets/icons/redo.svg";
 import DownloadIcon from "../../../assets/icons/download.svg";
