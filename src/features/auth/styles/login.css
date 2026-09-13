@@ -176,6 +176,41 @@
   color: #111111;
 }
 
+.login-form__password {
+  display: flex;
+  align-items: center;
+  padding-right: 13px;
+  border: 1px solid #e6e7e9;
+  border-radius: 10px;
+}
+
+.login-form__password:focus-within {
+  border-color: #5284ef;
+  box-shadow: 0 0 0 3px rgba(82, 132, 239, 0.15);
+}
+
+.login-form__password input,
+.login-form__password input:focus {
+  flex: 1;
+  border: 0;
+  box-shadow: none;
+}
+
+.login-form__password button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.login-form__password img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
 .login-form__forgot {
   align-self: flex-end;
   margin-top: 20px;

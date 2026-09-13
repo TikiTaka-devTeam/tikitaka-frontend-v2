@@ -1,4 +1,6 @@
 import { useState } from "react";
+import hidePasswordIcon from "../../../assets/icons/HidePassword.svg";
+import watchPasswordIcon from "../../../assets/icons/WatchPassword.svg";
 import { login } from "../api/auth.api.js";
 import SocialLoginButtons from "./SocialLoginButtons.jsx";
 
@@ -10,6 +12,7 @@ function LoginForm({ onSignUp }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -85,15 +88,27 @@ function LoginForm({ onSignUp }) {
 
           <label className="login-form__field">
             <span className="sr-only">비밀번호</span>
-            <input
-              type="password"
-              name="password"
-              placeholder="비밀번호"
-              value={formValues.password}
-              onChange={handleChange}
-              autoComplete="current-password"
-              required
-            />
+            <div className="login-form__password">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="비밀번호"
+                value={formValues.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((previous) => !previous)}
+                aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+              >
+                <img
+                  src={showPassword ? watchPasswordIcon : hidePasswordIcon}
+                  alt=""
+                />
+              </button>
+            </div>
           </label>
 
           <button type="button" className="login-form__forgot">
