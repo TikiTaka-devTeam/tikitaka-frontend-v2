@@ -878,6 +878,12 @@ function SpacesPage() {
           )}
         </div>
 
+        {isSpacesLoading && (
+          <p className="spaces-loading" role="status">
+            Space를 불러오는 중입니다.
+          </p>
+        )}
+
         {!isSpacesLoading && spaces.length === 0 && <SpaceEmptyState />}
       </div>
 

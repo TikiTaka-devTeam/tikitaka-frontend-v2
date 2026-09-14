@@ -315,6 +315,22 @@
   pointer-events: none;
 }
 
+.spaces-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(90, 97, 112, 0.72);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .space-empty__text {
   margin: 0;
   padding: 0;

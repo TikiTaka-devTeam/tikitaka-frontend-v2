@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/space/space-back.svg";
+import backIcon from "../../../assets/icons/go-back.svg";
 import noticeEmptyIcon from "../../../assets/icons/notice-empty.svg";
 import moreIcon from "../../../assets/icons/more.svg";
 import pdfIcon from "../../../assets/icons/pdf.svg";
