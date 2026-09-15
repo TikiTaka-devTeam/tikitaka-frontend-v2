@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { oauthLogin } from "../api/auth.api.js";
+import { getCurrentUser, oauthLogin } from "../api/auth.api.js";
 import "../styles/login.css";
 
 function OAuthCallbackPage() {
@@ -59,8 +59,19 @@ function OAuthCallbackPage() {
         localStorage.setItem("tikitaka_access_token", data.access_token);
         localStorage.setItem("tikitaka_refresh_token", data.refresh_token);
 
-        if (data.user) {
-          localStorage.setItem("tikitaka_user", JSON.stringify(data.user));
+        let completeUser = data.user;
+
+        try {
+          const { data: currentUser } = await getCurrentUser();
+          completeUser = { ...(data.user || {}), ...(currentUser || {}) };
+        } catch {
+          // OAuth 로그인 자체는 성공했으므로 기존 응답으로 계속 진행합니다.
+        }
+
+        if (!isMounted) return;
+
+        if (completeUser) {
+          localStorage.setItem("tikitaka_user", JSON.stringify(completeUser));
         }
 
         sessionStorage.removeItem("tikitaka_oauth_signup");
