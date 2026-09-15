@@ -11,6 +11,11 @@
   },
   "dependencies": {
     "@stomp/stompjs": "^7.3.0",
+    "@tiptap/extension-text-align": "^3.31.3",
+    "@tiptap/extension-text-style": "^3.31.3",
+    "@tiptap/pm": "^3.31.3",
+    "@tiptap/react": "^3.31.3",
+    "@tiptap/starter-kit": "^3.31.3",
     "axios": "^1.16.1",
     "firebase": "^12.15.0",
     "lucide-react": "^1.17.0",
