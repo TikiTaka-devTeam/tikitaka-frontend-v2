@@ -1426,7 +1426,7 @@ function SpaceNoticePage() {
           </section>
         </section>
 
-        <SpaceToolbar activeItem="notice" />
+        <SpaceToolbar activeItem="notice" spaceId={spaceId} spaceName={spaceName} />
 
         <NoticeDeleteModal
           type={
@@ -1451,7 +1451,6 @@ function SpaceNoticePage() {
               : handleConfirmDelete
           }
         />
-        <SpaceToolbar activeItem="notice" spaceId={spaceId} spaceName={spaceName} />
       </div>
     </main>
   );
