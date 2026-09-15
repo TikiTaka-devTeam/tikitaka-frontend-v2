@@ -187,11 +187,20 @@
   white-space: nowrap;
 }
 
-.space-card__title {
+.space-card__title-row {
   position: absolute;
   top: 42px;
   right: 50px;
   left: 16px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.space-card__title {
+  min-width: 0;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -201,6 +210,15 @@
   line-height: normal;
   letter-spacing: 0;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.space-card__code {
+  flex: 0 0 auto;
+  color: #4d5c75;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: normal;
   white-space: nowrap;
 }
 
