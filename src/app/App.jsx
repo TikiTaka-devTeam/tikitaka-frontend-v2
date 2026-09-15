@@ -13,6 +13,7 @@ import SpaceLecturePage from "../features/spaces/pages/SpaceLecturePage.jsx";
 import SpacesPage from "../features/spaces/pages/SpacesPage.jsx";
 
 import SpaceNoticePage from "../features/notices/pages/SpaceNoticePage.jsx";
+import SpaceMembersPage from "../features/members/pages/SpaceMembersPage.jsx";
 
 import StudentLecturePage from "../features/lecture/pages/StudentLecturePage.jsx";
 import ProfessorLecturePage from "../features/lecture/pages/ProfessorLecturePage.jsx";
@@ -42,6 +43,7 @@ function App() {
         path="/spaces/:spaceId/notices"
         element={<SpaceNoticePage />}
       />
+      <Route path="/spaces/:spaceId/members" element={<SpaceMembersPage />} />
 
       <Route
         path="/spaces/:spaceId/documents/:documentId/lecture/student"
@@ -96,10 +98,6 @@ function App() {
       />
 
       <Route path="*" element={<Navigate to="/" replace />} />
-          <Route
-        path="/spaces/:spaceId/notices"
-        element={<SpaceNoticePage />}
-      />
     </Routes>
   );
 }
