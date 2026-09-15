@@ -5,14 +5,53 @@
   min-height: 100vh;
   min-height: 100dvh;
 
+  min-height: 100dvh;
   overflow: hidden;
 
   background: #edf0f6;
   color: #131a29;
 }
 
+.notice-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.notice-page__orb {
+  position: absolute;
+  pointer-events: none;
+
+  border-radius: 50%;
+  filter: blur(50px);
+  background: rgba(185, 212, 255, 0.13);
+}
+
+.notice-page__orb--left {
+  left: -180px;
+  top: 560px;
+  width: 410px;
+  height: 410px;
+}
+
+.notice-page__orb--right {
+  top: -230px;
+  right: -150px;
+  width: 460px;
+  height: 460px;
+}
+
+@media (max-width: 700px) {
+  .notice-page__orb--right {
+    right: -280px;
+  }
+}
+
 .notice-frame {
   position: relative;
+  z-index: 1;
 
   min-height: 100vh;
   min-height: 100dvh;

@@ -22,7 +22,7 @@ function DashboardPage() {
   }학기`;
 
   return (
-    <main className="dashboard-page">
+    <main className="dashboard-page space-page-transition">
       <div className="dashboard-background" aria-hidden="true">
         <div className="dashboard-page__orb dashboard-page__orb--left" />
         <div className="dashboard-page__orb dashboard-page__orb--right" />

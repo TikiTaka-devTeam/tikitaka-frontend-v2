@@ -1828,6 +1828,10 @@ export default function LectureViewerPage({
         pageShellClass
       }
     >
+      <div className="lecture-background" aria-hidden="true">
+        <div className="lecture-page__orb lecture-page__orb--left" />
+        <div className="lecture-page__orb lecture-page__orb--right" />
+      </div>
       <div className="lecture-frame">
         <LectureHeader
           title={

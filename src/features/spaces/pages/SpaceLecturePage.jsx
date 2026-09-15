@@ -279,9 +279,11 @@ function SpaceLecturePage() {
   };
 
   return (
-    <main className="space-lecture-page">
-      <div className="space-lecture-page__orb space-lecture-page__orb--left" />
-      <div className="space-lecture-page__orb space-lecture-page__orb--right" />
+    <main className="space-lecture-page space-page-transition">
+      <div className="space-lecture-background" aria-hidden="true">
+        <div className="space-lecture-page__orb space-lecture-page__orb--left" />
+        <div className="space-lecture-page__orb space-lecture-page__orb--right" />
+      </div>
 
       <div className="app-frame space-lecture-frame">
         <button
@@ -455,8 +457,7 @@ function SpaceLecturePage() {
             )}
         </section>
 
-        <div className="space-lecture-bottom-safe-area" aria-hidden="true" />
-        <SpaceToolbar activeItem="lecture" />
+        <SpaceToolbar activeItem="lecture" spaceId={spaceId} spaceName={spaceName} />
       </div>
 
       {isProfessor && materialModalStep === "form" && (
