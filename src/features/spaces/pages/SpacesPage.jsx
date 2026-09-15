@@ -141,13 +141,16 @@ function formatSchedules(schedules = []) {
     return "";
   }
 
+  const formatTime = (time) =>
+    String(time ?? "").replace(/^(\d{2}:\d{2}):\d{2}$/, "$1");
+
   return schedules
     .map((schedule) => {
       const day = DAY_LABELS[schedule.day] ?? schedule.day ?? "";
 
-      const startTime = schedule.start_time ?? "";
+      const startTime = formatTime(schedule.start_time);
 
-      const endTime = schedule.end_time ?? "";
+      const endTime = formatTime(schedule.end_time);
 
       if (startTime && endTime) {
         return `${day} ${startTime} - ${endTime}`;

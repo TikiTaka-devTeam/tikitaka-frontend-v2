@@ -86,7 +86,7 @@ const COLOR_KEY_MAP = {
 const MENU_LABEL_STYLE = {
   display: "inline-block",
   width: "36px",
-  textAlign: "right",
+  textAlign: "center",
 };
 
 const PENDING_BADGE_STYLE = {
@@ -195,7 +195,13 @@ function SpaceCard({
         {isPending ? "참여 대기중" : space.semester}
       </div>
 
-      <h3 className="space-card__title">{space.name}</h3>
+      <div className="space-card__title-row">
+        <h3 className="space-card__title">{space.name}</h3>
+
+        {space.spaceCode && (
+          <span className="space-card__code"># {space.spaceCode}</span>
+        )}
+      </div>
 
       <p className="space-card__info">
         {space.professor}
