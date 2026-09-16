@@ -1,13 +1,44 @@
 .lecture-page {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh;
-  background: #f8f9fd;
+  background: #edf0f6;
   color: #131a29;
   overflow-x: clip;
 }
 
+.lecture-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.lecture-page__orb {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(185, 212, 255, 0.13);
+  filter: blur(50px);
+}
+
+.lecture-page__orb--left {
+  top: 560px;
+  left: -180px;
+  width: 410px;
+  height: 410px;
+}
+
+.lecture-page__orb--right {
+  top: -230px;
+  right: -150px;
+  width: 460px;
+  height: 460px;
+}
+
 .lecture-frame {
   position: relative;
+  z-index: 1;
   width: min(100%, 1210px);
   min-height: 100vh;
   min-height: 100dvh;

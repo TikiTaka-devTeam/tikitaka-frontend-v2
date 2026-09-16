@@ -786,7 +786,7 @@ function SpacesPage() {
   };
 
   return (
-    <main className="spaces-page">
+    <main className="spaces-page space-page-transition">
       <div className="spaces-background" aria-hidden="true">
         <div className="spaces-page__orb spaces-page__orb--left" />
         <div className="spaces-page__orb spaces-page__orb--right" />
@@ -810,6 +810,16 @@ function SpacesPage() {
                 role="tablist"
                 aria-label="Space 상태"
               >
+                <span
+                  className="spaces-tabs__active-indicator"
+                  aria-hidden="true"
+                  style={{
+                    transform:
+                      selectedTab === "archived"
+                        ? "translateX(59px)"
+                        : "translateX(0)",
+                  }}
+                />
                 <button
                   type="button"
                   role="tab"

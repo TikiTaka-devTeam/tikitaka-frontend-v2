@@ -1087,7 +1087,12 @@ function SpaceNoticePage() {
   }
 
   return (
-    <main className="notice-page">
+    <main className="notice-page space-page-transition">
+      <div className="notice-background" aria-hidden="true">
+        <div className="notice-page__orb notice-page__orb--left" />
+        <div className="notice-page__orb notice-page__orb--right" />
+      </div>
+
       <div className="app-frame notice-frame">
         <button
           type="button"
@@ -1421,7 +1426,7 @@ function SpaceNoticePage() {
           </section>
         </section>
 
-        <SpaceToolbar activeItem="notice" />
+        <SpaceToolbar activeItem="notice" spaceId={spaceId} spaceName={spaceName} />
 
         <NoticeDeleteModal
           type={

@@ -3,6 +3,8 @@ import lectureIcon from "../../../assets/icons/space/space-lecture.svg";
 import memberIcon from "../../../assets/icons/space/space-member.svg";
 import noticeIcon from "../../../assets/icons/space/space-notice.svg";
 import questionIcon from "../../../assets/icons/space/space-question.svg";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import "../styles/spaceToolbar.css";
 
@@ -14,7 +16,32 @@ const SPACE_TOOLBAR_ITEMS = [
   { id: "member", label: "멤버", icon: memberIcon },
 ];
 
-function SpaceToolbar({ activeItem = "lecture" }) {
+function SpaceToolbar({ activeItem = "lecture", spaceId, spaceName }) {
+  const navigate = useNavigate();
+  const [selectedItem, setSelectedItem] = useState(activeItem);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleNavigation = (itemId) => {
+    if (!spaceId || isNavigating || itemId === selectedItem) return;
+    const destinations = {
+      lecture: `/spaces/${spaceId}`,
+      notice: `/spaces/${spaceId}/notices`,
+      member: `/spaces/${spaceId}/members`,
+    };
+    if (destinations[itemId]) {
+      setSelectedItem(itemId);
+      setIsNavigating(true);
+      window.setTimeout(() => {
+        navigate(destinations[itemId], { state: { spaceName } });
+      }, 260);
+    }
+  };
+
+  const activeIndex = Math.max(
+    0,
+    SPACE_TOOLBAR_ITEMS.findIndex((item) => item.id === selectedItem),
+  );
+
   return (
     <nav className="space-toolbar" aria-label="Space 메뉴">
       <svg
@@ -92,8 +119,13 @@ function SpaceToolbar({ activeItem = "lecture" }) {
         </defs>
       </svg>
 
+      <span
+        className={`space-toolbar__active-indicator space-toolbar__active-indicator--${activeIndex}`}
+        aria-hidden="true"
+      />
+
       {SPACE_TOOLBAR_ITEMS.map((item) => {
-        const isActive = item.id === activeItem;
+        const isActive = item.id === selectedItem;
 
         return (
           <button
@@ -103,6 +135,8 @@ function SpaceToolbar({ activeItem = "lecture" }) {
               isActive ? "space-toolbar__item--active" : ""
             }`}
             aria-current={isActive ? "page" : undefined}
+            disabled={isNavigating}
+            onClick={() => handleNavigation(item.id)}
           >
             <img
               src={item.icon}

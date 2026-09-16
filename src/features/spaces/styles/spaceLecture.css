@@ -8,8 +8,16 @@
   color: #131a29;
 }
 
-.space-lecture-page__orb {
+.space-lecture-background {
   position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.space-lecture-page__orb {
+  position: absolute;
   border-radius: 50%;
   background: rgba(185, 212, 255, 0.13);
   filter: blur(50px);
@@ -31,6 +39,8 @@
 }
 
 .space-lecture-frame {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -392,22 +402,6 @@
   color: #e24b63;
 }
 
-.space-lecture-bottom-safe-area {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 4;
-  height: 129px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0),
-    rgba(242, 247, 255, 0.82)
-  );
-  filter: blur(2px);
-  pointer-events: none;
-}
-
 @media (max-width: 900px) {
   .space-lecture-content {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -415,6 +409,10 @@
 }
 
 @media (max-width: 700px) {
+  .space-lecture-page__orb--right {
+    right: -280px;
+  }
+
   .space-lecture-header h1 {
     max-width: calc(100vw - 260px);
     font-size: 17px;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import hidePasswordIcon from "../../../assets/icons/HidePassword.svg";
 import watchPasswordIcon from "../../../assets/icons/WatchPassword.svg";
-import { login } from "../api/auth.api.js";
+import { getCurrentUser, login } from "../api/auth.api.js";
 import SocialLoginButtons from "./SocialLoginButtons.jsx";
 
 function LoginForm({ onSignUp }) {
@@ -49,8 +49,17 @@ function LoginForm({ onSignUp }) {
       localStorage.setItem("tikitaka_access_token", accessToken);
       localStorage.setItem("tikitaka_refresh_token", refreshToken);
 
-      if (user) {
-        localStorage.setItem("tikitaka_user", JSON.stringify(user));
+      let completeUser = user;
+
+      try {
+        const { data: currentUser } = await getCurrentUser();
+        completeUser = { ...(user || {}), ...(currentUser || {}) };
+      } catch {
+        // 로그인 자체는 성공했으므로 로그인 응답의 사용자 정보로 계속 진행합니다.
+      }
+
+      if (completeUser) {
+        localStorage.setItem("tikitaka_user", JSON.stringify(completeUser));
       }
 
       setSuccessMessage("로그인되었습니다.");
