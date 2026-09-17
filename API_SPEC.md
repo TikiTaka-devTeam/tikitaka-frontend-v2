@@ -369,30 +369,57 @@ file: week1.pdf
 
 ## 6. 강의자료 수정 API
 
-### MAT-006 - 수정 세션 생성
+### MAT-006 - 수정 세션 생성 또는 재개
 
 - **Method / Endpoint:** `POST /api/v1/documents/{document_id}/revisions`
 - **권한:** 교수 또는 강의자료 관리 권한이 있는 조교
-- **용도:** 강의자료 수정 세션을 생성한다.
+- **용도:** 강의자료 수정 세션을 생성하거나 현재 사용자의 기존 `EDITING` 세션을 재개한다.
 - **Path:** `document_id`
 - **Query:** 없음
 - **Request Body:** 없음
+- **Response Status:** 신규 세션 생성 `201 Created`, 기존 `EDITING` 세션 재개 `200 OK`
 - **Response JSON:**
 
 ```json
 {
   "revision_id": "uuid",
   "document_id": "uuid",
+  "status": "EDITING",
   "base_document_version": 3,
   "preview_version": 0,
-  "status": "EDITING"
+  "title": "운영체제 1주차",
+  "source_file_name": "추가자료.pdf",
+  "source_pdf_url": "https://...",
+  "source_page_count": 20,
+  "revision_slides": [
+    {
+      "revision_slide_id": "uuid",
+      "source_page_number": 1,
+      "thumbnail_url": "https://..."
+    }
+  ],
+  "preview_pages": [
+    {
+      "page_id": "uuid-1",
+      "position": 1,
+      "source_type": "ORIGINAL",
+      "status": "ACTIVE",
+      "thumbnail_url": "https://..."
+    }
+  ],
+  "can_undo": false,
+  "can_redo": false
 }
 ```
 
 - **프론트엔드 유의사항:**
-  - 기존 Slide를 기준으로 `ACTIVE` 상태의 `RevisionPage`가 생성된다.
-  - 문서당 `EDITING` 또는 `PROCESSING` 상태의 활성 세션은 하나만 허용한다.
-  - 이후 수정 요청에 `revision_id`를 사용한다.
+  - 신규 세션에서는 기존 Slide를 기준으로 `ACTIVE` 상태의 `RevisionPage`가 생성된다.
+  - 현재 사용자가 생성한 `EDITING` 세션이 있으면 새로 생성하지 않고 최신 편집 상태를 같은 응답 형식으로 반환한다.
+  - 기존 세션 재개 응답의 `preview_pages`, `preview_version`, `revision_slides`, Undo/Redo 상태를 기준으로 화면을 즉시 복원한다.
+  - 기존 `EDITING` 세션을 재개한 호출은 활동으로 간주하며 서버의 `updated_at`을 갱신한다.
+  - 다른 사용자의 `EDITING` 세션이 있으면 `409 REVISION_ALREADY_ACTIVE`를 반환한다.
+  - `PROCESSING` 세션이 있으면 `409 REVISION_NOT_EDITABLE`을 반환한다.
+  - 이후 수정 요청에는 응답의 `revision_id`와 최신 `preview_version`을 사용한다.
 
 ### MAT-007 - 삽입용 PDF 임시 업로드
 
@@ -449,6 +476,16 @@ file: 운영체제_1주차_추가자료.pdf
   "base_document_version": 3,
   "preview_version": 4,
   "title": "운영체제 1주차",
+  "source_file_name": "추가자료.pdf",
+  "source_pdf_url": "https://...",
+  "source_page_count": 20,
+  "revision_slides": [
+    {
+      "revision_slide_id": "uuid",
+      "source_page_number": 1,
+      "thumbnail_url": "https://..."
+    }
+  ],
   "preview_pages": [
     {
       "page_id": "uuid-1",
@@ -479,7 +516,12 @@ file: 운영체제_1주차_추가자료.pdf
 
 - **프론트엔드 유의사항:**
   - `DELETE_PENDING` 페이지도 기존 위치에 유지하여 표시한다.
-  - 새로고침이나 버전 충돌 후 이 응답을 기준으로 편집 화면을 복원한다.
+  - 페이지 새로고침, 네트워크 오류 또는 편집 작업 충돌 후 이미 보유한 `revision_id`로 호출한다.
+  - 응답 상태가 `CANCELED`이면 해당 응답의 PDF URL과 페이지 데이터를 사용하지 않고 저장된 `revision_id`를 제거한 뒤 MAT-006을 한 번 호출하여 새 수정 세션을 생성한다.
+  - 응답의 `source_file_name`, `source_pdf_url`, `revision_slides`를 사용하여 삽입용 PDF와 우측 페이지 목록도 함께 복원한다.
+  - `source_pdf_url`의 실제 PDF를 렌더링하고, PDF 로딩이 불가능한 경우 `thumbnail_url`을 대체 미리보기로 사용할 수 있다.
+  - 응답의 `preview_pages`를 `position` 순서로 정렬하고 페이지 상태를 기준으로 편집 화면을 복원한다.
+  - `REVISION + DELETE_PENDING` 페이지는 서버 위치 계산을 위해 내부 목록에는 유지하되 화면에서는 제외한다. `ORIGINAL + DELETE_PENDING`은 기존 위치에 유지하여 표시한다.
   - 이후 변경 요청에는 현재 `preview_version`을 `base_preview_version`으로 전달한다.
   - Undo/Redo 버튼은 `can_undo`, `can_redo`를 기준으로 활성화한다.
 
@@ -535,6 +577,7 @@ file: 운영체제_1주차_추가자료.pdf
   - 요청 한 건은 여러 페이지를 포함하더라도 하나의 Undo/Redo 단위다.
   - 동일한 `client_operation_id`와 동일한 내용으로 재요청하면 기존 결과를 반환한다.
   - `base_preview_version`에는 마지막 서버 응답의 `preview_version`을 사용한다.
+  - 화면에서 숨긴 `REVISION + DELETE_PENDING` 페이지가 있으면 표시 순번을 그대로 `position`으로 보내지 않고, 전체 `preview_pages`에서 다음으로 보이는 페이지의 실제 위치를 기준으로 삽입 위치를 계산한다.
   - 성공 후 서버가 반환한 `preview_version`과 Undo/Redo 상태를 저장한다.
   - 충돌 HTTP 상태와 오류 JSON은 명세서에 구체 형식 없음.
 
@@ -628,7 +671,10 @@ file: 운영체제_1주차_추가자료.pdf
 
 - **프론트엔드 유의사항:**
   - 요청 후 즉시 완료된 것이 아니라 비동기 처리 중인 상태다.
+  - 요청에는 프론트가 보유한 최신 `preview_version`을 `base_preview_version`으로 전달한다.
   - `PROCESSING` 상태에서는 추가 편집을 차단한다.
+  - `202 Accepted` 응답 후 문서별로 저장한 `revision_id`를 제거하고 저장 완료가 아닌 저장 요청 접수 상태로 안내한다.
+  - 저장 요청 중 네트워크 오류 또는 `409`가 발생하면 MAT-008을 호출하여 실제 세션이 `EDITING`인지 `PROCESSING`인지 확인한 후 화면 상태를 결정한다.
   - 처리 완료 여부 확인 방식은 명세서에 구체 형식 없음.
   - 완료 요청을 중복 전송하지 않도록 버튼을 비활성화한다.
 
