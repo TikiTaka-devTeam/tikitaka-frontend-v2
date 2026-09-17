@@ -7,7 +7,10 @@ export async function createDocumentRevision(
     `/documents/${documentId}/revisions`,
   );
 
-  return response.data;
+  return {
+    ...response.data,
+    __httpStatus: response.status,
+  };
 }
 
 export async function uploadRevisionSourcePdf(
@@ -53,9 +56,11 @@ export async function createRevisionOperation(
 export async function undoRevision(
   documentId,
   revisionId,
+  basePreviewVersion,
 ) {
   const response = await apiClient.post(
     `/documents/${documentId}/revisions/${revisionId}/undo`,
+    { base_preview_version: basePreviewVersion },
   );
 
   return response.data;
@@ -64,9 +69,11 @@ export async function undoRevision(
 export async function redoRevision(
   documentId,
   revisionId,
+  basePreviewVersion,
 ) {
   const response = await apiClient.post(
     `/documents/${documentId}/revisions/${revisionId}/redo`,
+    { base_preview_version: basePreviewVersion },
   );
 
   return response.data;
@@ -75,9 +82,11 @@ export async function redoRevision(
 export async function completeRevision(
   documentId,
   revisionId,
+  basePreviewVersion,
 ) {
   const response = await apiClient.post(
     `/documents/${documentId}/revisions/${revisionId}/complete`,
+    { base_preview_version: basePreviewVersion },
   );
 
   return response.data;

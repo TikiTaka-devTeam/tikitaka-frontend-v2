@@ -1,5 +1,6 @@
 import ModalBackdrop from "../../../components/common/ModalBackdrop.jsx";
 import deleteGuideIcon from "../../../assets/icons/documents/help-delete-guide.svg";
+import helpCloseIcon from "../../../assets/icons/documents/help-close.svg";
 import guideArrowIcon from "../../../assets/icons/documents/help-step.svg";
 import stepBadgeIcon from "../../../assets/icons/documents/help-step-badge.svg";
 
@@ -25,6 +26,15 @@ function DocumentModifyHelpOverlay({ onClose }) {
         aria-labelledby="document-modify-help-title"
         aria-describedby="document-modify-help-description"
       >
+        <button
+          type="button"
+          className="document-modify-help-close"
+          aria-label="도움말 닫기"
+          onClick={onClose}
+        >
+          <img src={helpCloseIcon} alt="" />
+        </button>
+
         <h2 id="document-modify-help-title">강의자료 수정 방법</h2>
         <p id="document-modify-help-description">
           필요한 기능을 한 화면에서 확인하세요
