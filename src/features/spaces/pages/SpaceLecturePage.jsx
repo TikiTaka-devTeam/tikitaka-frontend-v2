@@ -25,10 +25,15 @@ import {
 import "../styles/spaceLecture.css";
 
 function normalizeDocument(document, fileName) {
+  const title = document.title || "강의자료";
+  const normalizedFileName = typeof fileName === "string" && fileName.trim()
+    ? fileName
+    : `${title}.pdf`;
+
   return {
     id: document.document_id,
-    title: document.title,
-    fileName: fileName || `${document.title}.pdf`,
+    title,
+    fileName: normalizedFileName,
     thumbnailUrl: document.thumbnail_url,
     pageCount: document.page_count,
     uploadedAt: document.uploaded_at,
@@ -92,7 +97,9 @@ function SpaceLecturePage() {
           signal: controller.signal,
         });
         setMaterials(
-          Array.isArray(documents) ? documents.map(normalizeDocument) : [],
+          Array.isArray(documents)
+            ? documents.map((document) => normalizeDocument(document))
+            : [],
         );
       } catch (error) {
         if (error.code !== "ERR_CANCELED") {
