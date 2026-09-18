@@ -28,13 +28,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create production env file
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
         run: |
           {
-            echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}"
+            echo "VITE_API_BASE_URL=${VITE_API_BASE_URL}"
           } > .env.production
 
           grep -q '^VITE_API_BASE_URL=.' .env.production
-          grep -q '^VITE_FIREBASE_VAPID_KEY=.' .env.production
 
       - name: Build
         run: pnpm build
