@@ -46,16 +46,10 @@ export async function submitAssignment(
 ) {
   const formData = new FormData();
 
-  formData.append(
-    "comment",
-    comment,
-  );
+  formData.append("comment", comment);
 
   files.forEach((file) => {
-    formData.append(
-      "files",
-      file,
-    );
+    formData.append("files", file);
   });
 
   const response = await apiClient.post(
@@ -77,21 +71,28 @@ export async function updateMyAssignmentSubmission(
 ) {
   const formData = new FormData();
 
-  formData.append(
-    "comment",
-    comment,
-  );
+  formData.append("comment", comment);
 
   files.forEach((file) => {
-    formData.append(
-      "files",
-      file,
-    );
+    formData.append("files", file);
   });
 
   const response = await apiClient.put(
     `/assignments/${assignmentId}/submissions/me`,
     formData,
+    config,
+  );
+
+  return response.data;
+}
+
+export async function closeAssignment(
+  assignmentId,
+  config = {},
+) {
+  const response = await apiClient.patch(
+    `/assignments/${assignmentId}/close`,
+    null,
     config,
   );
 
