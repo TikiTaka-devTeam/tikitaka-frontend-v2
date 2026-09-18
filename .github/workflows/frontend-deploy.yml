@@ -53,7 +53,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          CONTENT=$(printf '✅[FRONTEND] 배포 성공\nRepository: %s\nBranch: %s\nURL: 차후 배포 예정' \
+          CONTENT=$(printf '✅[FRONTEND] 배포 성공\nRepository: %s\nBranch: %s\nURL: https://tikitaka-frontend-v2.tikitakadev2026.workers.dev/' \
             "$REPOSITORY" "$BRANCH")
 
           jq -n --arg content "$CONTENT" '{content: $content}' |
