@@ -1,3 +1,11 @@
+.professor-assignment-page {
+  font-family:
+    "Tikitaka UI",
+    "Pretendard Variable",
+    Pretendard,
+    sans-serif;
+}
+
 .professor-assignment-page .professor-assignment-summary {
   display: flex;
   align-items: center;
@@ -6,17 +14,14 @@
 
 .professor-assignment-page .professor-assignment-summary span {
   color: #386eeb;
-
   font-size: 11px;
   font-weight: 500;
   line-height: normal;
-
   white-space: nowrap;
 }
 
 .professor-assignment-page .professor-assignment-summary i {
   color: #386eeb;
-
   font-size: 11px;
   font-style: normal;
   font-weight: 500;
@@ -25,40 +30,29 @@
 
 .professor-assignment-page .professor-assignment-create-button {
   position: absolute;
-
   right: 26px;
   bottom: 28px;
-
   z-index: 15;
-
   width: 40px;
   height: 40px;
-
   padding: 0;
-
   display: grid;
   place-items: center;
-
   border: 0;
   background: transparent;
-
   box-shadow: none;
-
   cursor: pointer;
 }
 
 .professor-assignment-page .professor-assignment-create-button img {
   display: block;
-
   width: 40px;
   height: 40px;
-
   object-fit: contain;
 }
 
 .professor-assignment-page .professor-assignment-detail {
   position: relative;
-
   width: 100%;
   height: 100%;
 }
@@ -67,28 +61,21 @@
   .professor-assignment-detail
   .assignment-detail__deadline {
   position: absolute;
-
   top: 81px;
   right: 38px;
-
   margin: 0;
-
   color: #b2b8c4;
-
   font-size: 14px;
   font-weight: 600;
   line-height: normal;
-
   white-space: nowrap;
 }
 
 .professor-assignment-page
   .professor-assignment-detail__menu-wrapper {
   position: absolute;
-
   top: 30px;
   right: 38px;
-
   z-index: 30;
 }
 
@@ -96,27 +83,20 @@
   .professor-assignment-detail__more {
   width: 20px;
   height: 20px;
-
   padding: 0;
-
   display: grid;
   place-items: center;
-
   border: 0;
   border-radius: 5px;
-
   background: transparent;
-
   cursor: pointer;
 }
 
 .professor-assignment-page
   .professor-assignment-detail__more img {
   display: block;
-
   width: 20px;
   height: 20px;
-
   object-fit: contain;
 }
 
@@ -128,79 +108,57 @@
 .professor-assignment-page
   .professor-assignment-detail-menu {
   position: absolute;
-
   top: 27px;
   right: -7px;
-
+  z-index: 50;
   width: 90px;
-
+  box-sizing: border-box;
   padding: 12px 16px;
-
   display: flex;
   flex-direction: column;
   align-items: center;
-
   gap: 20px;
-
-  overflow: hidden;
-
   border-radius: 15px;
-
   background: #ffffff;
-
-  box-shadow:
-    0 18px 42px
-    rgba(
-      10,
-      26,
-      56,
-      0.22
-    );
+  box-shadow: 0 18px 42px rgba(10, 26, 56, 0.22);
 }
 
 .professor-assignment-page
-  .professor-assignment-detail-menu button {
+  .professor-assignment-detail-menu
+  button {
   width: 58px;
   height: 16px;
-
   padding: 0;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   gap: 9px;
-
   border: 0;
-
+  outline: none;
   background: transparent;
-
   color: #25283c;
-
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
   line-height: 16px;
-
   white-space: nowrap;
-
   cursor: pointer;
 }
 
 .professor-assignment-page
-  .professor-assignment-detail-menu button svg {
+  .professor-assignment-detail-menu
+  button
+  svg {
   width: 15px;
   height: 15px;
-
   flex: 0 0 15px;
 }
 
 .professor-assignment-page
-  .professor-assignment-detail-menu button span {
-  display: block;
-
+  .professor-assignment-detail-menu
+  button
+  span {
   min-width: 26px;
-
   text-align: center;
 }
 
@@ -215,82 +173,64 @@
 }
 
 .professor-assignment-page
-  .professor-assignment-close-error {
-  position: absolute;
-
-  top: 446px;
-  right: 38px;
-
-  margin: 0;
-
-  color: #e5484d;
-
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.professor-assignment-page
   .professor-assignment-attachments {
   position: absolute;
-
   top: 484px;
   left: 38px;
   right: 38px;
   bottom: 24px;
-
   z-index: 5;
-
-  display: block;
-
   overflow-x: hidden;
   overflow-y: auto;
-
-  visibility: visible;
-
-  opacity: 1;
-
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: #b8c1d1 transparent;
 }
 
 .professor-assignment-page
   .professor-assignment-attachments::-webkit-scrollbar {
-  display: none;
+  width: 5px;
+}
+
+.professor-assignment-page
+  .professor-assignment-attachments::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.professor-assignment-page
+  .professor-assignment-attachments::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #b8c1d1;
 }
 
 .professor-assignment-page
   .professor-assignment-attachments__header {
   display: flex;
   align-items: center;
-
-  gap: 8px;
+  gap: 6px;
 }
 
 .professor-assignment-page
-  .professor-assignment-attachments__header strong {
+  .professor-assignment-attachments__header
+  strong {
   color: #1f293b;
-
   font-size: 16px;
   font-weight: 600;
-  line-height: normal;
 }
 
 .professor-assignment-page
-  .professor-assignment-attachments__header span {
+  .professor-assignment-attachments__header
+  span {
   color: #7f8ca1;
-
   font-size: 16px;
   font-weight: 500;
-  line-height: normal;
 }
 
 .professor-assignment-page
   .professor-assignment-attachments__list {
   margin-top: 22px;
-
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-
   gap: 18px;
 }
 
@@ -298,84 +238,1086 @@
   .professor-assignment-attachments__file {
   width: fit-content;
   max-width: 100%;
-
   padding: 0;
-
   display: flex;
   align-items: center;
-
   gap: 8px;
-
   border: 0;
-
   background: transparent;
-
-  font-family: inherit;
-
   cursor: pointer;
 }
 
 .professor-assignment-page
-  .professor-assignment-attachments__file img {
-  display: block;
-
+  .professor-assignment-attachments__file
+  img {
   width: 22px;
   height: 22px;
-
   flex: 0 0 22px;
-
-  object-fit: contain;
 }
 
 .professor-assignment-page
-  .professor-assignment-attachments__file strong {
+  .professor-assignment-attachments__file
+  strong {
+  min-width: 0;
   overflow: hidden;
-
   color: #2e6bff;
-
   font-size: 14px;
   font-weight: 600;
-  line-height: normal;
-
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .professor-assignment-page
-  .professor-assignment-attachments__file span {
+  .professor-assignment-attachments__file
+  span {
   color: #808ca1;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+}
 
+.professor-assignment-page
+  .professor-assignment-close-error,
+.professor-assignment-page
+  .professor-assignment-manage-error {
+  position: absolute;
+  top: 446px;
+  right: 38px;
+  margin: 0;
+  color: #e5484d;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor-page__header {
+  position: absolute;
+  top: 39px;
+  left: 38px;
+  z-index: 2;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor-page__header
+  h2 {
+  margin: 0;
+  color: #292e3d;
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 35px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor-page__header
+  p {
+  margin: 4px 0 0;
+  color: #758094;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor-page__divider {
+  position: absolute;
+  top: 111px;
+  left: 38px;
+  z-index: 2;
+  width: calc(100% - 76px);
+  height: 1px;
+  background: #edeef1;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor {
+  position: absolute;
+  top: 112px;
+  right: 10px;
+  bottom: 12px;
+  left: 0;
+  z-index: 1;
+  width: auto;
+  height: auto;
+  box-sizing: border-box;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #b8c1d1 transparent;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--create {
+  padding-top: 403px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--edit {
+  padding-top: 322px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor::-webkit-scrollbar {
+  width: 5px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor::-webkit-scrollbar-track {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  background: transparent;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor::-webkit-scrollbar-thumb {
+  min-height: 44px;
+  border-radius: 999px;
+  background: #b8c1d1;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor::-webkit-scrollbar-thumb:hover {
+  background: #9faabc;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field
+  > label,
+.professor-assignment-page
+  .professor-assignment-editor__files-flow
+  > label {
+  margin: 0;
+  color: #292e3d;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field--title {
+  top: 20px;
+  left: 38px;
+  width: calc(100% - 66px);
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field--title
+  input {
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid #d6deeb;
+  border-radius: 10px;
+  outline: none;
+  background: #ffffff;
+  color: #292e3d;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field--title
+  input::placeholder {
+  color: #b2b8c4;
+  opacity: 1;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field--title
+  input:focus {
+  border-color: #cbd4e2;
+  outline: none;
+  box-shadow: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--create
+  .professor-assignment-editor__field--deadline {
+  top: 119px;
+  left: 38px;
+  width: 456px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--create
+  .professor-assignment-editor__field--close-type {
+  top: 144px;
+  left: 530px;
+  width: 200px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--edit
+  .professor-assignment-editor__field--deadline {
+  top: 26px;
+  left: 38px;
+  width: 456px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--edit
+  .professor-assignment-editor__field--close-type {
+  top: 51px;
+  left: 530px;
+  width: 200px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropdown-trigger {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #dee3ed;
+  border-radius: 10px;
+  outline: none;
+  background: #ffffff;
+  color: #b2b8c4;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 400;
   line-height: normal;
+  text-align: left;
+  box-shadow: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
 
+.professor-assignment-page
+  .professor-assignment-editor__dropdown-trigger.has-value {
+  color: #292e3d;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropdown-trigger:hover {
+  border-color: #ced6e3;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropdown-trigger:focus,
+.professor-assignment-page
+  .professor-assignment-editor__dropdown-trigger:focus-visible {
+  border-color: #cbd4e2;
+  outline: none;
+  box-shadow: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropdown-trigger
+  > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropdown-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  object-fit: contain;
+}
+
+.professor-assignment-page
+  .professor-assignment-close-type-dropdown {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  z-index: 100;
+  width: 200px;
+  height: 94px;
+  box-sizing: border-box;
+  padding: 8px 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid #dee3ed;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 10px rgba(14, 23, 41, 0.14);
+}
+
+.professor-assignment-page
+  .professor-assignment-close-type-dropdown
+  > button {
+  width: 100%;
+  height: 40px;
+  flex: 0 0 40px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+  background: transparent;
+  color: #4d5c75;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  cursor: pointer;
+}
+
+.professor-assignment-page
+  .professor-assignment-close-type-dropdown
+  > button.is-selected {
+  background: #edeef1;
+  color: #2e66f5;
+  font-weight: 500;
+}
+
+.professor-assignment-page
+  .professor-assignment-close-type-dropdown__check {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.professor-assignment-page
+  .professor-assignment-close-type-dropdown__check::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 2px;
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid #2e6bff;
+  border-bottom: 2px solid #2e6bff;
+  transform: rotate(-45deg);
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown {
+  position: absolute;
+  top: 81px;
+  left: 0;
+  z-index: 100;
+  width: 456px;
+  box-sizing: border-box;
+  padding: 16px 18px 14px;
+  border: 1px solid #dee3ed;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 10px rgba(14, 23, 41, 0.14);
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__header {
+  height: 32px;
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__header
+  strong {
+  color: #292e3d;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: normal;
+  text-align: center;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__header
+  button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+  background: transparent;
+  color: #758094;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__header
+  button:hover {
+  background: #f4f5f7;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__header
+  button
+  span {
+  position: relative;
+  top: -1px;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__weekdays {
+  margin-top: 11px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__weekdays
+  span {
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: #8b95a7;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 3px;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__calendar
+  > span,
+.professor-assignment-page
+  .professor-assignment-date-dropdown__calendar
+  > button {
+  width: 38px;
+  height: 34px;
+  justify-self: center;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__calendar
+  > button {
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  outline: none;
+  background: transparent;
+  color: #52627a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: normal;
+  cursor: pointer;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__calendar
+  > button:hover {
+  background: #f4f5f7;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__calendar
+  > button.is-selected {
+  background: #2e6bff;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__divider {
+  width: 100%;
+  height: 1px;
+  margin-top: 12px;
+  background: #edeef1;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time {
+  min-height: 48px;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time-label {
+  width: 38px;
+  flex: 0 0 38px;
+  margin-right: 8px;
+  color: #758094;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time-control
+  input {
+  width: 44px;
+  height: 34px;
+  box-sizing: border-box;
+  padding: 0;
+  border: 1px solid #dee3ed;
+  border-radius: 8px;
+  outline: none;
+  background: #ffffff;
+  color: #292e3d;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+  box-shadow: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time-control
+  input::-webkit-inner-spin-button,
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time-control
+  input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time-control
+  input:disabled {
+  background: #f7f8fa;
+  color: #b2b8c4;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__time-control
+  > span {
+  color: #758094;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__confirm {
+  width: 68px;
+  height: 34px;
+  margin-left: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+  background: #2e6bff;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.professor-assignment-page
+  .professor-assignment-date-dropdown__confirm:disabled {
+  background: #d9deea;
+  color: #ffffff;
+  cursor: default;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--create
+  .professor-assignment-editor__field--description {
+  top: 212px;
+  left: 38px;
+  width: calc(100% - 66px);
+}
+
+.professor-assignment-page
+  .professor-assignment-editor--edit
+  .professor-assignment-editor__field--description {
+  top: 125px;
+  left: 38px;
+  width: calc(100% - 66px);
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field--description
+  textarea {
+  width: 100%;
+  height: 146px;
+  box-sizing: border-box;
+  padding: 14px;
+  resize: none;
+  overflow-y: auto;
+  border: 1px solid #d6deeb;
+  border-radius: 10px;
+  outline: none;
+  background: #ffffff;
+  color: #292e3d;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  scrollbar-width: none;
+  box-shadow: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field--description
+  textarea::-webkit-scrollbar {
+  display: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__field--description
+  textarea::placeholder {
+  color: #b2b8c4;
+  opacity: 1;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__flow {
+  width: auto;
+  margin: 0 28px 0 38px;
+  padding-bottom: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__files-flow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropzone {
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #d6deeb;
+  border-radius: 10px;
+  outline: none;
+  background: #ffffff;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropzone
+  span {
+  min-width: 0;
+  overflow: hidden;
+  color: #b2b8c4;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__dropzone
+  strong {
+  flex: 0 0 auto;
+  color: #292e3d;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 19px;
+  white-space: nowrap;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-list {
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-card {
+  position: relative;
+  width: 100%;
+  height: 56px;
+  flex: 0 0 56px;
+  box-sizing: border-box;
+  padding: 0 48px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  border: 1px solid #dce3ee;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  object-fit: contain;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-info
+  strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: #263244;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-info
+  span {
+  color: #8a96a8;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-remove {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__file-remove
+  img {
+  display: block;
+  width: 8px;
+  height: 8px;
+  object-fit: contain;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__actions {
+  width: 100%;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__actions
+  p {
+  margin: 0;
+  color: #758094;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__save {
+  width: 106px;
+  height: 44px;
+  flex: 0 0 106px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  outline: none;
+  background: #2e6bff;
+  color: #fafafa;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__save:disabled {
+  background: #d9deea;
+  color: #ffffff;
+  opacity: 1;
+  cursor: default;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor__error {
+  margin: -8px 0 0;
+  color: #e5484d;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.professor-assignment-page
+  .professor-assignment-editor-page__error {
+  position: absolute;
+  right: 38px;
+  bottom: 10px;
+  z-index: 110;
+  margin: 0;
+  color: #e5484d;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .professor-assignment-page .assignment-modal__icon {
   width: 56px;
   height: 56px;
-
   flex: 0 0 56px;
-
   display: grid;
   place-items: center;
-
   overflow: hidden;
-
   border-radius: 16px;
-
   background: #f0f1ff;
 }
 
 .professor-assignment-page
   .assignment-modal__check-icon {
   display: block;
-
   width: 15.17px;
   height: 10.83px;
-
   object-fit: contain;
+}
+
+.assignment-manage-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(13, 23, 43, 0.42);
+}
+
+.assignment-manage-modal {
+  width: 377px;
+  height: 237px;
+  box-sizing: border-box;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(10, 26, 56, 0.22);
+}
+
+.assignment-manage-modal__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.assignment-manage-modal__icon {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f0f1ff;
+}
+
+.assignment-manage-modal__icon--delete {
+  background: #fff2f2;
+}
+
+.assignment-manage-modal__check-icon {
+  display: block;
+  width: 15.17px;
+  height: 10.83px;
+  object-fit: contain;
+}
+
+.assignment-manage-modal__delete-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.assignment-manage-modal__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.assignment-manage-modal__text h2 {
+  margin: 0;
+  color: #25283c;
+  font-family:
+    "Tikitaka UI",
+    "Pretendard Variable",
+    Pretendard,
+    sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 23px;
+  text-align: center;
+}
+
+.assignment-manage-modal__text p {
+  margin: 0;
+  color: #7d8194;
+  font-family:
+    "Tikitaka UI",
+    "Pretendard Variable",
+    Pretendard,
+    sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19px;
+  text-align: center;
+}
+
+.assignment-manage-modal__text
+  p.is-delete-warning {
+  color: #e24b63;
+}
+
+.assignment-manage-modal__actions {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.assignment-manage-modal__cancel,
+.assignment-manage-modal__confirm {
+  width: 107px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  outline: none;
+  font-family:
+    "Tikitaka UI",
+    "Pretendard Variable",
+    Pretendard,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.assignment-manage-modal__cancel {
+  border: 1px solid #d8dbe7;
+  background: #ffffff;
+  color: #292e3d;
+}
+
+.assignment-manage-modal__confirm {
+  border: 1px solid #2e6bff;
+  background: #2e6bff;
+  color: #ffffff;
+}
+
+.assignment-manage-modal__confirm.is-delete {
+  border-color: #e24b63;
+  background: #e24b63;
+}
+
+.assignment-manage-modal__confirm--wide {
+  width: 244px;
+}
+
+.assignment-manage-modal__cancel:disabled,
+.assignment-manage-modal__confirm:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 @media (max-width: 900px) {
@@ -391,11 +1333,6 @@
   }
 
   .professor-assignment-page
-    .professor-assignment-close-error {
-    right: 28px;
-  }
-
-  .professor-assignment-page
     .professor-assignment-attachments {
     left: 28px;
     right: 28px;
@@ -404,40 +1341,18 @@
 
 @media (max-width: 700px) {
   .professor-assignment-page
-    .professor-assignment-summary {
-    gap: 3px;
-  }
-
+    .professor-assignment-summary
+    span,
   .professor-assignment-page
-    .professor-assignment-summary span,
-  .professor-assignment-page
-    .professor-assignment-summary i {
+    .professor-assignment-summary
+    i {
     font-size: 10px;
-  }
-
-  .professor-assignment-page
-    .professor-assignment-detail
-    .assignment-detail__deadline {
-    top: 83px;
-    right: 28px;
-
-    font-size: 11px;
   }
 }
 
 @media (max-width: 520px) {
   .professor-assignment-page
-    .professor-assignment-detail
-    .assignment-detail__deadline {
-    top: 88px;
-    right: 20px;
-
-    font-size: 10px;
-  }
-
-  .professor-assignment-page
     .professor-assignment-detail__menu-wrapper {
-    top: 30px;
     right: 20px;
   }
 
@@ -447,9 +1362,7 @@
     bottom: 20px;
   }
 
-  .professor-assignment-page
-    .professor-assignment-attachments {
-    left: 20px;
-    right: 20px;
+  .assignment-manage-modal {
+    width: calc(100vw - 40px);
   }
 }
