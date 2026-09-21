@@ -25,23 +25,104 @@ import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
 
 import {
   closeAssignment,
+  createAssignment,
+  deleteAssignment,
   getAssignmentDetail,
   getAssignmentSummary,
   getSpaceAssignments,
+  updateAssignment,
 } from "../api/assignmentsApi.js";
 
 import AssignmentCloseModal from "../components/AssignmentCloseModal.jsx";
+import AssignmentEditorForm from "../components/AssignmentEditorForm.jsx";
+import AssignmentManageModal from "../components/AssignmentManageModal.jsx";
 
 import "../styles/studentAssignments.css";
 import "../styles/professorAssignments.css";
+
+async function fetchProfessorSpaceAssignments(
+  spaceId,
+  config = {},
+) {
+  return getSpaceAssignments(
+    spaceId,
+    config,
+  );
+}
+
+async function fetchProfessorAssignmentSummary(
+  spaceId,
+  config = {},
+) {
+  return getAssignmentSummary(
+    spaceId,
+    config,
+  );
+}
+
+async function fetchProfessorAssignmentDetail(
+  assignmentId,
+  config = {},
+) {
+  return getAssignmentDetail(
+    assignmentId,
+    config,
+  );
+}
+
+async function createProfessorAssignment(
+  spaceId,
+  data,
+  config = {},
+) {
+  return createAssignment(
+    spaceId,
+    data,
+    config,
+  );
+}
+
+async function updateProfessorAssignment(
+  assignmentId,
+  data,
+  config = {},
+) {
+  return updateAssignment(
+    assignmentId,
+    data,
+    config,
+  );
+}
+
+async function removeProfessorAssignment(
+  assignmentId,
+  config = {},
+) {
+  return deleteAssignment(
+    assignmentId,
+    config,
+  );
+}
+
+async function closeProfessorAssignment(
+  assignmentId,
+  config = {},
+) {
+  return closeAssignment(
+    assignmentId,
+    config,
+  );
+}
 
 function getApiErrorMessage(
   error,
   fallbackMessage,
 ) {
   return (
-    error?.response?.data?.message ??
-    error?.response?.data?.detail ??
+    error?.response?.data
+      ?.message ??
+    error?.response?.data
+      ?.detail ??
     error?.message ??
     fallbackMessage
   );
@@ -94,9 +175,7 @@ function getFileSizeText(
     return file.file_size_text;
   }
 
-  if (
-    file.fileSizeText
-  ) {
+  if (file.fileSizeText) {
     return file.fileSizeText;
   }
 
@@ -149,6 +228,30 @@ function formatShortDeadline(
   return `${date.getFullYear()}.${
     date.getMonth() + 1
   }.${date.getDate()}`;
+}
+
+function isPastDue(
+  dueAt,
+) {
+  if (!dueAt) {
+    return false;
+  }
+
+  const dueDate =
+    new Date(dueAt);
+
+  if (
+    Number.isNaN(
+      dueDate.getTime(),
+    )
+  ) {
+    return false;
+  }
+
+  return (
+    dueDate.getTime() <
+    Date.now()
+  );
 }
 
 function getDdayLabel(
@@ -236,6 +339,16 @@ function getListDotClass(
     return "is-closed";
   }
 
+  if (
+    assignment.close_type ===
+      "MANUAL" &&
+    isPastDue(
+      assignment.due_at,
+    )
+  ) {
+    return "is-closed";
+  }
+
   return "is-active";
 }
 
@@ -305,6 +418,13 @@ function ProfessorAssignmentPage() {
   ] = useState(null);
 
   const [
+    viewMode,
+    setViewMode,
+  ] = useState(
+    "detail",
+  );
+
+  const [
     isAssignmentMenuOpen,
     setIsAssignmentMenuOpen,
   ] = useState(false);
@@ -320,11 +440,6 @@ function ProfessorAssignmentPage() {
   ] = useState(false);
 
   const [
-    isClosing,
-    setIsClosing,
-  ] = useState(false);
-
-  const [
     listError,
     setListError,
   ] = useState("");
@@ -335,13 +450,45 @@ function ProfessorAssignmentPage() {
   ] = useState("");
 
   const [
+    manageError,
+    setManageError,
+  ] = useState("");
+
+  const [
+    isManaging,
+    setIsManaging,
+  ] = useState(false);
+
+  const [
+    manageModalAction,
+    setManageModalAction,
+  ] = useState(null);
+
+  const [
+    manageModalStep,
+    setManageModalStep,
+  ] = useState(
+    "confirm",
+  );
+
+  const [
+    pendingSaveData,
+    setPendingSaveData,
+  ] = useState(null);
+
+  const [
+    isClosing,
+    setIsClosing,
+  ] = useState(false);
+
+  const [
     closeError,
     setCloseError,
   ] = useState("");
 
   const [
-    modalStep,
-    setModalStep,
+    closeModalStep,
+    setCloseModalStep,
   ] = useState(null);
 
   useEffect(() => {
@@ -365,7 +512,7 @@ function ProfessorAssignmentPage() {
           summaryResponse,
         ] =
           await Promise.all([
-            getSpaceAssignments(
+            fetchProfessorSpaceAssignments(
               spaceId,
               {
                 signal:
@@ -374,7 +521,7 @@ function ProfessorAssignmentPage() {
               },
             ),
 
-            getAssignmentSummary(
+            fetchProfessorAssignmentSummary(
               spaceId,
               {
                 signal:
@@ -455,11 +602,11 @@ function ProfessorAssignmentPage() {
       summaryResponse,
     ] =
       await Promise.all([
-        getSpaceAssignments(
+        fetchProfessorSpaceAssignments(
           spaceId,
         ),
 
-        getAssignmentSummary(
+        fetchProfessorAssignmentSummary(
           spaceId,
         ),
       ]);
@@ -495,14 +642,14 @@ function ProfessorAssignmentPage() {
     if (
       !assignment
         ?.assignment_id ||
-      isDetailLoading
+      isDetailLoading ||
+      isManaging
     ) {
       return;
     }
 
     const assignmentId =
-      assignment
-        .assignment_id;
+      assignment.assignment_id;
 
     setSelectedAssignmentId(
       assignmentId,
@@ -512,13 +659,29 @@ function ProfessorAssignmentPage() {
       null,
     );
 
+    setViewMode(
+      "detail",
+    );
+
     setIsAssignmentMenuOpen(
       false,
     );
 
     setDetailError("");
+    setManageError("");
     setCloseError("");
-    setModalStep(null);
+
+    setManageModalAction(
+      null,
+    );
+
+    setPendingSaveData(
+      null,
+    );
+
+    setCloseModalStep(
+      null,
+    );
 
     setIsDetailLoading(
       true,
@@ -526,7 +689,7 @@ function ProfessorAssignmentPage() {
 
     try {
       const detail =
-        await getAssignmentDetail(
+        await fetchProfessorAssignmentDetail(
           assignmentId,
         );
 
@@ -543,6 +706,26 @@ function ProfessorAssignmentPage() {
                 ? {
                     ...item,
 
+                    title:
+                      detail
+                        ?.title ??
+                      item.title,
+
+                    content_preview:
+                      detail
+                        ?.content_preview ??
+                      item.content_preview,
+
+                    due_at:
+                      detail
+                        ?.due_at ??
+                      item.due_at,
+
+                    close_type:
+                      detail
+                        ?.close_type ??
+                      item.close_type,
+
                     status:
                       detail
                         ?.status ??
@@ -550,12 +733,8 @@ function ProfessorAssignmentPage() {
 
                     grading_status:
                       detail
-                        ?.grading_status,
-
-                    close_type:
-                      detail
-                        ?.close_type ??
-                      item.close_type,
+                        ?.grading_status ??
+                      item.grading_status,
                   }
                 : item,
           ),
@@ -574,19 +753,386 @@ function ProfessorAssignmentPage() {
     }
   }
 
+  function handleOpenCreate() {
+    if (
+      isManaging ||
+      isClosing
+    ) {
+      return;
+    }
+
+    setViewMode(
+      "create",
+    );
+
+    setIsAssignmentMenuOpen(
+      false,
+    );
+
+    setDetailError("");
+    setManageError("");
+    setCloseError("");
+
+    setManageModalAction(
+      null,
+    );
+
+    setManageModalStep(
+      "confirm",
+    );
+
+    setPendingSaveData(
+      null,
+    );
+  }
+
+  function handleOpenEdit() {
+    if (
+      !assignmentDetail ||
+      isManaging ||
+      isClosing
+    ) {
+      return;
+    }
+
+    setIsAssignmentMenuOpen(
+      false,
+    );
+
+    setManageError("");
+    setCloseError("");
+
+    setViewMode(
+      "edit",
+    );
+  }
+
+  function handleRequestDelete() {
+    if (
+      !assignmentDetail ||
+      isManaging ||
+      isClosing
+    ) {
+      return;
+    }
+
+    setIsAssignmentMenuOpen(
+      false,
+    );
+
+    setManageError("");
+
+    setManageModalAction(
+      "delete",
+    );
+
+    setManageModalStep(
+      "confirm",
+    );
+
+    setPendingSaveData(
+      null,
+    );
+  }
+
+  function handleRequestSave(
+    data,
+  ) {
+    if (
+      isManaging ||
+      isClosing
+    ) {
+      return;
+    }
+
+    const action =
+      viewMode === "edit"
+        ? "edit"
+        : "create";
+
+    setPendingSaveData(
+      data,
+    );
+
+    setManageError("");
+
+    setManageModalAction(
+      action,
+    );
+
+    setManageModalStep(
+      "confirm",
+    );
+  }
+
+  function handleCancelManage() {
+    if (isManaging) {
+      return;
+    }
+
+    setManageModalAction(
+      null,
+    );
+
+    setManageModalStep(
+      "confirm",
+    );
+
+    setPendingSaveData(
+      null,
+    );
+  }
+
+  async function handleConfirmManage() {
+    if (
+      !manageModalAction ||
+      isManaging
+    ) {
+      return;
+    }
+
+    setIsManaging(true);
+    setManageError("");
+
+    try {
+      if (
+        manageModalAction ===
+        "create"
+      ) {
+        if (
+          !pendingSaveData
+        ) {
+          return;
+        }
+
+        const created =
+          await createProfessorAssignment(
+            spaceId,
+            pendingSaveData,
+          );
+
+        const createdId =
+          created
+            ?.assignment_id;
+
+        if (createdId) {
+          setSelectedAssignmentId(
+            createdId,
+          );
+
+          let nextDetail =
+            created;
+
+          try {
+            nextDetail =
+              await fetchProfessorAssignmentDetail(
+                createdId,
+              );
+          } catch {
+            nextDetail =
+              created;
+          }
+
+          setAssignmentDetail(
+            nextDetail,
+          );
+        }
+
+        try {
+          await refreshListData();
+        } catch {
+          setListError(
+            "과제 목록을 새로 불러오지 못했습니다.",
+          );
+        }
+
+        setManageModalStep(
+          "success",
+        );
+
+        return;
+      }
+
+      if (
+        manageModalAction ===
+        "edit"
+      ) {
+        if (
+          !assignmentDetail
+            ?.assignment_id ||
+          !pendingSaveData
+        ) {
+          return;
+        }
+
+        const assignmentId =
+          assignmentDetail
+            .assignment_id;
+
+        const updated =
+          await updateProfessorAssignment(
+            assignmentId,
+            pendingSaveData,
+          );
+
+        let nextDetail =
+          updated;
+
+        try {
+          nextDetail =
+            await fetchProfessorAssignmentDetail(
+              assignmentId,
+            );
+        } catch {
+          nextDetail = {
+            ...assignmentDetail,
+            ...updated,
+          };
+        }
+
+        setAssignmentDetail(
+          nextDetail,
+        );
+
+        try {
+          await refreshListData();
+        } catch {
+          setListError(
+            "과제 목록을 새로 불러오지 못했습니다.",
+          );
+        }
+
+        setManageModalStep(
+          "success",
+        );
+
+        return;
+      }
+
+      if (
+        manageModalAction ===
+        "delete"
+      ) {
+        if (
+          !assignmentDetail
+            ?.assignment_id
+        ) {
+          return;
+        }
+
+        await removeProfessorAssignment(
+          assignmentDetail
+            .assignment_id,
+        );
+
+        try {
+          await refreshListData();
+        } catch {
+          setListError(
+            "과제 목록을 새로 불러오지 못했습니다.",
+          );
+        }
+
+        setManageModalStep(
+          "success",
+        );
+      }
+    } catch (error) {
+      const fallbackMessage =
+        manageModalAction ===
+        "create"
+          ? "과제 등록에 실패했습니다."
+          : manageModalAction ===
+              "edit"
+            ? "과제 수정에 실패했습니다."
+            : "과제 삭제에 실패했습니다.";
+
+      setManageError(
+        getApiErrorMessage(
+          error,
+          fallbackMessage,
+        ),
+      );
+
+      setManageModalAction(
+        null,
+      );
+
+      setManageModalStep(
+        "confirm",
+      );
+    } finally {
+      setIsManaging(
+        false,
+      );
+    }
+  }
+
+  function handleManageSuccess() {
+    const completedAction =
+      manageModalAction;
+
+    setManageModalAction(
+      null,
+    );
+
+    setManageModalStep(
+      "confirm",
+    );
+
+    setPendingSaveData(
+      null,
+    );
+
+    if (
+      completedAction ===
+      "delete"
+    ) {
+      setSelectedAssignmentId(
+        null,
+      );
+
+      setAssignmentDetail(
+        null,
+      );
+
+      setViewMode(
+        "detail",
+      );
+
+      setManageError("");
+
+      return;
+    }
+
+    if (
+      completedAction ===
+        "create" ||
+      completedAction ===
+        "edit"
+    ) {
+      setViewMode(
+        "detail",
+      );
+
+      setManageError("");
+    }
+  }
+
   function handleRequestClose() {
     if (
       !assignmentDetail ||
       assignmentDetail
         .status !== "OPEN" ||
-      isClosing
+      isClosing ||
+      isManaging
     ) {
       return;
     }
 
     setCloseError("");
 
-    setModalStep(
+    setCloseModalStep(
       "confirm",
     );
   }
@@ -596,7 +1142,9 @@ function ProfessorAssignmentPage() {
       return;
     }
 
-    setModalStep(null);
+    setCloseModalStep(
+      null,
+    );
   }
 
   async function handleConfirmClose() {
@@ -613,30 +1161,54 @@ function ProfessorAssignmentPage() {
       assignmentDetail
         .assignment_id;
 
-    setIsClosing(true);
+    setIsClosing(
+      true,
+    );
+
     setCloseError("");
 
     try {
-      await closeAssignment(
+      await closeProfessorAssignment(
         assignmentId,
       );
 
-      const detail =
-        await getAssignmentDetail(
-          assignmentId,
-        );
+      let nextDetail = {
+        ...assignmentDetail,
+        status: "CLOSED",
+      };
+
+      try {
+        nextDetail =
+          await fetchProfessorAssignmentDetail(
+            assignmentId,
+          );
+      } catch {
+        nextDetail = {
+          ...assignmentDetail,
+          status:
+            "CLOSED",
+        };
+      }
 
       setAssignmentDetail(
-        detail,
+        nextDetail,
       );
 
-      await refreshListData();
+      try {
+        await refreshListData();
+      } catch {
+        setListError(
+          "과제 목록을 새로 불러오지 못했습니다.",
+        );
+      }
 
-      setModalStep(
+      setCloseModalStep(
         "success",
       );
     } catch (error) {
-      setModalStep(null);
+      setCloseModalStep(
+        null,
+      );
 
       setCloseError(
         getApiErrorMessage(
@@ -652,7 +1224,9 @@ function ProfessorAssignmentPage() {
   }
 
   function handleCloseSuccess() {
-    setModalStep(null);
+    setCloseModalStep(
+      null,
+    );
   }
 
   function handleFileOpen(
@@ -681,6 +1255,76 @@ function ProfessorAssignmentPage() {
       ? assignmentDetail
           .files
       : [];
+
+  function renderEditor() {
+    const isEdit =
+      viewMode ===
+      "edit";
+
+    if (
+      isEdit &&
+      !assignmentDetail
+    ) {
+      return (
+        <div className="assignment-panel-state">
+          수정할 과제를 선택해주세요.
+        </div>
+      );
+    }
+
+    return (
+      <section className="professor-assignment-editor-page">
+        <div className="professor-assignment-editor-page__header">
+          <h2>
+            {isEdit
+              ? "과제 수정"
+              : "과제 등록"}
+          </h2>
+
+          <p>
+            {isEdit
+              ? "과제를 수정하고 학생들에게 안내하세요."
+              : "새 과제를 만들고 학생들에게 안내하세요."}
+          </p>
+        </div>
+
+        <div className="professor-assignment-editor-page__divider" />
+
+        <AssignmentEditorForm
+          key={
+            isEdit
+              ? `edit-${assignmentDetail?.assignment_id}`
+              : "create-assignment"
+          }
+          mode={
+            isEdit
+              ? "edit"
+              : "create"
+          }
+          assignment={
+            isEdit
+              ? assignmentDetail
+              : null
+          }
+          isSaving={
+            isManaging
+          }
+          onRequestSave={
+            handleRequestSave
+          }
+        />
+
+        {manageError && (
+          <p
+            className="professor-assignment-editor-page__error"
+            role="alert"
+          >
+            {manageError}
+          </p>
+        )}
+      </section>
+    );
+  }
 
   function renderDetail() {
     if (
@@ -758,10 +1402,8 @@ function ProfessorAssignmentPage() {
             <div className="professor-assignment-detail-menu">
               <button
                 type="button"
-                onClick={() =>
-                  setIsAssignmentMenuOpen(
-                    false,
-                  )
+                onClick={
+                  handleOpenEdit
                 }
               >
                 <PencilEditIcon
@@ -776,10 +1418,8 @@ function ProfessorAssignmentPage() {
               <button
                 type="button"
                 className="professor-assignment-detail-menu__delete"
-                onClick={() =>
-                  setIsAssignmentMenuOpen(
-                    false,
-                  )
+                onClick={
+                  handleRequestDelete
                 }
               >
                 <DeleteIcon
@@ -858,7 +1498,8 @@ function ProfessorAssignmentPage() {
             type="button"
             className="assignment-detail__submit-button"
             disabled={
-              isClosing
+              isClosing ||
+              isManaging
             }
             onClick={
               handleRequestClose
@@ -874,6 +1515,15 @@ function ProfessorAssignmentPage() {
             role="alert"
           >
             {closeError}
+          </p>
+        )}
+
+        {manageError && (
+          <p
+            className="professor-assignment-manage-error"
+            role="alert"
+          >
+            {manageError}
           </p>
         )}
 
@@ -953,6 +1603,19 @@ function ProfessorAssignmentPage() {
         </section>
       </article>
     );
+  }
+
+  function renderRightPanel() {
+    if (
+      viewMode ===
+        "create" ||
+      viewMode ===
+        "edit"
+    ) {
+      return renderEditor();
+    }
+
+    return renderDetail();
   }
 
   return (
@@ -1103,6 +1766,9 @@ function ProfessorAssignmentPage() {
               type="button"
               className="professor-assignment-create-button"
               aria-label="과제 작성"
+              onClick={
+                handleOpenCreate
+              }
             >
               <img
                 src={
@@ -1114,7 +1780,7 @@ function ProfessorAssignmentPage() {
           </aside>
 
           <section className="assignment-right-panel">
-            {renderDetail()}
+            {renderRightPanel()}
           </section>
         </section>
 
@@ -1124,13 +1790,14 @@ function ProfessorAssignmentPage() {
 
         <AssignmentCloseModal
           type={
-            modalStep ===
+            closeModalStep ===
             "success"
               ? "success"
               : "confirm"
           }
           isOpen={
-            modalStep !== null
+            closeModalStep !==
+            null
           }
           isClosing={
             isClosing
@@ -1139,10 +1806,36 @@ function ProfessorAssignmentPage() {
             handleCancelClose
           }
           onConfirm={
-            modalStep ===
+            closeModalStep ===
             "success"
               ? handleCloseSuccess
               : handleConfirmClose
+          }
+        />
+
+        <AssignmentManageModal
+          action={
+            manageModalAction ??
+            "create"
+          }
+          step={
+            manageModalStep
+          }
+          isOpen={
+            manageModalAction !==
+            null
+          }
+          isProcessing={
+            isManaging
+          }
+          onCancel={
+            handleCancelManage
+          }
+          onConfirm={
+            manageModalStep ===
+            "success"
+              ? handleManageSuccess
+              : handleConfirmManage
           }
         />
       </div>
