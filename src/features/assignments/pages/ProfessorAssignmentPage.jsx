@@ -1,4 +1,4 @@
-import {
+﻿import {
   useEffect,
   useState,
 } from "react";
@@ -35,10 +35,12 @@ import {
 
 import AssignmentCloseModal from "../components/AssignmentCloseModal.jsx";
 import AssignmentEditorForm from "../components/AssignmentEditorForm.jsx";
+import AssignmentGradePanel from "../components/AssignmentGradePanel.jsx";
 import AssignmentManageModal from "../components/AssignmentManageModal.jsx";
 
 import "../styles/studentAssignments.css";
 import "../styles/professorAssignments.css";
+import "../styles/professorAssignmentGrades.css";
 
 async function fetchProfessorSpaceAssignments(
   spaceId,
@@ -807,6 +809,88 @@ function ProfessorAssignmentPage() {
     );
   }
 
+  function handleOpenGrade() {
+    if (
+      !assignmentDetail ||
+      assignmentDetail.status !==
+        "CLOSED" ||
+      assignmentDetail
+        .grading_status !==
+        "DRAFT"
+    ) {
+      return;
+    }
+
+    setIsAssignmentMenuOpen(
+      false,
+    );
+
+    setManageError("");
+    setCloseError("");
+    setDetailError("");
+
+    setViewMode(
+      "grade",
+    );
+  }
+
+  function handleOpenGradeEdit() {
+    if (
+      !assignmentDetail ||
+      assignmentDetail
+        .grading_status !==
+        "FINALIZED"
+    ) {
+      return;
+    }
+
+    setIsAssignmentMenuOpen(
+      false,
+    );
+
+    setManageError("");
+    setCloseError("");
+    setDetailError("");
+
+    setViewMode(
+      "grade-edit",
+    );
+  }
+
+  function handleCloseGradePanel() {
+    setViewMode(
+      "detail",
+    );
+  }
+
+  function handleGradeSaved(
+    nextAssignment,
+  ) {
+    setAssignmentDetail(
+      (current) =>
+        current
+          ? {
+              ...current,
+              ...nextAssignment,
+            }
+          : current,
+    );
+
+    setAssignments(
+      (current) =>
+        current.map(
+          (assignment) =>
+            assignment.assignment_id ===
+            selectedAssignmentId
+              ? {
+                  ...assignment,
+                  ...nextAssignment,
+                }
+              : assignment,
+        ),
+    );
+  }
+
   function handleRequestDelete() {
     if (
       !assignmentDetail ||
@@ -1175,6 +1259,10 @@ function ProfessorAssignmentPage() {
       let nextDetail = {
         ...assignmentDetail,
         status: "CLOSED",
+        grading_status:
+          assignmentDetail
+            .grading_status ??
+          "DRAFT",
       };
 
       try {
@@ -1187,11 +1275,35 @@ function ProfessorAssignmentPage() {
           ...assignmentDetail,
           status:
             "CLOSED",
+          grading_status:
+            assignmentDetail
+              .grading_status ??
+            "DRAFT",
         };
       }
 
       setAssignmentDetail(
         nextDetail,
+      );
+
+      setAssignments(
+        (current) =>
+          current.map(
+            (assignment) =>
+              assignment
+                .assignment_id ===
+              assignmentId
+                ? {
+                    ...assignment,
+                    status:
+                      "CLOSED",
+                    grading_status:
+                      nextDetail
+                        ?.grading_status ??
+                      "DRAFT",
+                  }
+                : assignment,
+          ),
       );
 
       try {
@@ -1371,6 +1483,19 @@ function ProfessorAssignmentPage() {
       assignmentDetail
         .status === "OPEN";
 
+    const canGrade =
+      assignmentDetail
+        .status ===
+        "CLOSED" &&
+      assignmentDetail
+        .grading_status ===
+        "DRAFT";
+
+    const canEditGrade =
+      assignmentDetail
+        .grading_status ===
+      "FINALIZED";
+
     return (
       <article className="assignment-detail professor-assignment-detail">
         <div className="professor-assignment-detail__menu-wrapper">
@@ -1509,6 +1634,38 @@ function ProfessorAssignmentPage() {
           </button>
         )}
 
+        {canGrade && (
+          <button
+            type="button"
+            className="assignment-detail__submit-button"
+            disabled={
+              isClosing ||
+              isManaging
+            }
+            onClick={
+              handleOpenGrade
+            }
+          >
+            채점하러 가기
+          </button>
+        )}
+
+        {canEditGrade && (
+          <button
+            type="button"
+            className="assignment-detail__submit-button"
+            disabled={
+              isClosing ||
+              isManaging
+            }
+            onClick={
+              handleOpenGradeEdit
+            }
+          >
+            성적 수정하기
+          </button>
+        )}
+
         {closeError && (
           <p
             className="professor-assignment-close-error"
@@ -1618,6 +1775,10 @@ function ProfessorAssignmentPage() {
     return renderDetail();
   }
 
+  const isGradingView =
+    viewMode === "grade" ||
+    viewMode === "grade-edit";
+
   return (
     <main className="assignment-page professor-assignment-page">
       <div className="app-frame assignment-frame">
@@ -1658,130 +1819,156 @@ function ProfessorAssignmentPage() {
           }
         />
 
-        <section className="assignment-layout">
-          <aside className="assignment-list-panel">
-            <div className="assignment-list-panel__header">
-              <span>
-                마감순
-              </span>
-
-              <strong className="professor-assignment-summary">
-                <span>
-                  마감 전{" "}
-                  {
-                    summary
-                      .before_deadline_count
-                  }
-                </span>
-
-                <i>
-                  ·
-                </i>
-
-                <span>
-                  채점 전{" "}
-                  {
-                    summary
-                      .grading_pending_count
-                  }
-                </span>
-              </strong>
-            </div>
-
-            <div className="assignment-list-panel__divider" />
-
-            {isListLoading ? (
-              <div className="assignment-list-state">
-                과제를 불러오는 중입니다.
-              </div>
-            ) : listError ? (
-              <div className="assignment-list-state assignment-list-state--error">
-                {listError}
-              </div>
-            ) : assignments
-                .length ===
-              0 ? (
-              <div className="assignment-list-state">
-                등록된 과제가 없습니다.
-              </div>
-            ) : (
-              <div className="assignment-list">
-                {assignments.map(
-                  (
-                    assignment,
-                  ) => (
-                    <button
-                      type="button"
-                      key={
-                        assignment
-                          .assignment_id
-                      }
-                      className={`assignment-list-item${
-                        selectedAssignmentId ===
-                        assignment
-                          .assignment_id
-                          ? " is-selected"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        handleSelectAssignment(
-                          assignment,
-                        )
-                      }
-                    >
-                      <span
-                        className={`assignment-list-item__dot ${getListDotClass(
-                          assignment,
-                        )}`}
-                      />
-
-                      <span className="assignment-list-item__body">
-                        <strong>
-                          {
-                            assignment
-                              .title
-                          }
-                        </strong>
-
-                        <small>
-                          {
-                            assignment
-                              .content_preview
-                          }
-                        </small>
-                      </span>
-
-                      <span className="assignment-list-item__status">
-                        {getDdayLabel(
-                          assignment,
-                        )}
-                      </span>
-                    </button>
-                  ),
-                )}
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="professor-assignment-create-button"
-              aria-label="과제 작성"
-              onClick={
-                handleOpenCreate
+        <section
+          className={`assignment-layout${
+            isGradingView
+              ? " assignment-layout--grading"
+              : ""
+          }`}
+        >
+          {isGradingView ? (
+            <AssignmentGradePanel
+              key={`${viewMode}-${assignmentDetail?.assignment_id}`}
+              assignment={
+                assignmentDetail
               }
-            >
-              <img
-                src={
-                  noticeCreateIcon
-                }
-                alt=""
-              />
-            </button>
-          </aside>
+              mode={
+                viewMode
+              }
+              onCancel={
+                handleCloseGradePanel
+              }
+              onSaved={
+                handleGradeSaved
+              }
+            />
+          ) : (
+            <>
+              <aside className="assignment-list-panel">
+                <div className="assignment-list-panel__header">
+                  <span>
+                    마감순
+                  </span>
 
-          <section className="assignment-right-panel">
-            {renderRightPanel()}
-          </section>
+                  <strong className="professor-assignment-summary">
+                    <span>
+                      마감 전{" "}
+                      {
+                        summary
+                          .before_deadline_count
+                      }
+                    </span>
+
+                    <i>
+                      ·
+                    </i>
+
+                    <span>
+                      채점 전{" "}
+                      {
+                        summary
+                          .grading_pending_count
+                      }
+                    </span>
+                  </strong>
+                </div>
+
+                <div className="assignment-list-panel__divider" />
+
+                {isListLoading ? (
+                  <div className="assignment-list-state">
+                    과제를 불러오는 중입니다.
+                  </div>
+                ) : listError ? (
+                  <div className="assignment-list-state assignment-list-state--error">
+                    {listError}
+                  </div>
+                ) : assignments
+                    .length ===
+                  0 ? (
+                  <div className="assignment-list-state">
+                    등록된 과제가 없습니다.
+                  </div>
+                ) : (
+                  <div className="assignment-list">
+                    {assignments.map(
+                      (
+                        assignment,
+                      ) => (
+                        <button
+                          type="button"
+                          key={
+                            assignment
+                              .assignment_id
+                          }
+                          className={`assignment-list-item${
+                            selectedAssignmentId ===
+                            assignment
+                              .assignment_id
+                              ? " is-selected"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            handleSelectAssignment(
+                              assignment,
+                            )
+                          }
+                        >
+                          <span
+                            className={`assignment-list-item__dot ${getListDotClass(
+                              assignment,
+                            )}`}
+                          />
+
+                          <span className="assignment-list-item__body">
+                            <strong>
+                              {
+                                assignment
+                                  .title
+                              }
+                            </strong>
+
+                            <small>
+                              {
+                                assignment
+                                  .content_preview
+                              }
+                            </small>
+                          </span>
+
+                          <span className="assignment-list-item__status">
+                            {getDdayLabel(
+                              assignment,
+                            )}
+                          </span>
+                        </button>
+                      ),
+                    )}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="professor-assignment-create-button"
+                  aria-label="과제 작성"
+                  onClick={
+                    handleOpenCreate
+                  }
+                >
+                  <img
+                    src={
+                      noticeCreateIcon
+                    }
+                    alt=""
+                  />
+                </button>
+              </aside>
+
+              <section className="assignment-right-panel">
+                {renderRightPanel()}
+              </section>
+            </>
+          )}
         </section>
 
         <SpaceToolbar

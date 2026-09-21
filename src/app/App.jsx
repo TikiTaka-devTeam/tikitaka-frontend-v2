@@ -1,4 +1,8 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+﻿import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 
 import LoginPage from "../features/auth/pages/LoginPage.jsx";
 import OAuthCallbackPage from "../features/auth/pages/OAuthCallbackPage.jsx";
@@ -17,76 +21,129 @@ import SpaceMembersPage from "../features/members/pages/SpaceMembersPage.jsx";
 
 import StudentAssignmentPage from "../features/assignments/pages/StudentAssignmentPage.jsx";
 import ProfessorAssignmentPage from "../features/assignments/pages/ProfessorAssignmentPage.jsx";
-
 import StudentLecturePage from "../features/lecture/pages/StudentLecturePage.jsx";
 import ProfessorLecturePage from "../features/lecture/pages/ProfessorLecturePage.jsx";
 
 function App() {
-  const accessToken = localStorage.getItem("tikitaka_access_token");
+  const accessToken =
+    localStorage.getItem(
+      "tikitaka_access_token",
+    );
 
   return (
     <Routes>
       <Route
         path="/"
         element={
-          accessToken ? <DashboardPage /> : <Navigate to="/login" replace />
+          accessToken ? (
+            <DashboardPage />
+          ) : (
+            <Navigate
+              to="/login"
+              replace
+            />
+          )
         }
       />
 
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/spaces" element={<SpacesPage />} />
-      <Route path="/spaces/:spaceId" element={<SpaceLecturePage />} />
+      <Route
+        path="/dashboard"
+        element={<DashboardPage />}
+      />
+
+      <Route
+        path="/search"
+        element={<SearchPage />}
+      />
+
+      <Route
+        path="/spaces"
+        element={<SpacesPage />}
+      />
+
+      <Route
+        path="/spaces/:spaceId"
+        element={<SpaceLecturePage />}
+      />
 
       <Route
         path="/spaces/:spaceId/assignments"
-        element={<StudentAssignmentPage />}
+        element={
+          <StudentAssignmentPage />
+        }
       />
 
       <Route
         path="/spaces/:spaceId/assignments/professor"
-        element={<ProfessorAssignmentPage />}
+        element={
+          <ProfessorAssignmentPage />
+        }
       />
 
       <Route
         path="/spaces/:spaceId/documents/:documentId/modify"
-        element={<DocumentModifyPage />}
+        element={
+          <DocumentModifyPage />
+        }
       />
 
       <Route
         path="/spaces/:spaceId/notices"
-        element={<SpaceNoticePage />}
+        element={
+          <SpaceNoticePage />
+        }
       />
 
       <Route
         path="/spaces/:spaceId/members"
-        element={<SpaceMembersPage />}
+        element={
+          <SpaceMembersPage />
+        }
       />
 
       <Route
         path="/spaces/:spaceId/documents/:documentId/lecture/student"
-        element={<StudentLecturePage />}
+        element={
+          <StudentLecturePage />
+        }
       />
 
       <Route
         path="/spaces/:spaceId/documents/:documentId/lecture/professor"
-        element={<ProfessorLecturePage />}
+        element={
+          <ProfessorLecturePage />
+        }
       />
 
       <Route
         path="/login"
         element={
-          accessToken ? <Navigate to="/dashboard" replace /> : <LoginPage />
+          accessToken ? (
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          ) : (
+            <LoginPage />
+          )
         }
       />
 
-      <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+      <Route
+        path="/oauth/callback"
+        element={
+          <OAuthCallbackPage />
+        }
+      />
 
       <Route
         path="/signup-terms"
         element={
           accessToken ? (
-            <Navigate to="/dashboard" replace />
+            <Navigate
+              to="/dashboard"
+              replace
+            />
           ) : (
             <SignupTermsPage />
           )
@@ -97,7 +154,10 @@ function App() {
         path="/signup-inform"
         element={
           accessToken ? (
-            <Navigate to="/dashboard" replace />
+            <Navigate
+              to="/dashboard"
+              replace
+            />
           ) : (
             <SignupInformPage />
           )
@@ -108,14 +168,25 @@ function App() {
         path="/signup-complete"
         element={
           accessToken ? (
-            <Navigate to="/dashboard" replace />
+            <Navigate
+              to="/dashboard"
+              replace
+            />
           ) : (
             <SignupCompletePage />
           )
         }
       />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
+      />
     </Routes>
   );
 }
