@@ -343,7 +343,7 @@ function AssignmentEditorForm({
             ? current
             : nextHasMoreBelow,
       );
-    }, []);
+    }, [setHasMoreBelow]);
 
   const handleEditorRef =
     useCallback(
@@ -1341,25 +1341,27 @@ function AssignmentEditorForm({
           </p>
         )}
 
-        <div className="professor-assignment-editor__actions">
-          <p>
-            {isEdit
-              ? "수정 후 학생들에게 바로 반영됩니다."
-              : "등록 후 학생들에게 바로 공개됩니다."}
-          </p>
+        {canSubmit && (
+          <div className="professor-assignment-editor__actions">
+            <p>
+              {isEdit
+                ? "수정 후 학생들에게 바로 반영됩니다."
+                : "등록 후 학생들에게 바로 공개됩니다."}
+            </p>
 
-          <button
-            type="submit"
-            className="professor-assignment-editor__save"
-            disabled={!canSubmit || isSaving}
-          >
-            {isSaving
-              ? "저장 중"
-              : isEdit
-                ? "수정 완료"
-                : "과제 등록"}
-          </button>
-        </div>
+            <button
+              type="submit"
+              className="professor-assignment-editor__save"
+              disabled={isSaving}
+            >
+              {isSaving
+                ? "저장 중"
+                : isEdit
+                  ? "수정 완료"
+                  : "과제 등록"}
+            </button>
+          </div>
+        )}
       </div>
     </form>
   );

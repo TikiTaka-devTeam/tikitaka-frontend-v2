@@ -1,0 +1,354 @@
+.assignment-layout--grading {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.assignment-grade-panel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 635px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 4px 16px
+    rgba(20, 31, 51, 0.08);
+  font-family:
+    "Tikitaka UI",
+    "Pretendard Variable",
+    Pretendard,
+    sans-serif;
+}
+
+.assignment-grade-panel__header {
+  position: absolute;
+  top: 45px;
+  left: 38px;
+  right: 38px;
+  height: 48px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.assignment-grade-panel__header h2 {
+  margin: 0;
+  color: #1f293b;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.assignment-grade-panel__header p {
+  margin: 15px 0 0;
+  color: #788599;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.assignment-grade-panel__max-score {
+  margin-top: 17px;
+  margin-right: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.assignment-grade-panel__max-score input {
+  width: 75px;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #d8dbe7;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #737d91;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.assignment-grade-panel__max-score input:focus {
+  border-color: #2e6bff;
+}
+
+.assignment-grade-panel__max-score span {
+  color: #1f293b;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.assignment-grade-panel__divider {
+  position: absolute;
+  top: 106px;
+  left: 38px;
+  right: 40px;
+  height: 1px;
+  background: #d8dbe7;
+}
+
+.assignment-grade-panel__table {
+  position: absolute;
+  top: 127px;
+  left: 46px;
+  right: 40px;
+  bottom: 90px;
+}
+
+.assignment-grade-panel__table-head,
+.assignment-grade-panel__row {
+  display: grid;
+  grid-template-columns:
+    107px
+    107px
+    134px
+    280px
+    233px
+    minmax(150px, 1fr);
+  align-items: center;
+}
+
+.assignment-grade-panel__table-head {
+  height: 24px;
+  color: #1f293b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.assignment-grade-panel__table-body {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.assignment-grade-panel__row {
+  min-height: 34px;
+  color: #737d91;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.assignment-grade-panel__status {
+  color: #1f293b;
+}
+
+.assignment-grade-panel__status.is-submitted {
+  color: #1f293b;
+}
+
+.assignment-grade-panel__status.is-late {
+  color: #e97a7a;
+}
+
+.assignment-grade-panel__status.is-not-submitted {
+  color: #e5484d;
+}
+
+.assignment-grade-panel__name {
+  color: #1f2638;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.assignment-grade-panel__student-number,
+.assignment-grade-panel__submitted-at {
+  color: #737d91;
+}
+
+.assignment-grade-panel__submission {
+  min-width: 0;
+}
+
+.assignment-grade-panel__file {
+  max-width: 260px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #2e6bff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.assignment-grade-panel__dash {
+  color: #737d91;
+}
+
+.assignment-grade-panel__score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assignment-grade-panel__score input {
+  width: 75px;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #d8dbe7;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #1f293b;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.assignment-grade-panel__score input::placeholder {
+  color: #737d91;
+}
+
+.assignment-grade-panel__score input:focus {
+  border-color: #2e6bff;
+}
+
+.assignment-grade-panel__score span,
+.assignment-grade-panel__score strong {
+  color: #1f293b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.assignment-grade-panel__footer {
+  position: absolute;
+  left: 39px;
+  right: 40px;
+  bottom: 28px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.assignment-grade-panel__download {
+  height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #1f293b;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.assignment-grade-panel__download img {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  object-fit: contain;
+}
+
+.assignment-grade-panel__download:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.assignment-grade-panel__error {
+  position: absolute;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  color: #e24b63;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.assignment-grade-panel__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.assignment-grade-panel__cancel,
+.assignment-grade-panel__save {
+  width: 107px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+  cursor: pointer;
+}
+
+.assignment-grade-panel__cancel {
+  border: 1px solid #d8dbe7;
+  background: #ffffff;
+  color: #3e4257;
+}
+
+.assignment-grade-panel__save {
+  border: 1px solid #2e6bff;
+  background: #2e6bff;
+  color: #ffffff;
+}
+
+.assignment-grade-panel__cancel:disabled,
+.assignment-grade-panel__save:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.assignment-grade-panel__state {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #788599;
+  font-size: 14px;
+}
+
+.professor-assignment-page
+  .assignment-detail__submit-button.assignment-detail__submit-button--grade-edit {
+  width: 156px;
+  height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: #e24b63;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.professor-assignment-page
+  .assignment-detail__submit-button.assignment-detail__submit-button--grade-edit:hover {
+  background: #e24b63;
+}
+
+@media (max-width: 1100px) {
+  .assignment-grade-panel__table-head,
+  .assignment-grade-panel__row {
+    grid-template-columns:
+      80px
+      90px
+      110px
+      minmax(190px, 1fr)
+      150px
+      140px;
+  }
+}
