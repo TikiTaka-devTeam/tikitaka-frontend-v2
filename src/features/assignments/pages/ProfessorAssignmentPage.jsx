@@ -1973,6 +1973,8 @@ function ProfessorAssignmentPage() {
 
         <SpaceToolbar
           activeItem="assignment"
+          spaceId={spaceId}
+          spaceName={spaceName}
         />
 
         <AssignmentCloseModal
