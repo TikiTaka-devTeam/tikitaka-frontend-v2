@@ -5,10 +5,16 @@ import DeleteIcon from "../../../assets/icons/delete.svg?react";
 
 import "../styles/deleteStatusModal.css";
 
-function DeleteConfirmModal({ onCancel, onConfirm }) {
+function DeleteConfirmModal({
+  description = "삭제한 Space는 다시 복구할 수 없습니다",
+  error = "",
+  isConfirming = false,
+  onCancel,
+  onConfirm,
+}) {
   return (
     <CompactModal
-      onClose={onCancel}
+      onClose={isConfirming ? undefined : onCancel}
       labelledBy="delete-confirm-modal-title"
       describedBy="delete-confirm-modal-description"
       className="delete-status-modal"
@@ -29,8 +35,9 @@ function DeleteConfirmModal({ onCancel, onConfirm }) {
           id="delete-confirm-modal-description"
           className="delete-status-modal__description delete-status-modal__description--danger"
         >
-          삭제한 Space는 다시 복구할 수 없습니다
+          {description}
         </p>
+        {error && <p className="delete-status-modal__error" role="alert">{error}</p>}
       </div>
 
       <ModalActions
@@ -38,7 +45,9 @@ function DeleteConfirmModal({ onCancel, onConfirm }) {
         onCancel={onCancel}
         onConfirm={onConfirm}
         cancelText="취소"
-        confirmText="삭제"
+        confirmText={isConfirming ? "삭제 중" : "삭제"}
+        cancelDisabled={isConfirming}
+        confirmDisabled={isConfirming}
       />
     </CompactModal>
   );

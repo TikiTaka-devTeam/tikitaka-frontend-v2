@@ -34,7 +34,7 @@ function NoticeConfirmModal({
   return (
     <div className="notice-modal-backdrop">
       <section
-        className="notice-modal"
+        className="compact-modal notice-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="notice-modal-title"

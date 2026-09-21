@@ -7,16 +7,18 @@ function ModalActions({
   confirmText = "저장",
   confirmType = "button",
   confirmDisabled = false,
+  cancelDisabled = false,
   showCancel = true,
   className = "",
 }) {
   return (
-    <div className={`modal-actions ${className}`}>
+    <div className={`modal-actions${showCancel ? "" : " modal-actions--single"} ${className}`}>
       {showCancel && (
         <button
           type="button"
           className="modal-actions__button modal-actions__cancel"
           onClick={onCancel}
+          disabled={cancelDisabled}
         >
           {cancelText}
         </button>

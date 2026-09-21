@@ -83,6 +83,7 @@
 }
 
 .delete-status-modal__description--danger {
+  --small-modal-description-color: #e24b63;
   color: #e24b63;
 }
 

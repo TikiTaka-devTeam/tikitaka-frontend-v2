@@ -17,7 +17,7 @@ function AssignmentCloseModal({
   return (
     <div className="assignment-modal-backdrop">
       <section
-        className="assignment-modal"
+        className="compact-modal assignment-modal"
         role={
           isSuccess
             ? "dialog"

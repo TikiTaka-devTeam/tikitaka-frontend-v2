@@ -1,7 +1,7 @@
 .modal-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .modal-actions__button {
@@ -41,4 +41,19 @@
   cursor: not-allowed;
 
   opacity: 0.5;
+}
+
+.modal-actions__cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.compact-modal:not(.member-permission-modal) .modal-actions.modal-actions--single {
+  width: min(244px, 100%);
+  height: 44px;
+  justify-content: center;
+}
+
+.compact-modal:not(.member-permission-modal) .modal-actions.modal-actions--single .modal-actions__confirm {
+  width: 100%;
 }

@@ -24,7 +24,7 @@ export default function DownloadModal({
       }}
     >
       <section
-        className="lecture-modal"
+        className="compact-modal lecture-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="lecture-download-title"
