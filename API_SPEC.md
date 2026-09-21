@@ -783,7 +783,7 @@ file: 운영체제_1주차_추가자료.pdf
 ### QST-001
 - **Method/Endpoint/권한·용도:** `GET /api/v1/spaces/{space_id}/questions` / 강의 참여자 / 전체 질문
 - **입력:** Path `space_id`; Query `sort,document_id,category_id,cursor,size`; body 없음.
-- **Response JSON:** `{"questions":[{"question_id":"uuid","title":"CPU 스케줄링이 왜 필요한가요?","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":{"slide_id":"uuid","page_number":3,"thumbnail_url":"https://..."},"categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"created_at":"2026-08-11T10:59:00","view_count":32,"like_count":4,"status":"ANSWERED"}],"total_count":24,"next_cursor":"cursor-value","has_next":true}`
+- **Response JSON:** `{"questions":[{"question_id":"uuid","title":"CPU 스케줄링이 왜 필요한가요?","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":{"slide_id":"uuid","page_number":3,"thumbnail_url":"https://example.com/thumbnails/slide-3.png"},"categories":[{"category_id":"uuid","name":"CPU 스케줄링"},{"category_id":"uuid","name":"프로세스 관리"}],"created_at":"2026-08-11T10:59:00+09:00","view_count":32,"like_count":4,"status":"ANSWERED"}],"total_count":24,"next_cursor":"cursor-value","has_next":true}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** 커서·필터 조합별 캐시 분리.
 
 ### QST-002
@@ -805,26 +805,27 @@ file: 운영체제_1주차_추가자료.pdf
 ### QST-005
 - **Method/Endpoint/권한·용도:** `GET /api/v1/questions/{question_id}` / 강의 참여자 / 상세
 - **입력:** Path `question_id`; body 없음.
-- **Response JSON:** `{"question_id":"uuid","title":"CPU 스케줄링이 왜 필요한가요?","content":"필요한 이유가 궁금합니다.","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":{"slide_id":"uuid","page_number":3,"thumbnail_url":"https://..."},"categories":[],"x_ratio":0.42,"y_ratio":0.58,"view_count":32,"like_count":4,"liked":false,"status":"ANSWERED","answers":[],"comments":[]}`
+- **Response JSON:** `{"question_id":"uuid","title":"CPU 스케줄링이 왜 필요한가요?","content":"필요한 이유가 궁금합니다.","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":{"slide_id":"uuid","page_number":3,"thumbnail_url":"https://example.com/thumbnails/slide-3.png"},"categories":[{"category_id":"uuid","name":"CPU 스케줄링"},{"category_id":"uuid","name":"프로세스 관리"}],"x_ratio":0.42,"y_ratio":0.58,"view_count":32,"like_count":4,"liked":false,"status":"ANSWERED","answers":[],"comments":[],"answer_type":"VOICE","transcript":"음성 전사 원문"}`
+- **확인 필요:** 최신 예시는 `answer_type`, `transcript`를 최상위에 표시한다. 여러 공식 답변이 있는 경우 어떤 답변에 대응하는지 명세되어 있지 않다.
 - **오류:** 명세서에 구체 형식 없음. **FE:** 조회 시 최근 항목 갱신.
 
 ### QST-006
-- **Method/Endpoint/권한·용도:** `POST /api/v1/slides/{slide_id}/questions` / 학생 / 핀 질문
+- **Method/Endpoint/권한·용도:** `POST /api/v1/slides/{slide_id}/questions` / 학생 / 슬라이드 핀 위치 질문 등록. 저장 후 AI가 강의 관련 여부를 판단하고 기존 Category에 분류·연결한다.
 - **입력 JSON:** `{"title":"CPU 스케줄링","content":"CPU 스케줄링은 왜 필요한가요?","x_ratio":0.42,"y_ratio":0.58}`
-- **Response JSON:** `{"question_id":"uuid","document_id":"uuid","slide_id":"uuid","title":"CPU 스케줄링","content":"CPU 스케줄링은 왜 필요한가요?","x_ratio":0.42,"y_ratio":0.58,"categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"status":"PENDING","created_at":"2026-08-11T10:59:00"}`
+- **Response JSON:** `{"question_id":"uuid","document_id":"uuid","slide_id":"uuid","title":"CPU 스케줄링","content":"CPU 스케줄링은 왜 필요한가요?","x_ratio":0.42,"y_ratio":0.58,"categories":[{"category_id":"uuid","name":"CPU 스케줄링"},{"category_id":"uuid","name":"프로세스 관리"}],"status":"PENDING","created_at":"2026-08-11T10:59:00+09:00"}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** 좌표 ratio.
 
 ### QST-007
-- **Method/Endpoint/권한·용도:** `POST /api/v1/spaces/{space_id}/questions` / 학생 / 질문 페이지 등록
+- **Method/Endpoint/권한·용도:** `POST /api/v1/spaces/{space_id}/questions` / 학생 / 질문 페이지 등록. 저장 후 AI가 강의 관련 여부를 판단하고 기존 Category에 분류·연결한다.
 - **입력 JSON:** `{"document_id":"uuid","title":"CPU 스케줄링","content":"CPU 스케줄링은 왜 필요한가요?"}`
-- **Response JSON:** `{"question_id":"uuid","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":null,"title":"CPU 스케줄링","content":"CPU 스케줄링은 왜 필요한가요?","categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"status":"PENDING","created_at":"2026-08-11T10:59:00"}`
+- **Response JSON:** `{"question_id":"uuid","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":null,"title":"CPU 스케줄링","content":"CPU 스케줄링은 왜 필요한가요?","categories":[{"category_id":"uuid-1","name":"CPU 스케줄링"},{"category_id":"uuid-2","name":"프로세스 관리"}],"status":"PENDING","created_at":"2026-08-11T10:59:00+09:00"}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** slide nullable.
 
 ### QST-008
-- **Method/Endpoint/권한·용도:** `POST /api/v1/spaces/{space_id}/questions/similar` / 학생 / 유사 질문
-- **입력 JSON:** `{"document_id":"uuid","slide_id":"uuid","title":"CPU 스케줄링","content":"CPU 스케줄링은 왜 필요한가요?"}`
-- **Response JSON:** `{"similar_questions":[{"question_id":"uuid","title":"CPU 스케줄링의 목적이 무엇인가요?","content":"스케줄링이 필요한 이유가...","categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"status":"ANSWERED","like_count":8,"similarity":0.92}]}`
-- **오류:** 명세서에 구체 형식 없음. **FE:** 최종 등록 전 호출.
+- **Method/Endpoint/권한·용도:** `POST /api/v1/questions/{question_id}/similar` / 강의 참여자 / 등록된 질문의 유사 질문 조회
+- **입력:** Path `question_id`; body 없음.
+- **Response JSON:** `{"question_id":"uuid","similar_questions":[{"question_id":"uuid-2","title":"CPU 스케줄링의 목적이 무엇인가요?","content":"스케줄링이 필요한 이유가 궁금합니다.","categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"status":"ANSWERED","like_count":8,"similarity":0.92}]}`
+- **오류:** 명세서에 구체 형식 없음. **FE:** 질문 등록 후 반환된 `question_id`로 호출한다. AI 처리 상태가 `COMPLETED`일 때만 조회 가능하다.
 
 ### QST-009~017
 
@@ -845,16 +846,25 @@ file: 운영체제_1주차_추가자료.pdf
 - **입력:** Path `space_id`; body 없음. **Response JSON:** `{"documents":[{"document_id":"document-uuid-1","title":"운영체제 3주차","categories":[{"category_id":"category-uuid-1","name":"CPU 스케줄링","source":"AI"},{"category_id":"category-uuid-2","name":"프로세스 관리","source":"MANUAL"}]},{"document_id":"document-uuid-2","title":"운영체제 4주차","categories":[]}]}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** source 표시 선택.
 
-### QST-019
-- **Method/Endpoint/권한·용도:** `PATCH /api/v1/spaces/{space_id}/question-categories` / 교수·권한 조교 / 일괄 저장
-- **입력 JSON:** `{"operations":[{"operation_id":"op-001","type":"CREATE","document_id":"document-uuid-1","temp_id":"temp-category-1","name":"메모리"},{"operation_id":"op-002","type":"UPDATE","document_id":"document-uuid-1","category_id":"category-uuid-2","name":"가상 메모리"},{"operation_id":"op-003","type":"DELETE","document_id":"document-uuid-1","category_id":"category-uuid-3"}]}`
-- **Response JSON:** `{"results":[{"operation_id":"op-001","type":"CREATE","document_id":"document-uuid-1","temp_id":"temp-category-1","category_id":"new-category-uuid","status":"SUCCESS"},{"operation_id":"op-002","type":"UPDATE","document_id":"document-uuid-1","category_id":"category-uuid-2","status":"SUCCESS"},{"operation_id":"op-003","type":"DELETE","document_id":"document-uuid-1","category_id":"category-uuid-3","status":"SUCCESS"}],"saved_at":"2026-08-11T14:30:00+09:00"}`
-- **오류:** 명세서에 구체 형식 없음. **FE:** operation별 status 확인.
+### QST-019~024
 
-### QST-020
-- **Method/Endpoint/권한·용도:** `GET /api/v1/spaces/{space_id}/questions/export?format=csv` / 교수·권한 조교 / CSV
-- **입력:** Path `space_id`, Query `format=csv`; body 없음. **Response JSON:** `{"download_url":"https://example.com/exports/questions.csv"}`
-- **오류:** 명세서에 구체 형식 없음. **FE:** URL 다운로드.
+| ID | Method / Endpoint | 권한·용도 | Request | Response JSON | 비고 |
+|---|---|---|---|---|---|
+| QST-019 | `POST /api/v1/documents/{document_id}/categories` | 교수 / Category 직접 추가 | `{"name":"3-way handshake"}` | `{"category_id":"uuid","document_id":"uuid","name":"3-way handshake","source_type":"MANUAL","created_at":"..."}` | 새 Category와 해당 자료의 기존 질문을 재분석하여 연결 |
+| QST-020 | `PATCH /api/v1/categories/{category_id}` | 교수 / Category명 수정 | `{"name":"TCP 연결 과정"}` | `{"category_id":"uuid","name":"TCP 연결 과정","updated_at":"..."}` | 수정한 Category의 질문 매핑만 재분석·갱신; 다른 Category 매핑 유지 |
+| QST-021 | `DELETE /api/v1/categories/{category_id}` | 교수 / Category 소프트 삭제 | body 없음 | `{"category_id":"uuid","is_deleted":true,"deleted_at":"..."}` | 해당 Category와 질문의 매핑 정리 |
+| QST-022 | `GET /api/v1/spaces/{space_id}/questions/export` | 교수·권한 조교 / 질문·답변 CSV 내보내기 | Query `format=csv`; body 없음 | `{"download_url":"https://example.com/exports/questions.csv"}` | 응답은 JSON이며 `download_url`에서 파일 다운로드 |
+| QST-023 | `POST /api/v1/questions/{question_id}/answers/voice` | 교수 / 음성 공식 답변 등록 | `multipart/form-data`, `file`: `answer.webm` | `{"answer_id":"uuid","question_id":"uuid","answer_type":"VOICE","content":"CPU 스케줄링은 여러 프로세스 중 CPU를 사용할 프로세스를 결정하는 과정입니다.","transcript":"어 CPU 스케줄링은 음 여러 프로세스가...","created_at":"2026-09-18T15:00:00Z"}` | STT 전사 후 발화 정규화하여 최종 답변 저장 |
+| QST-024 | `GET /api/v1/documents/{document_id}/categorized-questions` | 해당 Space 승인 멤버 / Category → Question 조회 | body 없음 | `{"document_id":"uuid","categories":[{"category_id":"uuid-1","name":"CPU 스케줄링","question_count":2,"questions":[{"question_id":"uuid-1","title":"타임 퀀텀이 뭐예요?","content":"Round Robin에서 타임 퀀텀이 궁금합니다.","status":"ANSWERED","like_count":3},{"question_id":"uuid-2","title":"Round Robin은 어떻게 동작하나요?","content":"프로세스가 어떤 순서로 CPU를 사용하는지 궁금합니다.","status":"PENDING","like_count":1}]}]}` | `COURSE_RELATED` 질문만 포함; 질문 하나가 여러 Category에 속할 수 있음 |
+
+### 질문 정렬·범위·AI 처리 규칙
+
+- **QST-001/002 정렬:** `MOST_VIEWED` → `view_count DESC`, `MOST_POPULAR` → `like_count DESC`, `LATEST` → `created_at DESC`. 동률이면 `created_at DESC`, 그다음 `question_id DESC`.
+- **QST-004 범위:** `scope=ALL`은 자료 전체, `scope=SLIDE`는 지정한 슬라이드만 조회하며 `slide_id`가 필수다.
+- **QST-006/007 질문 상태:** `questions.status`는 `PENDING`(공식 답변 없음) 또는 `ANSWERED`(공식 답변 1개 이상). `questions.question_scope`는 `COURSE_RELATED`(강의 내용 관련) 또는 `OTHER`(일정·과제·수업시간 등).
+- **QST-006/007 AI 처리:** `questions.ai_processing_status`는 `PENDING`(대기), `PROCESSING`(분석·분류 중), `COMPLETED`(분석 및 Category 매핑 완료), `FAILED`(AI 분석 또는 DB 반영 실패).
+- **QST-008 유사 질문:** 기준 질문의 Category에 속한 질문을 후보로 삼아 Embedding Cosine Similarity로 정렬한 상위 5개를 반환한다. AI 처리 상태가 `PENDING`/`PROCESSING`이면 조회할 수 없고, `FAILED`이면 조회 실패로 처리한다.
+- **QST-019~021 Category:** `question_categories.source_type`은 `MANUAL`(교수 생성) 또는 `AI`(최초 PDF 분석)이다. `question_categories.is_deleted`는 정상 Category에 `FALSE`, 소프트 삭제된 Category에 `TRUE`다.
 
 ## 9. 과제 API
 

@@ -758,7 +758,7 @@
 }
 
 .question-panel__submit,
-.question-panel__force-submit,
+.question-panel__similar button,
 .question-panel__answer-area form button,
 .question-panel__voice button {
   min-width: 96px;
@@ -778,7 +778,7 @@
 }
 
 .question-panel__submit:disabled,
-.question-panel__force-submit:disabled,
+.question-panel__similar button:disabled,
 .question-panel__answer-area form button:disabled,
 .question-panel__voice button:disabled {
   opacity: 0.4;
@@ -827,7 +827,7 @@
   font-size: 10px;
 }
 
-.question-panel__force-submit {
+.question-panel__similar button {
   margin-top: 8px;
 }
 
