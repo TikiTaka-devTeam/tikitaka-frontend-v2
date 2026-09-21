@@ -647,14 +647,15 @@ file: 운영체제_1주차_추가자료.pdf
 
 - **Method / Endpoint:** `POST /api/v1/documents/{document_id}/revisions/{revision_id}/complete`
 - **권한:** 수정 세션 생성자
-- **용도:** 현재 `RevisionPage` 상태를 기준으로 새 PDF와 실제 Slide 구성을 반영한다.
+- **용도:** 현재 `RevisionPage`의 최종 상태를 기준으로 새로운 PDF와 실제 Slide 구성을 반영한다. 수정 완료 후 변경된 강의자료를 기준으로 Category AI 재분석을 수행한다.
 - **Path:** `document_id`, `revision_id`
 - **Query:** 없음
 - **Request JSON:**
 
 ```json
 {
-  "base_preview_version": 6
+  "base_preview_version": 3,
+  "title": "변경된 강의자료명"
 }
 ```
 
@@ -671,7 +672,7 @@ file: 운영체제_1주차_추가자료.pdf
 
 - **프론트엔드 유의사항:**
   - 요청 후 즉시 완료된 것이 아니라 비동기 처리 중인 상태다.
-  - 요청에는 프론트가 보유한 최신 `preview_version`을 `base_preview_version`으로 전달한다.
+  - 요청에는 프론트가 보유한 최신 `preview_version`을 `base_preview_version`으로 전달하고, 최종 강의자료명을 `title`로 전달한다.
   - `PROCESSING` 상태에서는 추가 편집을 차단한다.
   - `202 Accepted` 응답 후 문서별로 저장한 `revision_id`를 제거하고 저장 완료가 아닌 저장 요청 접수 상태로 안내한다.
   - 저장 요청 중 네트워크 오류 또는 `409`가 발생하면 MAT-008을 호출하여 실제 세션이 `EDITING`인지 `PROCESSING`인지 확인한 후 화면 상태를 결정한다.

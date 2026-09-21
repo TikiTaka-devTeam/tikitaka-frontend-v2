@@ -1062,6 +1062,7 @@ function DocumentModifyPage() {
         documentId,
         session.revision_id,
         session.preview_version,
+        documentName,
       );
 
       updateRevisionSession(completionResponse);

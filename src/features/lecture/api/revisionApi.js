@@ -83,10 +83,14 @@ export async function completeRevision(
   documentId,
   revisionId,
   basePreviewVersion,
+  title,
 ) {
   const response = await apiClient.post(
     `/documents/${documentId}/revisions/${revisionId}/complete`,
-    { base_preview_version: basePreviewVersion },
+    {
+      base_preview_version: basePreviewVersion,
+      title,
+    },
   );
 
   return response.data;
