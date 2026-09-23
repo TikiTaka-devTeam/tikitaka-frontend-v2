@@ -61,8 +61,6 @@ function QuestionList({
 
 function SimilarQuestionList({
   questions,
-  submitting,
-  onSubmitAnyway,
 }) {
   if (!questions.length) {
     return null;
@@ -104,20 +102,11 @@ function SimilarQuestionList({
         })}
       </div>
 
-      <button
-        type="button"
-        className="question-panel__force-submit"
-        disabled={submitting}
-        onClick={onSubmitAnyway}
-      >
-        그래도 질문 등록
-      </button>
     </div>
   );
 }
 
 function StudentQuestionComposer({
-  onCheckSimilar,
   onSubmit,
 }) {
   const [title, setTitle] =
@@ -125,16 +114,6 @@ function StudentQuestionComposer({
 
   const [content, setContent] =
     useState("");
-
-  const [
-    similarQuestions,
-    setSimilarQuestions,
-  ] = useState([]);
-
-  const [
-    checking,
-    setChecking,
-  ] = useState(false);
 
   const [
     submitting,
@@ -151,7 +130,6 @@ function StudentQuestionComposer({
 
       setTitle("");
       setContent("");
-      setSimilarQuestions([]);
     } finally {
       setSubmitting(false);
     }
@@ -162,46 +140,6 @@ function StudentQuestionComposer({
   ) {
     event.preventDefault();
 
-    const trimmedTitle =
-      title.trim();
-
-    const trimmedContent =
-      content.trim();
-
-    if (
-      !trimmedTitle ||
-      !trimmedContent
-    ) {
-      return;
-    }
-
-    setChecking(true);
-
-    try {
-      const questions =
-        await onCheckSimilar({
-          title: trimmedTitle,
-          content: trimmedContent,
-        });
-
-      if (questions.length) {
-        setSimilarQuestions(
-          questions,
-        );
-
-        return;
-      }
-
-      await submitQuestion({
-        title: trimmedTitle,
-        content: trimmedContent,
-      });
-    } finally {
-      setChecking(false);
-    }
-  }
-
-  async function handleSubmitAnyway() {
     const trimmedTitle =
       title.trim();
 
@@ -235,19 +173,7 @@ function StudentQuestionComposer({
           value={title}
           maxLength={120}
           placeholder="질문 제목을 입력해주세요"
-          onChange={(event) => {
-            setTitle(
-              event.target.value,
-            );
-
-            if (
-              similarQuestions.length
-            ) {
-              setSimilarQuestions(
-                [],
-              );
-            }
-          }}
+          onChange={(event) => setTitle(event.target.value)}
         />
       </label>
 
@@ -259,31 +185,9 @@ function StudentQuestionComposer({
         <textarea
           value={content}
           placeholder="질문 내용을 입력해주세요"
-          onChange={(event) => {
-            setContent(
-              event.target.value,
-            );
-
-            if (
-              similarQuestions.length
-            ) {
-              setSimilarQuestions(
-                [],
-              );
-            }
-          }}
+          onChange={(event) => setContent(event.target.value)}
         />
       </label>
-
-      <SimilarQuestionList
-        questions={
-          similarQuestions
-        }
-        submitting={submitting}
-        onSubmitAnyway={
-          handleSubmitAnyway
-        }
-      />
 
       <button
         type="submit"
@@ -291,15 +195,10 @@ function StudentQuestionComposer({
         disabled={
           !title.trim() ||
           !content.trim() ||
-          checking ||
           submitting
         }
       >
-        {checking
-          ? "확인 중"
-          : submitting
-            ? "등록 중"
-            : "등록"}
+        {submitting ? "등록 중" : "등록"}
       </button>
     </form>
   );
@@ -488,6 +387,7 @@ export default function QuestionPanel({
   onClose,
   onSelectQuestion,
   onCheckSimilar,
+  similarQuestionState,
   onCreateQuestion,
   onSubmitAnswer,
   onVoiceStop,
@@ -532,9 +432,6 @@ export default function QuestionPanel({
       ) : createMode &&
         role === "STUDENT" ? (
         <StudentQuestionComposer
-          onCheckSimilar={
-            onCheckSimilar
-          }
           onSubmit={
             onCreateQuestion
           }
@@ -587,6 +484,21 @@ export default function QuestionPanel({
                     },
                   )}
                 </div>
+              )}
+
+              {role === "STUDENT" && similarQuestionState?.questionId === selectedQuestion.id && (
+                similarQuestionState.status === "loading" ? (
+                  <p>AI 유사 질문을 확인하는 중입니다.</p>
+                ) : similarQuestionState.status === "error" ? (
+                  <div className="question-panel__similar">
+                    <p>AI 유사 질문을 확인하지 못했습니다. AI 분석이 끝난 뒤 다시 시도해 주세요.</p>
+                    <button type="button" onClick={() => onCheckSimilar(selectedQuestion.id)}>다시 확인</button>
+                  </div>
+                ) : similarQuestionState.questions.length > 0 ? (
+                  <SimilarQuestionList questions={similarQuestionState.questions} />
+                ) : (
+                  <p>유사 질문이 없습니다.</p>
+                )
               )}
 
               {role ===

@@ -92,6 +92,7 @@ function SpaceToolbar({
       assignment: isProfessor
         ? `/spaces/${spaceId}/assignments/professor`
         : `/spaces/${spaceId}/assignments`,
+      question: `/spaces/${spaceId}/questions`,
       member: `/spaces/${spaceId}/members`,
     };
 

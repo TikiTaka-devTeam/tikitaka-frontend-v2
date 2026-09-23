@@ -1391,7 +1391,11 @@ function StudentAssignmentPage() {
           </section>
         </section>
 
-        <SpaceToolbar activeItem="assignment" />
+        <SpaceToolbar
+          activeItem="assignment"
+          spaceId={spaceId}
+          spaceName={spaceName}
+        />
 
         <AssignmentSubmitModal
           type={

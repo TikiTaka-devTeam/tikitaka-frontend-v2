@@ -18,7 +18,7 @@ function NoticeDeleteModal({
   return (
     <div className="notice-delete-modal-backdrop">
       <section
-        className="notice-delete-modal"
+        className="compact-modal notice-delete-modal"
         role={
           isSuccess
             ? "dialog"

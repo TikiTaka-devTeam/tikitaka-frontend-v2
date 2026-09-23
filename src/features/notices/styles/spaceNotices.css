@@ -906,6 +906,7 @@
 }
 
 .notice-delete-modal__text p {
+  --small-modal-description-color: #e24b63;
   margin: 0;
 
   color: #e24b63;
@@ -918,6 +919,7 @@
 }
 
 .notice-delete-modal__text p.is-success {
+  --small-modal-description-color: #7d8194;
   color: #7d8194;
 }
 

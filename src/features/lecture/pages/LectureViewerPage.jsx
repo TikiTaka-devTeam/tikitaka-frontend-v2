@@ -118,7 +118,6 @@ function normalizeSlides(
 
 export default function LectureViewerPage({
   role,
-  spaceId: spaceIdProp,
   documentId: documentIdProp,
   pdfUrl: pdfUrlProp,
   slides: slidesProp,
@@ -139,16 +138,6 @@ export default function LectureViewerPage({
 
   const navigationState =
     location.state ?? {};
-
-  const spaceId =
-    spaceIdProp ??
-    params.spaceId ??
-    params.space_id ??
-    getStateValue(
-      navigationState,
-      "spaceId",
-      "space_id",
-    );
 
   const documentId =
     documentIdProp ??
@@ -314,6 +303,8 @@ export default function LectureViewerPage({
     selectedQuestion,
     setSelectedQuestion,
   ] = useState(null);
+
+  const [similarQuestionState, setSimilarQuestionState] = useState(null);
 
   const [
     questionPoint,
@@ -1344,47 +1335,14 @@ export default function LectureViewerPage({
     );
   }
 
-  async function handleCheckSimilarQuestion({
-    title,
-    content,
-  }) {
-    if (
-      !spaceId ||
-      !currentSlideId
-    ) {
-      return [];
-    }
-
+  async function handleCheckSimilarQuestion(questionId) {
+    if (!questionId) return;
+    setSimilarQuestionState({ questionId, status: "loading", questions: [] });
     try {
-      const response =
-        await getSimilarQuestions(
-          spaceId,
-          {
-            document_id:
-              documentId,
-
-            slide_id:
-              currentSlideId,
-
-            title,
-            content,
-          },
-        );
-
-      return (
-        response
-          ?.similar_questions ??
-        []
-      );
-    } catch (error) {
-      setToast(
-        error?.response
-          ?.data
-          ?.message ??
-          "유사 질문을 확인하지 못했습니다.",
-      );
-
-      return [];
+      const response = await getSimilarQuestions(questionId);
+      setSimilarQuestionState({ questionId, status: "ready", questions: response?.similar_questions ?? [] });
+    } catch {
+      setSimilarQuestionState({ questionId, status: "error", questions: [] });
     }
   }
 
@@ -1430,6 +1388,8 @@ export default function LectureViewerPage({
       setSelectedQuestion(
         created,
       );
+
+      void handleCheckSimilarQuestion(created.id);
 
       setQuestionPoint(
         null,
@@ -2014,6 +1974,7 @@ export default function LectureViewerPage({
             onCheckSimilar={
               handleCheckSimilarQuestion
             }
+            similarQuestionState={similarQuestionState}
             onCreateQuestion={
               handleCreateQuestion
             }

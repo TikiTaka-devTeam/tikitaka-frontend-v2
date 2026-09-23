@@ -22,6 +22,14 @@ export async function getQuestionDetail(questionId) {
   return response.data;
 }
 
+export async function deleteQuestion(questionId) {
+  const response = await apiClient.delete(
+    `/questions/${questionId}`,
+  );
+
+  return response.data;
+}
+
 export async function createSlideQuestion(
   slideId,
   payload,
@@ -34,13 +42,9 @@ export async function createSlideQuestion(
   return response.data;
 }
 
-export async function getSimilarQuestions(
-  spaceId,
-  payload,
-) {
+export async function getSimilarQuestions(questionId) {
   const response = await apiClient.post(
-    `/spaces/${spaceId}/questions/similar`,
-    payload,
+    `/questions/${questionId}/similar`,
   );
 
   return response.data;

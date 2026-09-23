@@ -15,4 +15,198 @@
   border-radius: 20px;
 
   background: #ffffff;
+  box-shadow: 0 18px 42px rgba(10, 26, 56, 0.22);
+}
+
+/* Figma Small Modal: shared geometry and typography for status dialogs. */
+.compact-modal:not(.member-permission-modal) {
+  width: min(377px, calc(100vw - 24px));
+  min-height: 237px;
+  height: auto;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 18px 42px rgba(10, 26, 56, 0.22);
+  text-align: center;
+}
+
+.compact-modal:not(.member-permission-modal) > :is(
+  .save-status-modal__icon-box,
+  .delete-status-modal__icon-box,
+  .archive-status-modal__icon-box,
+  .activate-status-modal__icon-box,
+  .member-status-modal__icon-box,
+  .system-error-modal__icon-box,
+  .question-submit-modal__icon,
+  .compact-modal__icon
+) {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  margin: 0 0 -4px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+}
+
+.compact-modal__icon {
+  background: #f0f1ff;
+}
+
+.compact-modal__icon img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.compact-modal:not(.member-permission-modal) :is(
+  .save-status-modal__text,
+  .delete-status-modal__text,
+  .archive-status-modal__text,
+  .activate-status-modal__text,
+  .member-status-modal__text,
+  .system-error-modal__text,
+  .question-submit-modal__copy,
+  .document-revision-save-modal__text,
+  .notice-modal__text,
+  .notice-delete-modal__text,
+  .assignment-modal__text,
+  .compact-modal__text
+) {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.compact-modal:not(.member-permission-modal) :is(
+  .save-status-modal__text,
+  .delete-status-modal__text,
+  .archive-status-modal__text,
+  .activate-status-modal__text,
+  .member-status-modal__text,
+  .system-error-modal__text,
+  .question-submit-modal__copy,
+  .document-revision-save-modal__text,
+  .notice-modal__text,
+  .notice-delete-modal__text,
+  .assignment-modal__text,
+  .compact-modal__text
+) > h2,
+.compact-modal.lecture-modal > h2 {
+  margin: 0;
+  color: #25283c;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: normal;
+  white-space: normal;
+}
+
+.compact-modal:not(.member-permission-modal) :is(
+  .save-status-modal__text,
+  .delete-status-modal__text,
+  .archive-status-modal__text,
+  .activate-status-modal__text,
+  .member-status-modal__text,
+  .system-error-modal__text,
+  .question-submit-modal__copy,
+  .document-revision-save-modal__text,
+  .notice-modal__text,
+  .notice-delete-modal__text,
+  .assignment-modal__text,
+  .compact-modal__text
+) > p:not([role="alert"]),
+.compact-modal.lecture-modal > p {
+  margin: 0;
+  color: var(--small-modal-description-color, #7d8194);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.compact-modal:not(.member-permission-modal) > :is(.modal-actions, [class$="__actions"], [class$="__single-button"]) {
+  margin-top: auto;
+}
+
+.compact-modal:is(.notice-modal, .notice-delete-modal, .assignment-modal) > [class$="__content"] {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.compact-modal:is(.notice-modal, .notice-delete-modal, .assignment-modal) > [class$="__content"] > [class$="__icon"] {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+}
+
+.compact-modal:is(.notice-modal, .notice-delete-modal, .assignment-modal, .lecture-modal) > :is(
+  [class$="__actions"],
+  [class$="__single-button"]
+) {
+  width: min(244px, 100%);
+  min-height: 44px;
+  margin: auto 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.compact-modal:is(.notice-modal, .notice-delete-modal, .assignment-modal, .lecture-modal) > [class$="__actions"] button,
+.compact-modal.notice-modal > .notice-modal__single-button {
+  flex: 0 0 107px;
+  width: 107px;
+  height: 44px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.compact-modal:is(.notice-modal, .notice-delete-modal, .assignment-modal, .lecture-modal) > [class$="__actions"] button:only-child,
+.compact-modal.notice-modal > .notice-modal__single-button {
+  flex-basis: 244px;
+  width: 244px;
+}
+
+.compact-modal.lecture-modal {
+  gap: 0;
+}
+
+.compact-modal.lecture-modal > .lecture-modal__icon {
+  flex: 0 0 56px;
+  margin: 0 0 20px;
+}
+
+.compact-modal.lecture-modal > p {
+  margin-top: 6px;
+}
+
+.compact-modal:not(.member-permission-modal) > .modal-actions {
+  width: min(244px, 100%);
+  justify-content: center;
+}
+
+.compact-modal:not(.member-permission-modal) > .modal-actions .modal-actions__button:only-child {
+  width: 244px;
 }

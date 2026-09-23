@@ -18,6 +18,7 @@ import SpacesPage from "../features/spaces/pages/SpacesPage.jsx";
 
 import SpaceNoticePage from "../features/notices/pages/SpaceNoticePage.jsx";
 import SpaceMembersPage from "../features/members/pages/SpaceMembersPage.jsx";
+import SpaceQuestionsPage from "../features/questions/pages/SpaceQuestionsPage.jsx";
 
 import StudentAssignmentPage from "../features/assignments/pages/StudentAssignmentPage.jsx";
 import ProfessorAssignmentPage from "../features/assignments/pages/ProfessorAssignmentPage.jsx";
@@ -46,25 +47,11 @@ function App() {
         }
       />
 
-      <Route
-        path="/dashboard"
-        element={<DashboardPage />}
-      />
-
-      <Route
-        path="/search"
-        element={<SearchPage />}
-      />
-
-      <Route
-        path="/spaces"
-        element={<SpacesPage />}
-      />
-
-      <Route
-        path="/spaces/:spaceId"
-        element={<SpaceLecturePage />}
-      />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/search" element={<SearchPage />} />
+      <Route path="/spaces" element={<SpacesPage />} />
+      <Route path="/spaces/:spaceId" element={<SpaceLecturePage />} />
+      <Route path="/spaces/:spaceId/questions" element={<SpaceQuestionsPage />} />
 
       <Route
         path="/spaces/:spaceId/assignments"
