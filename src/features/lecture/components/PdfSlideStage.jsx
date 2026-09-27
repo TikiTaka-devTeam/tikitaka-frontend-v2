@@ -21,6 +21,9 @@ const DRAW_TOOLS = new Set([
   "HIGHLIGHTER",
 ]);
 
+const MIN_DRAW_POINT_DISTANCE_PX = 0.75;
+const FINAL_POINT_DISTANCE_PX = 0.05;
+
 function clamp(value, min, max) {
   return Math.min(
     Math.max(value, min),
@@ -53,6 +56,40 @@ function pointFromEvent(
       1,
     ),
   };
+}
+
+function getPointerSamples(event) {
+  const nativeEvent =
+    event.nativeEvent ?? event;
+
+  if (
+    typeof nativeEvent.getCoalescedEvents ===
+    "function"
+  ) {
+    const coalescedEvents =
+      nativeEvent.getCoalescedEvents();
+
+    if (coalescedEvents.length) {
+      return [
+        ...coalescedEvents,
+        nativeEvent,
+      ];
+    }
+  }
+
+  return [nativeEvent];
+}
+
+function pointDistanceInPixels(
+  first,
+  second,
+  width,
+  height,
+) {
+  return Math.hypot(
+    (second.x - first.x) * width,
+    (second.y - first.y) * height,
+  );
 }
 
 function drawStroke(
@@ -122,14 +159,45 @@ function drawStroke(
     points[0].y * height,
   );
 
-  for (
-    let index = 1;
-    index < points.length;
-    index += 1
-  ) {
+  if (points.length === 2) {
     context.lineTo(
-      points[index].x * width,
-      points[index].y * height,
+      points[1].x * width,
+      points[1].y * height,
+    );
+  } else {
+    for (
+      let index = 1;
+      index < points.length - 1;
+      index += 1
+    ) {
+      const current =
+        points[index];
+
+      const next =
+        points[index + 1];
+
+      const midpointX =
+        (current.x + next.x) / 2;
+
+      const midpointY =
+        (current.y + next.y) / 2;
+
+      context.quadraticCurveTo(
+        current.x * width,
+        current.y * height,
+        midpointX * width,
+        midpointY * height,
+      );
+    }
+
+    const lastPoint =
+      points[points.length - 1];
+
+    context.quadraticCurveTo(
+      lastPoint.x * width,
+      lastPoint.y * height,
+      lastPoint.x * width,
+      lastPoint.y * height,
     );
   }
 
@@ -140,7 +208,6 @@ function drawStroke(
 function redrawStrokeCanvas(
   canvas,
   strokes,
-  draftStroke,
   width,
   height,
 ) {
@@ -155,16 +222,42 @@ function redrawStrokeCanvas(
   const pixelRatio =
     window.devicePixelRatio || 1;
 
-  canvas.width = Math.round(
-    width * pixelRatio,
-  );
+  const canvasWidth =
+    Math.round(
+      width * pixelRatio,
+    );
 
-  canvas.height = Math.round(
-    height * pixelRatio,
-  );
+  const canvasHeight =
+    Math.round(
+      height * pixelRatio,
+    );
 
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
+  if (
+    canvas.width !== canvasWidth
+  ) {
+    canvas.width = canvasWidth;
+  }
+
+  if (
+    canvas.height !== canvasHeight
+  ) {
+    canvas.height = canvasHeight;
+  }
+
+  const cssWidth = `${width}px`;
+  const cssHeight = `${height}px`;
+
+  if (
+    canvas.style.width !== cssWidth
+  ) {
+    canvas.style.width = cssWidth;
+  }
+
+  if (
+    canvas.style.height !== cssHeight
+  ) {
+    canvas.style.height = cssHeight;
+  }
 
   const context =
     canvas.getContext("2d");
@@ -197,15 +290,6 @@ function redrawStrokeCanvas(
       height,
     );
   });
-
-  if (draftStroke) {
-    drawStroke(
-      context,
-      draftStroke,
-      width,
-      height,
-    );
-  }
 }
 
 function distanceToSegment(
@@ -383,6 +467,15 @@ export default function PdfSlideStage({
   const strokeCanvasRef =
     useRef(null);
 
+  const draftCanvasRef =
+    useRef(null);
+
+  const draftStrokeRef =
+    useRef(null);
+
+  const draftFrameRef =
+    useRef(null);
+
   const activePointerRef =
     useRef(null);
 
@@ -420,14 +513,14 @@ export default function PdfSlideStage({
   });
 
   const [
-    draftStroke,
-    setDraftStroke,
-  ] = useState(null);
-
-  const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
+
+  const normalizedPdfUrl =
+    typeof pdfUrl === "string"
+      ? pdfUrl.trim()
+      : "";
 
   const editableStrokes =
     editableLayer === "SHARED"
@@ -451,14 +544,31 @@ export default function PdfSlideStage({
     );
 
   useEffect(() => {
-    if (!pdfUrl) {
+    if (!normalizedPdfUrl) {
+      setPdfDocument(null);
+      setPdfDocumentUrl("");
+
+      if (pdfUrl) {
+        setErrorMessage(
+          "PDF 주소 형식이 올바르지 않습니다.",
+        );
+      }
+
       return undefined;
     }
 
     let cancelled = false;
 
+    console.log(
+      "[PdfSlideStage] pdfUrl:",
+      typeof normalizedPdfUrl,
+      normalizedPdfUrl,
+    );
+
     const loadingTask =
-      getDocument(pdfUrl);
+      getDocument({
+        url: normalizedPdfUrl,
+      });
 
     loadingTask.promise
       .then((loadedDocument) => {
@@ -472,7 +582,7 @@ export default function PdfSlideStage({
         );
 
         setPdfDocumentUrl(
-          pdfUrl,
+          normalizedPdfUrl,
         );
 
         setErrorMessage("");
@@ -482,6 +592,9 @@ export default function PdfSlideStage({
           return;
         }
 
+        setPdfDocument(null);
+        setPdfDocumentUrl("");
+
         setErrorMessage(
           error?.message ||
             "PDF를 불러오지 못했습니다.",
@@ -490,9 +603,13 @@ export default function PdfSlideStage({
 
     return () => {
       cancelled = true;
+
       loadingTask.destroy();
     };
-  }, [pdfUrl]);
+  }, [
+    normalizedPdfUrl,
+    pdfUrl,
+  ]);
 
   useEffect(() => {
     const container =
@@ -532,7 +649,8 @@ export default function PdfSlideStage({
   useEffect(() => {
     if (
       !pdfDocument ||
-      pdfDocumentUrl !== pdfUrl ||
+      pdfDocumentUrl !==
+        normalizedPdfUrl ||
       !viewportSize.width ||
       !viewportSize.height
     ) {
@@ -667,7 +785,7 @@ export default function PdfSlideStage({
     pageNumber,
     pdfDocument,
     pdfDocumentUrl,
-    pdfUrl,
+    normalizedPdfUrl,
     viewportSize.height,
     viewportSize.width,
     zoom,
@@ -677,16 +795,171 @@ export default function PdfSlideStage({
     redrawStrokeCanvas(
       strokeCanvasRef.current,
       visibleStrokes,
-      draftStroke,
       pageSize.width,
       pageSize.height,
     );
   }, [
-    draftStroke,
     pageSize.height,
     pageSize.width,
     visibleStrokes,
   ]);
+
+  useEffect(() => {
+    redrawStrokeCanvas(
+      draftCanvasRef.current,
+      draftStrokeRef.current
+        ? [draftStrokeRef.current]
+        : [],
+      pageSize.width,
+      pageSize.height,
+    );
+  }, [
+    pageSize.height,
+    pageSize.width,
+  ]);
+
+  useEffect(
+    () => () => {
+      if (
+        draftFrameRef.current != null
+      ) {
+        cancelAnimationFrame(
+          draftFrameRef.current,
+        );
+      }
+    },
+    [],
+  );
+
+  function scheduleDraftRedraw() {
+    if (
+      draftFrameRef.current != null
+    ) {
+      return;
+    }
+
+    draftFrameRef.current =
+      requestAnimationFrame(() => {
+        draftFrameRef.current = null;
+
+        redrawStrokeCanvas(
+          draftCanvasRef.current,
+          draftStrokeRef.current
+            ? [draftStrokeRef.current]
+            : [],
+          pageSize.width,
+          pageSize.height,
+        );
+      });
+  }
+
+  function clearDraftStroke() {
+    if (
+      draftFrameRef.current != null
+    ) {
+      cancelAnimationFrame(
+        draftFrameRef.current,
+      );
+
+      draftFrameRef.current = null;
+    }
+
+    draftStrokeRef.current = null;
+
+    redrawStrokeCanvas(
+      draftCanvasRef.current,
+      [],
+      pageSize.width,
+      pageSize.height,
+    );
+  }
+
+  function appendPointerSamples(
+    event,
+    forceFinalPoint = false,
+  ) {
+    const canvas =
+      strokeCanvasRef.current;
+
+    const draftStroke =
+      draftStrokeRef.current;
+
+    if (
+      !canvas ||
+      !draftStroke ||
+      !pageSize.width ||
+      !pageSize.height
+    ) {
+      return;
+    }
+
+    const samples =
+      getPointerSamples(event);
+
+    let changed = false;
+
+    samples.forEach(
+      (sample, index) => {
+        const point =
+          pointFromEvent(
+            sample,
+            canvas,
+          );
+
+        if (!point) {
+          return;
+        }
+
+        const lastPoint =
+          draftStroke.points[
+            draftStroke.points.length -
+              1
+          ];
+
+        if (!lastPoint) {
+          draftStroke.points.push(
+            point,
+          );
+
+          changed = true;
+          return;
+        }
+
+        const distance =
+          pointDistanceInPixels(
+            lastPoint,
+            point,
+            pageSize.width,
+            pageSize.height,
+          );
+
+        const isLastSample =
+          index ===
+          samples.length - 1;
+
+        const minimumDistance =
+          forceFinalPoint &&
+          isLastSample
+            ? FINAL_POINT_DISTANCE_PX
+            : MIN_DRAW_POINT_DISTANCE_PX;
+
+        if (
+          distance >=
+          minimumDistance
+        ) {
+          draftStroke.points.push(
+            point,
+          );
+
+          changed = true;
+        }
+      },
+    );
+
+    if (changed) {
+      scheduleDraftRedraw();
+    }
+  }
 
   function handleTouchDown(
     event,
@@ -920,7 +1193,7 @@ export default function PdfSlideStage({
       event.pointerId,
     );
 
-    setDraftStroke({
+    draftStrokeRef.current = {
       id: `draft-${Date.now()}`,
       tool: activeTool,
       points: [point],
@@ -930,7 +1203,9 @@ export default function PdfSlideStage({
       strokeOrder:
         editableStrokes.length +
         1,
-    });
+    };
+
+    scheduleDraftRedraw();
   }
 
   function handlePointerMove(
@@ -954,15 +1229,7 @@ export default function PdfSlideStage({
     const canvas =
       strokeCanvasRef.current;
 
-    const point =
-      canvas
-        ? pointFromEvent(
-            event,
-            canvas,
-          )
-        : null;
-
-    if (!point) {
+    if (!canvas) {
       return;
     }
 
@@ -970,6 +1237,16 @@ export default function PdfSlideStage({
       activeTool ===
       "ERASER"
     ) {
+      const point =
+        pointFromEvent(
+          event,
+          canvas,
+        );
+
+      if (!point) {
+        return;
+      }
+
       const strokeIds =
         findErasableStrokeIds(
           editableStrokes,
@@ -995,21 +1272,7 @@ export default function PdfSlideStage({
       return;
     }
 
-    setDraftStroke(
-      (previous) => {
-        if (!previous) {
-          return previous;
-        }
-
-        return {
-          ...previous,
-          points: [
-            ...previous.points,
-            point,
-          ],
-        };
-      },
-    );
+    appendPointerSamples(event);
   }
 
   function finishPointer(
@@ -1055,13 +1318,21 @@ export default function PdfSlideStage({
 
     erasedIdsRef.current.clear();
 
-    if (draftStroke) {
-      onCreateStroke?.(
-        draftStroke,
-      );
+    appendPointerSamples(
+      event,
+      true,
+    );
 
-      setDraftStroke(null);
+    const completedStroke =
+      draftStrokeRef.current;
+
+    if (completedStroke) {
+      onCreateStroke?.(
+        completedStroke,
+      );
     }
+
+    clearDraftStroke();
   }
 
   function cancelPointer(
@@ -1080,7 +1351,7 @@ export default function PdfSlideStage({
 
     erasedIdsRef.current.clear();
 
-    setDraftStroke(null);
+    clearDraftStroke();
   }
 
   return (
@@ -1092,7 +1363,7 @@ export default function PdfSlideStage({
         ref={viewportRef}
         className="pdf-stage__viewport"
       >
-        {!pdfUrl && (
+        {!normalizedPdfUrl && (
           <div className="pdf-stage__message">
             강의자료를 불러오는 중입니다.
           </div>
@@ -1104,7 +1375,7 @@ export default function PdfSlideStage({
           </div>
         )}
 
-        {pdfUrl && (
+        {normalizedPdfUrl && (
           <div
             className="pdf-stage__page"
             style={{
@@ -1142,6 +1413,15 @@ export default function PdfSlideStage({
               onLostPointerCapture={
                 cancelPointer
               }
+            />
+
+            <canvas
+              ref={draftCanvasRef}
+              className="pdf-stage__stroke-canvas"
+              aria-hidden="true"
+              style={{
+                pointerEvents: "none",
+              }}
             />
 
             <div

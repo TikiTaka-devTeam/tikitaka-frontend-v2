@@ -405,14 +405,14 @@
   overflow: hidden;
   border: 1px solid #e0e5f0;
   border-radius: 4px;
-  background: #ffffff;
+  background: #3c4147;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
 }
 
 .lecture-page.is-panel-open .pdf-stage {
   height: 586px;
   margin-top: 20px;
-  background: #f7f8fb;
+  background: #3c4147;
 }
 
 .pdf-stage__viewport {
@@ -424,6 +424,7 @@
   place-items: center;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+  background: #3c4147;
 }
 
 .pdf-stage__page {
