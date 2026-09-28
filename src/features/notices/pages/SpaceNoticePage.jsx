@@ -36,9 +36,7 @@ import SpaceNoticeCreateView from "../components/SpaceNoticeCreateView.jsx";
 
 import "../styles/spaceNotices.css";
 
-function decodeJwtPayload(
-  token,
-) {
+function decodeJwtPayload(token) {
   try {
     if (!token) {
       return null;
@@ -116,33 +114,77 @@ function normalizeRoleValues(
   ];
 }
 
+function isNoticeWriterRole(
+  role,
+) {
+  const normalizedRole =
+    String(
+      role || "",
+    ).toUpperCase();
+
+  return (
+    normalizedRole.includes(
+      "PROFESSOR",
+    ) ||
+    normalizedRole.includes(
+      "ASSISTANT",
+    )
+  );
+}
+
+function readStoredRoleValues() {
+  const storedValues = [];
+
+  const userStorageKeys = [
+    "tikitaka_user",
+    "user",
+  ];
+
+  userStorageKeys.forEach(
+    (key) => {
+      const rawValue =
+        localStorage.getItem(
+          key,
+        );
+
+      if (!rawValue) {
+        return;
+      }
+
+      try {
+        storedValues.push(
+          JSON.parse(
+            rawValue,
+          ),
+        );
+      } catch {
+        storedValues.push(
+          rawValue,
+        );
+      }
+    },
+  );
+
+  storedValues.push(
+    localStorage.getItem(
+      "tikitaka_account_type",
+    ),
+    localStorage.getItem(
+      "account_type",
+    ),
+    localStorage.getItem(
+      "role",
+    ),
+  );
+
+  return normalizeRoleValues(
+    storedValues,
+  );
+}
+
 function canWriteNotice(
   locationState,
 ) {
-  const stateRoles =
-    normalizeRoleValues([
-      locationState?.role,
-      locationState?.userRole,
-      locationState?.user_role,
-      locationState?.spaceRole,
-      locationState?.space_role,
-    ]);
-
-  if (
-    stateRoles.length >
-    0
-  ) {
-    return stateRoles.some(
-      (role) =>
-        role.includes(
-          "PROFESSOR",
-        ) ||
-        role.includes(
-          "ASSISTANT",
-        ),
-    );
-  }
-
   const token =
     localStorage.getItem(
       "tikitaka_access_token",
@@ -153,24 +195,30 @@ function canWriteNotice(
       token,
     );
 
-  const tokenRoles =
+  const roles =
     normalizeRoleValues([
+      locationState?.role,
+      locationState?.userRole,
+      locationState?.user_role,
+      locationState?.spaceRole,
+      locationState?.space_role,
+
+      ...readStoredRoleValues(),
+
       payload?.role,
       payload?.roles,
       payload?.userRole,
       payload?.user_role,
+      payload?.accountType,
+      payload?.account_type,
+      payload?.spaceRole,
+      payload?.space_role,
       payload?.authority,
       payload?.authorities,
     ]);
 
-  return tokenRoles.some(
-    (role) =>
-      role.includes(
-        "PROFESSOR",
-      ) ||
-      role.includes(
-        "ASSISTANT",
-      ),
+  return roles.some(
+    isNoticeWriterRole,
   );
 }
 
@@ -231,12 +279,11 @@ function normalizeNoticeDetail(
       notice.authorName ??
       "",
 
-    viewCount:
-      Number(
-        notice.view_count ??
-          notice.viewCount ??
-          0,
-      ),
+    viewCount: Number(
+      notice.view_count ??
+        notice.viewCount ??
+        0,
+    ),
 
     content:
       notice.content ??
@@ -1088,7 +1135,10 @@ function SpaceNoticePage() {
 
   return (
     <main className="notice-page space-page-transition">
-      <div className="notice-background" aria-hidden="true">
+      <div
+        className="notice-background"
+        aria-hidden="true"
+      >
         <div className="notice-page__orb notice-page__orb--left" />
         <div className="notice-page__orb notice-page__orb--right" />
       </div>
@@ -1426,7 +1476,15 @@ function SpaceNoticePage() {
           </section>
         </section>
 
-        <SpaceToolbar activeItem="notice" spaceId={spaceId} spaceName={spaceName} />
+        <SpaceToolbar
+          activeItem="notice"
+          spaceId={
+            spaceId
+          }
+          spaceName={
+            spaceName
+          }
+        />
 
         <NoticeDeleteModal
           type={

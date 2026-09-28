@@ -26,9 +26,10 @@ import "../styles/spaceLecture.css";
 
 function normalizeDocument(document, fileName) {
   const title = document.title || "강의자료";
-  const normalizedFileName = typeof fileName === "string" && fileName.trim()
-    ? fileName
-    : `${title}.pdf`;
+  const normalizedFileName =
+    typeof fileName === "string" && fileName.trim()
+      ? fileName
+      : `${title}.pdf`;
 
   return {
     id: document.document_id,
@@ -42,7 +43,10 @@ function normalizeDocument(document, fileName) {
 
 function readUserRole() {
   try {
-    const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
+    const user = JSON.parse(
+      localStorage.getItem("tikitaka_user") || "null",
+    );
+
     const role =
       user?.account_type ??
       user?.accountType ??
@@ -66,7 +70,9 @@ function SpaceLecturePage() {
   const location = useLocation();
   const { spaceId } = useParams();
   const isProfessor = readUserRole() === "PROFESSOR";
-  const spaceName = location.state?.spaceName || "실무중심산학협력프로젝트1";
+  const spaceName =
+    location.state?.spaceName || "실무중심산학협력프로젝트1";
+
   const [materialModalStep, setMaterialModalStep] = useState(null);
   const [pendingMaterial, setPendingMaterial] = useState(null);
   const [materialSaveError, setMaterialSaveError] = useState("");
@@ -96,9 +102,12 @@ function SpaceLecturePage() {
         const documents = await getDocuments(spaceId, {
           signal: controller.signal,
         });
+
         setMaterials(
           Array.isArray(documents)
-            ? documents.map((document) => normalizeDocument(document))
+            ? documents.map((document) =>
+                normalizeDocument(document),
+              )
             : [],
         );
       } catch (error) {
@@ -110,7 +119,9 @@ function SpaceLecturePage() {
           );
         }
       } finally {
-        if (!controller.signal.aborted) setIsLoadingMaterials(false);
+        if (!controller.signal.aborted) {
+          setIsLoadingMaterials(false);
+        }
       }
     };
 
@@ -122,17 +133,26 @@ function SpaceLecturePage() {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrollIndicatorVisible(true);
-      window.clearTimeout(scrollIndicatorTimerRef.current);
-      scrollIndicatorTimerRef.current = window.setTimeout(() => {
-        setIsScrollIndicatorVisible(false);
-      }, 700);
+
+      window.clearTimeout(
+        scrollIndicatorTimerRef.current,
+      );
+
+      scrollIndicatorTimerRef.current =
+        window.setTimeout(() => {
+          setIsScrollIndicatorVisible(false);
+        }, 700);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.clearTimeout(scrollIndicatorTimerRef.current);
+      window.clearTimeout(
+        scrollIndicatorTimerRef.current,
+      );
     };
   }, []);
 
@@ -150,30 +170,57 @@ function SpaceLecturePage() {
     };
 
     document.addEventListener("mousedown", closeSortModal);
-    document.addEventListener("keydown", closeSortModalWithEscape);
+    document.addEventListener(
+      "keydown",
+      closeSortModalWithEscape,
+    );
 
     return () => {
-      document.removeEventListener("mousedown", closeSortModal);
-      document.removeEventListener("keydown", closeSortModalWithEscape);
+      document.removeEventListener(
+        "mousedown",
+        closeSortModal,
+      );
+
+      document.removeEventListener(
+        "keydown",
+        closeSortModalWithEscape,
+      );
     };
   }, []);
 
   useEffect(() => {
     const closeMenu = (event) => {
-      if (!event.target.closest(".lecture-material-card__menu-wrapper")) {
+      if (
+        !event.target.closest(
+          ".lecture-material-card__menu-wrapper",
+        )
+      ) {
         setOpenMaterialMenuId(null);
       }
     };
+
     const closeMenuWithEscape = (event) => {
-      if (event.key === "Escape") setOpenMaterialMenuId(null);
+      if (event.key === "Escape") {
+        setOpenMaterialMenuId(null);
+      }
     };
 
     document.addEventListener("mousedown", closeMenu);
-    document.addEventListener("keydown", closeMenuWithEscape);
+    document.addEventListener(
+      "keydown",
+      closeMenuWithEscape,
+    );
 
     return () => {
-      document.removeEventListener("mousedown", closeMenu);
-      document.removeEventListener("keydown", closeMenuWithEscape);
+      document.removeEventListener(
+        "mousedown",
+        closeMenu,
+      );
+
+      document.removeEventListener(
+        "keydown",
+        closeMenuWithEscape,
+      );
     };
   }, []);
 
@@ -185,18 +232,28 @@ function SpaceLecturePage() {
   };
 
   const handleConfirmMaterialSave = async () => {
-    if (!pendingMaterial || isUploadingMaterial) return;
+    if (!pendingMaterial || isUploadingMaterial) {
+      return;
+    }
 
     setMaterialSaveError("");
 
     try {
       setIsUploadingMaterial(true);
-      const uploadedDocument = await uploadDocument(spaceId, pendingMaterial);
+
+      const uploadedDocument = await uploadDocument(
+        spaceId,
+        pendingMaterial,
+      );
 
       setMaterials((currentMaterials) => [
         ...currentMaterials,
-        normalizeDocument(uploadedDocument, pendingMaterial.file.name),
+        normalizeDocument(
+          uploadedDocument,
+          pendingMaterial.file.name,
+        ),
       ]);
+
       setMaterialModalStep("complete");
     } catch (error) {
       setMaterialSaveError(
@@ -210,10 +267,15 @@ function SpaceLecturePage() {
   };
 
   const formatUploadedDate = (uploadedAt) => {
-    if (!uploadedAt) return "-";
+    if (!uploadedAt) {
+      return "-";
+    }
 
     const date = new Date(uploadedAt);
-    if (Number.isNaN(date.getTime())) return "-";
+
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
 
     return new Intl.DateTimeFormat("ko-KR", {
       year: "numeric",
@@ -234,7 +296,10 @@ function SpaceLecturePage() {
         );
       }
 
-      return new Date(second.uploadedAt).getTime() - new Date(first.uploadedAt).getTime();
+      return (
+        new Date(second.uploadedAt).getTime() -
+        new Date(first.uploadedAt).getTime()
+      );
     });
   }, [materials, sortOrder]);
 
@@ -243,14 +308,56 @@ function SpaceLecturePage() {
     setIsSortModalOpen(false);
   };
 
+  const openLecture = (material) => {
+    if (!spaceId || !material?.id) {
+      return;
+    }
+
+    const rolePath = isProfessor
+      ? "professor"
+      : "student";
+
+    navigate(
+      `/spaces/${spaceId}/documents/${material.id}/lecture/${rolePath}`,
+      {
+        state: {
+          spaceId,
+          documentId: material.id,
+          documentTitle: material.title,
+          spaceName,
+        },
+      },
+    );
+  };
+
+  const handleMaterialKeyDown = (
+    event,
+    material,
+  ) => {
+    if (
+      event.key !== "Enter" &&
+      event.key !== " "
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    openLecture(material);
+  };
+
   const openEditModal = (material) => {
     setOpenMaterialMenuId(null);
-    navigate(`/spaces/${spaceId}/documents/${material.id}/modify`, {
-      state: {
-        material,
-        spaceName,
+
+    navigate(
+      `/spaces/${spaceId}/documents/${material.id}/modify`,
+      {
+        state: {
+          material,
+          spaceName,
+        },
       },
-    });
+    );
   };
 
   const openDeleteModal = (material) => {
@@ -261,18 +368,24 @@ function SpaceLecturePage() {
   };
 
   const handleConfirmMaterialDelete = async () => {
-    if (!selectedMaterial || isDeletingMaterial) return;
+    if (!selectedMaterial || isDeletingMaterial) {
+      return;
+    }
 
     setDeleteMaterialError("");
 
     try {
       setIsDeletingMaterial(true);
+
       await deleteDocument(selectedMaterial.id);
+
       setMaterials((currentMaterials) =>
         currentMaterials.filter(
-          (material) => material.id !== selectedMaterial.id,
+          (material) =>
+            material.id !== selectedMaterial.id,
         ),
       );
+
       setDeleteModalStep("complete");
     } catch (error) {
       setDeleteMaterialError(
@@ -287,7 +400,10 @@ function SpaceLecturePage() {
 
   return (
     <main className="space-lecture-page space-page-transition">
-      <div className="space-lecture-background" aria-hidden="true">
+      <div
+        className="space-lecture-background"
+        aria-hidden="true"
+      >
         <div className="space-lecture-page__orb space-lecture-page__orb--left" />
         <div className="space-lecture-page__orb space-lecture-page__orb--right" />
       </div>
@@ -299,7 +415,10 @@ function SpaceLecturePage() {
           aria-label="Space 목록으로 돌아가기"
           onClick={() => navigate("/spaces")}
         >
-          <img src={backIcon} alt="" />
+          <img
+            src={backIcon}
+            alt=""
+          />
         </button>
 
         <header className="space-lecture-header">
@@ -319,40 +438,80 @@ function SpaceLecturePage() {
             aria-label="강의자료 정렬 기준"
             aria-expanded={isSortModalOpen}
             aria-haspopup="dialog"
-            onClick={() => setIsSortModalOpen((isOpen) => !isOpen)}
+            onClick={() =>
+              setIsSortModalOpen(
+                (isOpen) => !isOpen,
+              )
+            }
           >
             <img
               src={listIcon}
               alt=""
-              className={isSortModalOpen ? "is-active" : undefined}
+              className={
+                isSortModalOpen
+                  ? "is-active"
+                  : undefined
+              }
             />
           </button>
 
           <span
             className={`space-lecture-sort__scroll-indicator${
-              isScrollIndicatorVisible ? " is-visible" : ""
+              isScrollIndicatorVisible
+                ? " is-visible"
+                : ""
             }`}
             aria-hidden="true"
           />
 
           {isSortModalOpen && (
-            <div className="space-lecture-sort__modal" role="dialog" aria-label="정렬 기준">
+            <div
+              className="space-lecture-sort__modal"
+              role="dialog"
+              aria-label="정렬 기준"
+            >
               <strong>정렬 기준</strong>
+
               <button
                 type="button"
-                className={sortOrder === "latest" ? "is-selected" : undefined}
-                onClick={() => selectSortOrder("latest")}
+                className={
+                  sortOrder === "latest"
+                    ? "is-selected"
+                    : undefined
+                }
+                onClick={() =>
+                  selectSortOrder("latest")
+                }
               >
                 <span>최신순</span>
-                {sortOrder === "latest" && <img src={sortSelectedIcon} alt="" />}
+
+                {sortOrder === "latest" && (
+                  <img
+                    src={sortSelectedIcon}
+                    alt=""
+                  />
+                )}
               </button>
+
               <button
                 type="button"
-                className={sortOrder === "name" ? "is-selected" : undefined}
-                onClick={() => selectSortOrder("name")}
+                className={
+                  sortOrder === "name"
+                    ? "is-selected"
+                    : undefined
+                }
+                onClick={() =>
+                  selectSortOrder("name")
+                }
               >
                 <span>이름순</span>
-                {sortOrder === "name" && <img src={sortSelectedIcon} alt="" />}
+
+                {sortOrder === "name" && (
+                  <img
+                    src={sortSelectedIcon}
+                    alt=""
+                  />
+                )}
               </button>
             </div>
           )}
@@ -363,25 +522,33 @@ function SpaceLecturePage() {
           aria-label={`${spaceName} 강의자료`}
           data-space-id={spaceId}
         >
-          {isProfessor && !isLoadingMaterials && !materialsLoadError && (
-            <button
-              type="button"
-              className="lecture-material-card"
-              onClick={() => {
-                setSelectedMaterial(null);
-                setPendingMaterial(null);
-                setMaterialModalStep("form");
-              }}
-            >
-              <span className="lecture-material-card__upload">
-                <img src={uploadIcon} alt="" />
-              </span>
-              <span className="lecture-material-card__details">
-                <strong>강의자료 추가</strong>
-                <small>PDF, 이미지 또는 문서를 업로드하세요.</small>
-              </span>
-            </button>
-          )}
+          {isProfessor &&
+            !isLoadingMaterials &&
+            !materialsLoadError && (
+              <button
+                type="button"
+                className="lecture-material-card"
+                onClick={() => {
+                  setSelectedMaterial(null);
+                  setPendingMaterial(null);
+                  setMaterialModalStep("form");
+                }}
+              >
+                <span className="lecture-material-card__upload">
+                  <img
+                    src={uploadIcon}
+                    alt=""
+                  />
+                </span>
+
+                <span className="lecture-material-card__details">
+                  <strong>강의자료 추가</strong>
+                  <small>
+                    PDF, 이미지 또는 문서를 업로드하세요.
+                  </small>
+                </span>
+              </button>
+            )}
 
           {isLoadingMaterials && (
             <p
@@ -392,67 +559,137 @@ function SpaceLecturePage() {
             </p>
           )}
 
-          {!isLoadingMaterials && materialsLoadError && (
-            <p className="space-lecture-status space-lecture-status--error" role="alert">
-              {materialsLoadError}
-            </p>
-          )}
+          {!isLoadingMaterials &&
+            materialsLoadError && (
+              <p
+                className="space-lecture-status space-lecture-status--error"
+                role="alert"
+              >
+                {materialsLoadError}
+              </p>
+            )}
 
-          {!isLoadingMaterials && !materialsLoadError && sortedMaterials.map((material) => (
-            <article
-              key={material.id}
-              className="lecture-material-card lecture-material-card--document"
-            >
-              <div className="lecture-material-card__preview">
-                <img
-                  src={material.thumbnailUrl || materialThumbnail}
-                  alt={`${material.title} 첫 페이지`}
-                />
-              </div>
-              <div className="lecture-material-card__details">
-                <strong>{material.title}</strong>
-                <small>
-                  {formatUploadedDate(material.uploadedAt)} · {material.pageCount ?? 0}페이지
-                </small>
-                {isProfessor && (
-                  <div className="lecture-material-card__menu-wrapper">
-                    <button
-                      type="button"
-                      className={`lecture-material-card__more-button ${
-                        openMaterialMenuId === material.id ? "is-active" : ""
-                      }`}
-                      aria-label={`${material.title} 관리 메뉴`}
-                      aria-expanded={openMaterialMenuId === material.id}
-                      onClick={() =>
-                        setOpenMaterialMenuId((currentId) =>
-                          currentId === material.id ? null : material.id,
-                        )
+          {!isLoadingMaterials &&
+            !materialsLoadError &&
+            sortedMaterials.map(
+              (material) => (
+                <article
+                  key={material.id}
+                  className="lecture-material-card lecture-material-card--document"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() =>
+                    openLecture(material)
+                  }
+                  onKeyDown={(event) =>
+                    handleMaterialKeyDown(
+                      event,
+                      material,
+                    )
+                  }
+                >
+                  <div className="lecture-material-card__preview">
+                    <img
+                      src={
+                        material.thumbnailUrl ||
+                        materialThumbnail
                       }
-                    >
-                      <img src={moreIcon} alt="" />
-                    </button>
+                      alt={`${material.title} 첫 페이지`}
+                    />
+                  </div>
 
-                    {openMaterialMenuId === material.id && (
-                      <div className="lecture-material-menu">
-                        <button type="button" onClick={() => openEditModal(material)}>
-                          <PencilEditIcon aria-hidden="true" />
-                          <span>수정</span>
-                        </button>
+                  <div className="lecture-material-card__details">
+                    <strong>
+                      {material.title}
+                    </strong>
+
+                    <small>
+                      {formatUploadedDate(
+                        material.uploadedAt,
+                      )}{" "}
+                      ·{" "}
+                      {material.pageCount ?? 0}
+                      페이지
+                    </small>
+
+                    {isProfessor && (
+                      <div
+                        className="lecture-material-card__menu-wrapper"
+                        onClick={(event) =>
+                          event.stopPropagation()
+                        }
+                        onKeyDown={(event) =>
+                          event.stopPropagation()
+                        }
+                      >
                         <button
                           type="button"
-                          className="lecture-material-menu__delete"
-                          onClick={() => openDeleteModal(material)}
+                          className={`lecture-material-card__more-button ${
+                            openMaterialMenuId ===
+                            material.id
+                              ? "is-active"
+                              : ""
+                          }`}
+                          aria-label={`${material.title} 관리 메뉴`}
+                          aria-expanded={
+                            openMaterialMenuId ===
+                            material.id
+                          }
+                          onClick={() =>
+                            setOpenMaterialMenuId(
+                              (currentId) =>
+                                currentId ===
+                                material.id
+                                  ? null
+                                  : material.id,
+                            )
+                          }
                         >
-                          <DeleteIcon aria-hidden="true" />
-                          <span>삭제</span>
+                          <img
+                            src={moreIcon}
+                            alt=""
+                          />
                         </button>
+
+                        {openMaterialMenuId ===
+                          material.id && (
+                          <div className="lecture-material-menu">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openEditModal(
+                                  material,
+                                )
+                              }
+                            >
+                              <PencilEditIcon
+                                aria-hidden="true"
+                              />
+                              <span>수정</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="lecture-material-menu__delete"
+                              onClick={() =>
+                                openDeleteModal(
+                                  material,
+                                )
+                              }
+                            >
+                              <DeleteIcon
+                                aria-hidden="true"
+                              />
+                              <span>삭제</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            </article>
-          ))}
+                </article>
+              ),
+            )}
 
           {!isProfessor &&
             !isLoadingMaterials &&
@@ -464,66 +701,85 @@ function SpaceLecturePage() {
             )}
         </section>
 
-        <SpaceToolbar activeItem="lecture" spaceId={spaceId} spaceName={spaceName} />
+        <SpaceToolbar
+          activeItem="lecture"
+          spaceId={spaceId}
+          spaceName={spaceName}
+        />
       </div>
 
-      {isProfessor && materialModalStep === "form" && (
-        <MaterialUploadModal
-          initialMaterial={pendingMaterial}
-          onClose={closeMaterialModal}
-          onSave={(material) => {
-            setMaterialSaveError("");
-            setPendingMaterial(material);
-            setMaterialModalStep("confirm");
-          }}
-        />
-      )}
+      {isProfessor &&
+        materialModalStep === "form" && (
+          <MaterialUploadModal
+            initialMaterial={pendingMaterial}
+            onClose={closeMaterialModal}
+            onSave={(material) => {
+              setMaterialSaveError("");
+              setPendingMaterial(material);
+              setMaterialModalStep("confirm");
+            }}
+          />
+        )}
 
-      {isProfessor && materialModalStep === "confirm" && pendingMaterial && (
-        <MaterialSaveConfirmModal
-          error={materialSaveError}
-          isEditing={false}
-          isSubmitting={isUploadingMaterial}
-          onCancel={() => {
-            if (isUploadingMaterial) return;
-            setMaterialSaveError("");
-            setMaterialModalStep("form");
-          }}
-          onConfirm={handleConfirmMaterialSave}
-        />
-      )}
+      {isProfessor &&
+        materialModalStep === "confirm" &&
+        pendingMaterial && (
+          <MaterialSaveConfirmModal
+            error={materialSaveError}
+            isEditing={false}
+            isSubmitting={isUploadingMaterial}
+            onCancel={() => {
+              if (isUploadingMaterial) {
+                return;
+              }
 
-      {isProfessor && materialModalStep === "complete" && (
-        <MaterialSaveCompleteModal
-          isEditing={Boolean(selectedMaterial)}
-          onConfirm={closeMaterialModal}
-        />
-      )}
+              setMaterialSaveError("");
+              setMaterialModalStep("form");
+            }}
+            onConfirm={handleConfirmMaterialSave}
+          />
+        )}
 
-      {isProfessor && deleteModalStep === "confirm" && selectedMaterial && (
-        <MaterialDeleteConfirmModal
-          error={deleteMaterialError}
-          isDeleting={isDeletingMaterial}
-          onCancel={() => {
-            if (isDeletingMaterial) return;
-            setDeleteModalStep(null);
-            setSelectedMaterial(null);
-            setDeleteMaterialError("");
-          }}
-          onConfirm={handleConfirmMaterialDelete}
-        />
-      )}
+      {isProfessor &&
+        materialModalStep === "complete" && (
+          <MaterialSaveCompleteModal
+            isEditing={Boolean(
+              selectedMaterial,
+            )}
+            onConfirm={closeMaterialModal}
+          />
+        )}
 
-      {isProfessor && deleteModalStep === "complete" && (
-        <DeleteCompleteModal
-          description="삭제한 강의자료는 다시 복구할 수 없습니다"
-          onConfirm={() => {
-            setDeleteModalStep(null);
-            setSelectedMaterial(null);
-            setDeleteMaterialError("");
-          }}
-        />
-      )}
+      {isProfessor &&
+        deleteModalStep === "confirm" &&
+        selectedMaterial && (
+          <MaterialDeleteConfirmModal
+            error={deleteMaterialError}
+            isDeleting={isDeletingMaterial}
+            onCancel={() => {
+              if (isDeletingMaterial) {
+                return;
+              }
+
+              setDeleteModalStep(null);
+              setSelectedMaterial(null);
+              setDeleteMaterialError("");
+            }}
+            onConfirm={handleConfirmMaterialDelete}
+          />
+        )}
+
+      {isProfessor &&
+        deleteModalStep === "complete" && (
+          <DeleteCompleteModal
+            description="삭제한 강의자료는 다시 복구할 수 없습니다"
+            onConfirm={() => {
+              setDeleteModalStep(null);
+              setSelectedMaterial(null);
+              setDeleteMaterialError("");
+            }}
+          />
+        )}
     </main>
   );
 }

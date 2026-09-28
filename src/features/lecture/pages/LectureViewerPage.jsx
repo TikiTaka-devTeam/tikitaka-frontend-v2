@@ -4,7 +4,6 @@ import {
   useRef,
   useState,
 } from "react";
-
 import {
   useLocation,
   useNavigate,
@@ -21,6 +20,7 @@ import DownloadModal from "../components/DownloadModal";
 
 import {
   getDocumentDownloadUrl,
+  getDocumentSlides,
 } from "../api/lectureApi";
 
 import {
@@ -32,6 +32,13 @@ import {
   syncPrivateStrokes,
   syncSharedStrokes,
 } from "../api/strokeApi";
+
+import {
+  createLectureSocket,
+  requestStrokeResync,
+  sendSharedStroke,
+  sendStrokeAck,
+} from "../api/lectureSocket";
 
 import {
   createAnswer,
@@ -60,6 +67,15 @@ const DRAWING_TOOLS =
     "HIGHLIGHTER",
     "ERASER",
   ]);
+
+function getStrokeId(stroke) {
+  return (
+    stroke?.id ??
+    stroke?.strokeId ??
+    stroke?.stroke_id ??
+    ""
+  );
+}
 
 function getStateValue(
   state,
@@ -116,6 +132,142 @@ function normalizeSlides(
     );
 }
 
+function extractPdfUrl(
+  value,
+) {
+  if (!value) {
+    return "";
+  }
+
+  if (
+    typeof value ===
+    "string"
+  ) {
+    return value.trim();
+  }
+
+  if (
+    typeof URL !==
+      "undefined" &&
+    value instanceof URL
+  ) {
+    return value.href;
+  }
+
+  if (
+    typeof value ===
+    "object"
+  ) {
+    const nestedValue =
+      value.url ??
+      value.href ??
+      value.pdf_url ??
+      value.pdfUrl ??
+      value.download_url ??
+      value.downloadUrl ??
+      value.file_url ??
+      value.fileUrl ??
+      "";
+
+    if (
+      nestedValue === value
+    ) {
+      return "";
+    }
+
+    return extractPdfUrl(
+      nestedValue,
+    );
+  }
+
+  return "";
+}
+
+function unwrapSlidesResponse(
+  response,
+) {
+  if (!response) {
+    return {};
+  }
+
+  if (
+    response.data &&
+    typeof response.data ===
+      "object"
+  ) {
+    return response.data;
+  }
+
+  if (
+    response.result &&
+    typeof response.result ===
+      "object"
+  ) {
+    return response.result;
+  }
+
+  if (
+    response.payload &&
+    typeof response.payload ===
+      "object"
+  ) {
+    return response.payload;
+  }
+
+  return response;
+}
+
+function normalizeSlidesResponse(
+  response,
+) {
+  const payload =
+    unwrapSlidesResponse(
+      response,
+    );
+
+  const normalizedSlides =
+    normalizeSlides(
+      payload?.slides ??
+        response?.slides ??
+        [],
+    );
+
+  const rawPdfUrl =
+    payload?.pdf_url ??
+    payload?.pdfUrl ??
+    payload?.document
+      ?.pdf_url ??
+    payload?.document
+      ?.pdfUrl ??
+    response?.pdf_url ??
+    response?.pdfUrl ??
+    "";
+
+  const pdfUrl =
+    extractPdfUrl(
+      rawPdfUrl,
+    );
+
+  const pageCount =
+    Number(
+      payload?.page_count ??
+        payload?.pageCount ??
+        response?.page_count ??
+        response?.pageCount ??
+        normalizedSlides.length,
+    ) ||
+    normalizedSlides.length;
+
+  return {
+    pdfUrl,
+
+    pageCount,
+
+    slides:
+      normalizedSlides,
+  };
+}
+
 export default function LectureViewerPage({
   role,
   documentId: documentIdProp,
@@ -149,15 +301,17 @@ export default function LectureViewerPage({
       "document_id",
     );
 
-  const pdfUrl =
-    pdfUrlProp ??
-    navigationState.pdfUrl ??
-    navigationState.pdf_url ??
-    navigationState.document
-      ?.pdfUrl ??
-    navigationState.document
-      ?.pdf_url ??
-    "";
+  const initialPdfUrl =
+    extractPdfUrl(
+      pdfUrlProp ??
+        navigationState.pdfUrl ??
+        navigationState.pdf_url ??
+        navigationState.document
+          ?.pdfUrl ??
+        navigationState.document
+          ?.pdf_url ??
+        "",
+    );
 
   const documentTitle =
     documentTitleProp ??
@@ -187,7 +341,7 @@ export default function LectureViewerPage({
       "slide_id",
     );
 
-  const slides =
+  const initialSlides =
     useMemo(
       () =>
         normalizeSlides(
@@ -205,7 +359,7 @@ export default function LectureViewerPage({
       ],
     );
 
-  const pageCount =
+  const initialPageCount =
     Number(
       pageCountProp ??
         navigationState.pageCount ??
@@ -214,20 +368,42 @@ export default function LectureViewerPage({
           ?.pageCount ??
         navigationState.document
           ?.page_count ??
-        slides.length,
-    ) || slides.length;
+        initialSlides.length,
+    ) ||
+    initialSlides.length;
+
+  const [
+    pdfUrl,
+    setPdfUrl,
+  ] = useState(
+    initialPdfUrl,
+  );
+
+  const [
+    slides,
+    setSlides,
+  ] = useState(
+    initialSlides,
+  );
+
+  const [
+    pageCount,
+    setPageCount,
+  ] = useState(
+    initialPageCount,
+  );
 
   const initialSlideIndex =
     useMemo(() => {
       if (
         !initialSlideId ||
-        !slides.length
+        !initialSlides.length
       ) {
         return 0;
       }
 
       const index =
-        slides.findIndex(
+        initialSlides.findIndex(
           (slide) =>
             String(slide.id) ===
             String(
@@ -240,7 +416,7 @@ export default function LectureViewerPage({
         : 0;
     }, [
       initialSlideId,
-      slides,
+      initialSlides,
     ]);
 
   const [
@@ -258,7 +434,7 @@ export default function LectureViewerPage({
   const [
     activeTool,
     setActiveTool,
-  ] = useState("PEN");
+  ] = useState(null);
 
   const [
     toolOptionsOpen,
@@ -372,6 +548,12 @@ export default function LectureViewerPage({
       Promise.resolve(),
     );
 
+  const socketRef =
+    useRef(null);
+
+  const lastReceivedStrokeSeqRef =
+    useRef(0);
+
   const currentSlide =
     slides[currentIndex] ??
     null;
@@ -406,6 +588,94 @@ export default function LectureViewerPage({
     "#212326";
 
   useEffect(() => {
+    if (!documentId) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    async function loadDocument() {
+      try {
+        const response =
+          await getDocumentSlides(
+            documentId,
+          );
+
+        if (cancelled) {
+          return;
+        }
+
+        const normalized =
+          normalizeSlidesResponse(
+            response,
+          );
+
+        if (
+          !normalized.pdfUrl
+        ) {
+          setToast(
+            "PDF 주소를 불러오지 못했습니다.",
+          );
+        }
+
+        setPdfUrl(
+          normalized.pdfUrl,
+        );
+
+        setSlides(
+          normalized.slides,
+        );
+
+        setPageCount(
+          normalized.pageCount ||
+            normalized.slides
+              .length,
+        );
+
+        const nextIndex =
+          initialSlideId
+            ? normalized.slides.findIndex(
+                (slide) =>
+                  String(
+                    slide.id,
+                  ) ===
+                  String(
+                    initialSlideId,
+                  ),
+              )
+            : 0;
+
+        setCurrentIndex(
+          nextIndex >= 0
+            ? nextIndex
+            : 0,
+        );
+      } catch (error) {
+        if (!cancelled) {
+          setToast(
+            error?.response
+              ?.data
+              ?.message ??
+              error?.response
+                ?.data
+                ?.detail ??
+              "강의자료를 불러오지 못했습니다.",
+          );
+        }
+      }
+    }
+
+    loadDocument();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    documentId,
+    initialSlideId,
+  ]);
+
+  useEffect(() => {
     if (
       !currentSlideId ||
       !documentId
@@ -422,12 +692,25 @@ export default function LectureViewerPage({
             return;
           }
 
-          setSlideLoading(true);
+          setSlideLoading(
+            true,
+          );
 
-          setPrivateStrokes([]);
-          setSharedStrokes([]);
-          setQuestions([]);
-          setFixers([]);
+          setPrivateStrokes(
+            [],
+          );
+
+          setSharedStrokes(
+            [],
+          );
+
+          setQuestions(
+            [],
+          );
+
+          setFixers(
+            [],
+          );
 
           setSelectedQuestion(
             null,
@@ -591,6 +874,183 @@ export default function LectureViewerPage({
     currentSlideId,
     documentId,
     role,
+  ]);
+
+  useEffect(() => {
+    if (
+      !spaceId ||
+      !currentSlideId
+    ) {
+      return undefined;
+    }
+
+    socketRef.current?.deactivate?.();
+
+    socketRef.current = null;
+
+    lastReceivedStrokeSeqRef.current = 0;
+
+    const slideId =
+      currentSlideId;
+
+    const client =
+      createLectureSocket({
+        spaceId,
+        slideId,
+
+        onSharedStroke: (
+          stroke,
+          payload,
+        ) => {
+          if (
+            String(
+              payload?.slideId ??
+                payload?.slide_id ??
+                slideId,
+            ) !==
+            String(slideId)
+          ) {
+            return;
+          }
+
+          const strokeSeq =
+            Number(
+              payload?.strokeSeq ??
+                payload?.stroke_seq ??
+                0,
+            );
+
+          if (
+            Number.isFinite(
+              strokeSeq,
+            ) &&
+            strokeSeq > 0
+          ) {
+            lastReceivedStrokeSeqRef.current =
+              Math.max(
+                lastReceivedStrokeSeqRef.current,
+                strokeSeq,
+              );
+          }
+
+          if (
+            role !==
+            "PROFESSOR"
+          ) {
+            const incoming =
+              normalizeStroke(
+                stroke,
+              );
+
+            const incomingId =
+              getStrokeId(
+                incoming,
+              );
+
+            if (
+              incomingId &&
+              !incoming.isDeleted
+            ) {
+              setSharedStrokes(
+                (previous) => {
+                  const index =
+                    previous.findIndex(
+                      (item) =>
+                        String(
+                          getStrokeId(
+                            item,
+                          ),
+                        ) ===
+                        String(
+                          incomingId,
+                        ),
+                    );
+
+                  if (
+                    index < 0
+                  ) {
+                    return [
+                      ...previous,
+                      incoming,
+                    ];
+                  }
+
+                  const next =
+                    [...previous];
+
+                  next[index] =
+                    incoming;
+
+                  return next;
+                },
+              );
+            }
+          }
+
+          if (
+            role !==
+              "PROFESSOR" &&
+            lastReceivedStrokeSeqRef.current >
+              0
+          ) {
+            sendStrokeAck(
+              client,
+              {
+                spaceId,
+                slideId,
+
+                lastReceivedStrokeSeq:
+                  lastReceivedStrokeSeqRef.current,
+              },
+            );
+          }
+        },
+
+        onConnect: () => {
+          if (
+            role ===
+            "PROFESSOR"
+          ) {
+            return;
+          }
+
+          requestStrokeResync(
+            client,
+            {
+              spaceId,
+              slideId,
+
+              lastReceivedStrokeSeq:
+                lastReceivedStrokeSeqRef.current,
+            },
+          );
+        },
+
+        onError: (error) => {
+          console.error(
+            "강의 필기 WebSocket 오류",
+            error,
+          );
+        },
+      });
+
+    socketRef.current =
+      client;
+
+    return () => {
+      client?.deactivate?.();
+
+      if (
+        socketRef.current ===
+        client
+      ) {
+        socketRef.current = null;
+      }
+    };
+  }, [
+    currentSlideId,
+    role,
+    spaceId,
   ]);
 
   useEffect(() => {
@@ -793,6 +1253,7 @@ export default function LectureViewerPage({
 
     const optimisticStroke = {
       ...stroke,
+
       id: localStrokeId,
     };
 
@@ -882,6 +1343,24 @@ export default function LectureViewerPage({
           }
 
           if (
+            role ===
+              "PROFESSOR" &&
+            layer ===
+              "SHARED"
+          ) {
+            sendSharedStroke(
+              socketRef.current,
+              {
+                spaceId,
+                slideId,
+
+                stroke:
+                  savedStroke,
+              },
+            );
+          }
+
+          if (
             recordHistory &&
             slideId ===
               currentSlideId
@@ -900,7 +1379,9 @@ export default function LectureViewerPage({
               ],
             );
 
-            setRedoStack([]);
+            setRedoStack(
+              [],
+            );
           }
 
           return savedStroke;
@@ -1057,7 +1538,9 @@ export default function LectureViewerPage({
               ],
             );
 
-            setRedoStack([]);
+            setRedoStack(
+              [],
+            );
           }
 
           return removed;
@@ -1093,6 +1576,7 @@ export default function LectureViewerPage({
         await createStrokeOnServer(
           {
             ...stroke,
+
             id: undefined,
           },
           false,
@@ -1238,23 +1722,13 @@ export default function LectureViewerPage({
         tool,
       )
     ) {
-      if (
-        activeTool ===
-        tool
-      ) {
-        setToolOptionsOpen(
-          (previous) =>
-            !previous,
-        );
-      } else {
-        setActiveTool(
-          tool,
-        );
+      setActiveTool(
+        tool,
+      );
 
-        setToolOptionsOpen(
-          true,
-        );
-      }
+      setToolOptionsOpen(
+        true,
+      );
 
       setCreateQuestionMode(
         false,
@@ -1667,8 +2141,11 @@ export default function LectureViewerPage({
         );
 
       const downloadUrl =
-        response?.download_url ??
-        response?.downloadUrl;
+        extractPdfUrl(
+          response?.download_url ??
+            response?.downloadUrl ??
+            response,
+        );
 
       if (!downloadUrl) {
         throw new Error();
@@ -1715,7 +2192,7 @@ export default function LectureViewerPage({
     );
 
     setActiveTool(
-      "PEN",
+      null,
     );
 
     setToolOptionsOpen(
@@ -1759,7 +2236,7 @@ export default function LectureViewerPage({
     );
 
     setActiveTool(
-      "PEN",
+      null,
     );
 
     setToolOptionsOpen(
@@ -1788,10 +2265,14 @@ export default function LectureViewerPage({
         pageShellClass
       }
     >
-      <div className="lecture-background" aria-hidden="true">
+      <div
+        className="lecture-background"
+        aria-hidden="true"
+      >
         <div className="lecture-page__orb lecture-page__orb--left" />
         <div className="lecture-page__orb lecture-page__orb--right" />
       </div>
+
       <div className="lecture-frame">
         <LectureHeader
           title={
@@ -1832,11 +2313,29 @@ export default function LectureViewerPage({
                 activeTool={
                   activeTool
                 }
+                activeColor={
+                  activeColor
+                }
                 panelOpen={
                   panelOpen
                 }
                 onToolChange={
                   handleToolChange
+                }
+                onColorChange={(
+                  value,
+                  tool,
+                ) =>
+                  setColorByTool(
+                    (
+                      previous,
+                    ) => ({
+                      ...previous,
+
+                      [tool]:
+                        value,
+                    }),
+                  )
                 }
               />
 

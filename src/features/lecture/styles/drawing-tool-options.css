@@ -1,0 +1,457 @@
+.lecture-toolbar-wrap
+  .drawing-options.drawing-options--figma-thickness {
+  position: absolute;
+  width: calc(
+    var(--lecture-u, 1px) * 160
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 109
+  );
+  min-width: calc(
+    var(--lecture-u, 1px) * 160
+  );
+  min-height: calc(
+    var(--lecture-u, 1px) * 109
+  );
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid #e6e7e9;
+  border-radius: calc(
+    var(--lecture-u, 1px) * 10
+  );
+  background: #ffffff;
+  box-shadow:
+    0
+      calc(
+        var(--lecture-u, 1px) * 4
+      )
+      calc(
+        var(--lecture-u, 1px) * 6
+      )
+      rgba(31, 41, 55, 0.1),
+    0
+      calc(
+        var(--lecture-u, 1px) * 2
+      )
+      calc(
+        var(--lecture-u, 1px) * 4
+      )
+      rgba(31, 41, 55, 0.06);
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-label {
+  position: absolute;
+  left: calc(
+    var(--lecture-u, 1px) * 14
+  );
+  top: calc(
+    var(--lecture-u, 1px) * 25
+  );
+  width: calc(
+    var(--lecture-u, 1px) * 29
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 16
+  );
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: #000000;
+  font-family:
+    Inter,
+    "Tikitaka UI",
+    sans-serif;
+  font-size: calc(
+    var(--lecture-u, 1px) * 8
+  );
+  font-weight: 600;
+  line-height: calc(
+    var(--lecture-u, 1px) * 16
+  );
+  white-space: nowrap;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider {
+  position: absolute;
+  left: calc(
+    var(--lecture-u, 1px) * 43
+  );
+  top: calc(
+    var(--lecture-u, 1px) * 28
+  );
+  width: calc(
+    var(--lecture-u, 1px) * 106
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 11
+  );
+  overflow: visible;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-track-image {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: calc(
+    var(--lecture-u, 1px) * 106
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 11
+  );
+  display: block;
+  max-width: none;
+  max-height: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-thumb {
+  position: absolute;
+  z-index: 2;
+
+  top: 50%;
+
+  width: calc(
+    var(--lecture-u, 1px) * 13
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 13
+  );
+
+  transform:
+    translate(-50%, -50%);
+
+  overflow: visible;
+  pointer-events: none;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-thumb
+  img {
+  position: absolute;
+
+  left: calc(
+    var(--lecture-u, 1px) * -7
+  );
+
+  top: calc(
+    var(--lecture-u, 1px) * -3
+  );
+
+  width: calc(
+    var(--lecture-u, 1px) * 27
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 27
+  );
+
+  max-width: none;
+  max-height: none;
+
+  display: block;
+
+  transform: none;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider
+  input[type="range"] {
+  position: absolute;
+  z-index: 3;
+
+  left: 0;
+  top: 50%;
+
+  width: 100%;
+  height: calc(
+    var(--lecture-u, 1px) * 13
+  );
+
+  margin: 0;
+  padding: 0;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  border: 0;
+  outline: 0;
+  background: transparent;
+
+  transform:
+    translateY(-50%);
+
+  cursor: pointer;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider
+  input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: calc(
+    var(--lecture-u, 1px) * 13
+  );
+
+  border: 0;
+  background: transparent;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider
+  input[type="range"]::-webkit-slider-thumb {
+  width: calc(
+    var(--lecture-u, 1px) * 13
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 13
+  );
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  opacity: 0;
+
+  cursor: grab;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider
+  input[type="range"]:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider
+  input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: calc(
+    var(--lecture-u, 1px) * 13
+  );
+
+  border: 0;
+  background: transparent;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider
+  input[type="range"]::-moz-range-progress {
+  background: transparent;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__thickness-slider
+  input[type="range"]::-moz-range-thumb {
+  width: calc(
+    var(--lecture-u, 1px) * 13
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 13
+  );
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  opacity: 0;
+
+  cursor: grab;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__preset-row--figma {
+  position: absolute;
+
+  left: calc(
+    var(--lecture-u, 1px) * 14
+  );
+  top: calc(
+    var(--lecture-u, 1px) * 76
+  );
+
+  width: calc(
+    var(--lecture-u, 1px) * 132
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 14
+  );
+
+  margin: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      calc(
+        var(--lecture-u, 1px) * 30
+      )
+    );
+
+  column-gap: calc(
+    var(--lecture-u, 1px) * 21
+  );
+
+  align-items: center;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__preset-row--figma
+  button {
+  width: calc(
+    var(--lecture-u, 1px) * 30
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 14
+  );
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+  box-shadow: none;
+
+  cursor: pointer;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__preset-row--figma
+  button.is-active {
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+  box-shadow: none;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__preset-line {
+  width: calc(
+    var(--lecture-u, 1px) * 30
+  );
+
+  display: block;
+
+  border-radius: calc(
+    var(--lecture-u, 1px) * 15
+  );
+
+  background: #212326;
+
+  pointer-events: none;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__preset-line--thin {
+  height: calc(
+    var(--lecture-u, 1px) * 3
+  );
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__preset-line--medium {
+  height: calc(
+    var(--lecture-u, 1px) * 5
+  );
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--figma-thickness
+  .drawing-options__preset-line--thick {
+  height: calc(
+    var(--lecture-u, 1px) * 7
+  );
+}
+
+.drawing-options__color-add {
+  position: relative;
+
+  width: calc(
+    var(--lecture-u, 1px) * 24
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 24
+  );
+
+  padding: 0;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  border: 0;
+  border-radius: 50%;
+  outline: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.drawing-options__color-add img {
+  width: calc(
+    var(--lecture-u, 1px) * 24
+  );
+  height: calc(
+    var(--lecture-u, 1px) * 24
+  );
+
+  display: block;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+.drawing-options__native-color-input {
+  position: fixed;
+
+  left: -10000px;
+  top: -10000px;
+
+  width: 1px;
+  height: 1px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+
+  opacity: 0;
+  pointer-events: none;
+}

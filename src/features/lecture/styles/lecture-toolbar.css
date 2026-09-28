@@ -1,26 +1,28 @@
 .lecture-toolbar.lecture-toolbar--figma {
   width: 100%;
   height: 55px;
-
   display: flex;
   align-items: center;
-
+  overflow: visible;
   border: 1px solid #dee3ed;
   border-radius: 16px;
-
   background: #ffffff;
-
   box-shadow: 0 10px 26px rgba(20, 36, 71, 0.07);
-
   backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
 }
 
 .lecture-toolbar.lecture-toolbar--figma
   .lecture-toolbar__inner {
+  width: 848px;
   height: 35px;
-  margin-left: 121px;
+  margin-left: 120px;
+  display: flex;
+  align-items: center;
+}
 
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__tools {
   display: flex;
   align-items: center;
   gap: 30px;
@@ -28,12 +30,9 @@
 
 .lecture-toolbar.lecture-toolbar--figma
   .lecture-toolbar__slot {
-  position: relative;
-
   width: 25px;
   height: 35px;
   flex: 0 0 25px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,15 +42,17 @@
   .lecture-toolbar__button {
   width: 35px;
   height: 35px;
-  padding: 0;
-
+  flex: 0 0 35px;
+  padding: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-
+  appearance: none;
+  -webkit-appearance: none;
   border: 0;
+  border-radius: 0;
+  outline: 0;
   background: transparent;
-
   cursor: pointer;
 }
 
@@ -63,13 +64,16 @@
 }
 
 .lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button:hover {
+  opacity: 0.72;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
   .lecture-toolbar__icon {
   position: relative;
-
   width: 25px;
   height: 25px;
   flex: 0 0 25px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,18 +83,12 @@
   .lecture-toolbar__icon img {
   width: 25px;
   height: 25px;
-
   display: block;
   object-fit: contain;
-
   pointer-events: none;
   user-select: none;
 }
 
-/*
-  question.svg는 파일 전체 영역 안에서 실제 아이콘이 중앙 일부만 차지하므로
-  SVG 파일은 그대로 두고 25×25 영역에서 실제 아이콘 부분만 보여준다.
-*/
 .lecture-toolbar.lecture-toolbar--figma
   .lecture-toolbar__button[data-tool="Q_POINT"]
   .lecture-toolbar__icon {
@@ -99,19 +97,15 @@
 
 .lecture-toolbar.lecture-toolbar--figma
   .lecture-toolbar__button[data-tool="Q_POINT"]
-  .lecture-toolbar__icon img {
+  .lecture-toolbar__icon
+  img {
   position: absolute;
-
-  width: 77px;
-  height: 77px;
-
   left: -26px;
   top: -16px;
-
+  width: 77px;
+  height: 77px;
   max-width: none;
   max-height: none;
-
-  object-fit: initial;
 }
 
 .lecture-toolbar.lecture-toolbar--figma
@@ -119,33 +113,512 @@
   width: 1px;
   height: 35px;
   flex: 0 0 1px;
-
-  margin-left: 12px;
-
+  margin-left: 42px;
   background: #d7dce5;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__drawing-controls {
+  height: 35px;
+  margin-left: 29px;
+  display: flex;
+  align-items: center;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__thickness-button {
+  width: 35px;
+  height: 35px;
+  flex: 0 0 35px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__thickness-preview {
+  width: 35px;
+  height: 7px;
+  display: block;
+  border-radius: 15px;
+  background: #212326;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-palette {
+  margin-left: 31px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-swatch {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  padding: 0;
+  display: block;
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 50%;
+  outline: 0;
+  cursor: pointer;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-swatch.is-active {
+  border: 2px solid #ffffff;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25);
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-swatch--custom {
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed #141b34;
+  background: #ffffff;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-swatch--custom
+  > span {
+  position: relative;
+  width: 10px;
+  height: 10px;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-swatch--custom
+  > span::before,
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-swatch--custom
+  > span::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: #141b34;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__quick-swatch--custom
+  > span::after {
+  transform:
+    translate(-50%, -50%)
+    rotate(90deg);
+}
+
+.lecture-toolbar-wrap .drawing-options {
+  position: absolute;
+  z-index: 30;
+  box-sizing: border-box;
+  border: 1px solid #e6e7e9;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--thickness {
+  left: 55.78%;
+  top: 60px;
+  width: 160px;
+  height: 109px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row {
+  position: absolute;
+  left: 13px;
+  top: 20px;
+  width: 136px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row
+  strong {
+  width: 30px;
+  flex: 0 0 30px;
+  overflow: visible;
+  color: #000000;
+  font-family:
+    Inter,
+    "Tikitaka UI",
+    sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row
+  input[type="range"] {
+  --range-progress: 30%;
+  width: 106px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row
+  input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 3px;
+  border-radius: 10px;
+  background:
+    linear-gradient(
+      to right,
+      #777f8c 0%,
+      #777f8c var(--range-progress),
+      #d9dce2 var(--range-progress),
+      #d9dce2 100%
+    );
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row
+  input[type="range"]::-webkit-slider-thumb {
+  width: 13px;
+  height: 13px;
+  margin-top: -5px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 50%;
+  background: #b8bdc6;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row
+  input[type="range"]::-moz-range-track {
+  height: 3px;
+  border-radius: 10px;
+  background: #d9dce2;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row
+  input[type="range"]::-moz-range-progress {
+  height: 3px;
+  border-radius: 10px;
+  background: #777f8c;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__range-row
+  input[type="range"]::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: #b8bdc6;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__preset-row {
+  position: absolute;
+  left: 13px;
+  top: 76px;
+  width: 132px;
+  height: 10px;
+  margin: 0;
+  display: grid;
+  grid-template-columns:
+    repeat(3, 30px);
+  column-gap: 21px;
+  align-items: center;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__preset-row
+  button {
+  width: 30px;
+  height: 14px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__preset-row
+  span {
+  width: 30px;
+  display: block;
+  border-radius: 15px;
+  background: #212326;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__preset-row
+  button.is-active,
+.lecture-toolbar-wrap
+  .drawing-options__preset-row
+  button.is-active
+  span {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--colors {
+  right: 4.86%;
+  top: 60px;
+  width: 160px;
+  height: 109px;
+  padding: 19px 27px;
+  display: grid;
+  grid-template-columns:
+    repeat(3, 24px);
+  grid-template-rows:
+    repeat(2, 24px);
+  column-gap: 16px;
+  row-gap: 21px;
+  border-radius: 8px;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--colors
+  button,
+.lecture-toolbar-wrap
+  .drawing-options__custom {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--colors
+  button {
+  border: 0;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--colors
+  button.is-active {
+  border: 2px solid #ffffff;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25);
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__custom {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1.5px dashed #141b34;
+  background: #ffffff;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__custom
+  > span {
+  position: relative;
+  width: 10px;
+  height: 10px;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__custom
+  > span::before,
+.lecture-toolbar-wrap
+  .drawing-options__custom
+  > span::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: #141b34;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__custom
+  > span::after {
+  transform:
+    translate(-50%, -50%)
+    rotate(90deg);
+}
+
+.lecture-toolbar-wrap
+  .drawing-options__custom
+  input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--eraser {
+  left: 145px;
+  top: 60px;
+  width: 56px;
+  min-height: 145px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  border-radius: 10px;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--eraser
+  button {
+  min-width: 38px;
+  height: 25px;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--eraser
+  button.is-active {
+  border-radius: 6px;
+  outline: 2px solid
+    rgba(46, 107, 255, 0.2);
+}
+
+.lecture-toolbar-wrap
+  .drawing-options--eraser
+  span {
+  display: block;
+  max-width: 38px;
+  border-radius: 15px;
+  background: #212326;
 }
 
 .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
   .lecture-toolbar__inner {
+  width: auto;
   margin-left: 39px;
+}
+
+.lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+  .lecture-toolbar__drawing-controls,
+.lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+  .lecture-toolbar__end-divider {
+  display: none;
 }
 
 @media (max-width: 1100px) {
   .lecture-toolbar.lecture-toolbar--figma
-    .lecture-toolbar__inner,
-  .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
     .lecture-toolbar__inner {
+    width: auto;
     margin-left: 40px;
-    gap: clamp(16px, 2.2vw, 30px);
+    margin-right: 28px;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__tools {
+    gap: clamp(
+      18px,
+      2.4vw,
+      30px
+    );
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__drawing-controls {
+    margin-left: auto;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__quick-palette {
+    gap: 14px;
+    margin-left: 20px;
   }
 }
 
 @media (max-width: 980px) {
   .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__drawing-controls,
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__end-divider {
+    display: none;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma
     .lecture-toolbar__inner,
   .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
     .lecture-toolbar__inner {
     margin-left: 24px;
+    margin-right: 24px;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__tools {
+    gap: clamp(
+      16px,
+      2.5vw,
+      30px
+    );
+  }
+
+  .lecture-toolbar-wrap
+    .drawing-options--thickness {
+    left: 50%;
+    transform:
+      translateX(-50%);
+  }
+
+  .lecture-toolbar-wrap
+    .drawing-options--colors {
+    right: 12px;
   }
 }
 
@@ -167,15 +640,319 @@
     min-width: max-content;
     margin-left: 14px;
     margin-right: 18px;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma
+    .lecture-toolbar__tools {
     gap: 22px;
+  }
+
+  .lecture-toolbar-wrap
+    .drawing-options--colors {
+    right: 4px;
+  }
+
+  .lecture-toolbar-wrap
+    .drawing-options--eraser {
+    left: 64px;
   }
 }
 
 @media (max-width: 520px) {
   .lecture-toolbar.lecture-toolbar--figma
-    .lecture-toolbar__inner,
+    .lecture-toolbar__tools {
+    gap: 18px;
+  }
+
+  .lecture-toolbar-wrap
+    .drawing-options--thickness {
+    width: 150px;
+  }
+
+  .lecture-toolbar-wrap
+    .drawing-options--colors {
+    width: 150px;
+    padding-inline: 22px;
+  }
+}
+
+.lecture-toolbar.lecture-toolbar--figma {
+  height: calc(var(--lecture-u, 1px) * 55);
+  border-radius: calc(var(--lecture-u, 1px) * 16);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__inner {
+  width: calc(var(--lecture-u, 1px) * 848);
+  height: calc(var(--lecture-u, 1px) * 35);
+  margin-left: calc(var(--lecture-u, 1px) * 120);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__tools {
+  gap: calc(var(--lecture-u, 1px) * 30);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__slot {
+  width: calc(var(--lecture-u, 1px) * 25);
+  height: calc(var(--lecture-u, 1px) * 35);
+  flex-basis: calc(var(--lecture-u, 1px) * 25);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__button {
+  width: calc(var(--lecture-u, 1px) * 35);
+  height: calc(var(--lecture-u, 1px) * 35);
+  flex-basis: calc(var(--lecture-u, 1px) * 35);
+  padding: calc(var(--lecture-u, 1px) * 5);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__icon {
+  width: calc(var(--lecture-u, 1px) * 25);
+  height: calc(var(--lecture-u, 1px) * 25);
+  flex-basis: calc(var(--lecture-u, 1px) * 25);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__icon img,
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__color-svg,
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__color-svg svg {
+  width: calc(var(--lecture-u, 1px) * 25);
+  height: calc(var(--lecture-u, 1px) * 25);
+  display: block;
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__icon img {
+  filter: none !important;
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__color-svg {
+  pointer-events: none;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button[data-tool="Q_POINT"]
+  .lecture-toolbar__icon img {
+  left: calc(var(--lecture-u, 1px) * -26);
+  top: calc(var(--lecture-u, 1px) * -16);
+  width: calc(var(--lecture-u, 1px) * 77);
+  height: calc(var(--lecture-u, 1px) * 77);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__end-divider {
+  height: calc(var(--lecture-u, 1px) * 35);
+  margin-left: calc(var(--lecture-u, 1px) * 42);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__drawing-controls {
+  height: calc(var(--lecture-u, 1px) * 35);
+  margin-left: calc(var(--lecture-u, 1px) * 29);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__thickness-button {
+  width: calc(var(--lecture-u, 1px) * 35);
+  height: calc(var(--lecture-u, 1px) * 35);
+  flex-basis: calc(var(--lecture-u, 1px) * 35);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__thickness-preview {
+  width: calc(var(--lecture-u, 1px) * 35);
+  height: max(5px, calc(var(--lecture-u, 1px) * 7));
+  border-radius: calc(var(--lecture-u, 1px) * 15);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__quick-palette {
+  margin-left: calc(var(--lecture-u, 1px) * 31);
+  gap: calc(var(--lecture-u, 1px) * 20);
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__quick-swatch {
+  width: max(22px, calc(var(--lecture-u, 1px) * 24));
+  height: max(22px, calc(var(--lecture-u, 1px) * 24));
+  flex-basis: max(22px, calc(var(--lecture-u, 1px) * 24));
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__quick-swatch > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.lecture-toolbar-wrap .drawing-options--thickness {
+  left: clamp(
+    calc(var(--lecture-u, 1px) * 8),
+    55.78%,
+    calc(100% - calc(var(--lecture-u, 1px) * 168))
+  );
+  top: calc(var(--lecture-u, 1px) * 60);
+  width: clamp(150px, calc(var(--lecture-u, 1px) * 160), 180px);
+  height: clamp(104px, calc(var(--lecture-u, 1px) * 109), 124px);
+  border-radius: calc(var(--lecture-u, 1px) * 10);
+}
+
+.lecture-toolbar-wrap .drawing-options__range-row {
+  left: calc(var(--lecture-u, 1px) * 13);
+  top: calc(var(--lecture-u, 1px) * 20);
+  width: calc(100% - calc(var(--lecture-u, 1px) * 24));
+  height: calc(var(--lecture-u, 1px) * 20);
+}
+
+.lecture-toolbar-wrap .drawing-options__range-row strong {
+  width: calc(var(--lecture-u, 1px) * 30);
+  flex-basis: calc(var(--lecture-u, 1px) * 30);
+  font-size: clamp(8px, calc(var(--lecture-u, 1px) * 8), 10px);
+  line-height: calc(var(--lecture-u, 1px) * 16);
+}
+
+.lecture-toolbar-wrap .drawing-options__range-row input[type="range"] {
+  width: calc(var(--lecture-u, 1px) * 106);
+  height: calc(var(--lecture-u, 1px) * 16);
+}
+
+.lecture-toolbar-wrap .drawing-options__preset-row {
+  left: calc(var(--lecture-u, 1px) * 13);
+  top: calc(var(--lecture-u, 1px) * 76);
+  width: calc(var(--lecture-u, 1px) * 132);
+  height: calc(var(--lecture-u, 1px) * 10);
+  grid-template-columns: repeat(3, calc(var(--lecture-u, 1px) * 30));
+  column-gap: calc(var(--lecture-u, 1px) * 21);
+}
+
+.lecture-toolbar-wrap .drawing-options__preset-row button,
+.lecture-toolbar-wrap .drawing-options__preset-row span {
+  width: calc(var(--lecture-u, 1px) * 30);
+}
+
+.lecture-toolbar-wrap .drawing-options__preset-row button {
+  height: calc(var(--lecture-u, 1px) * 14);
+}
+
+.lecture-toolbar-wrap .drawing-options--colors {
+  right: max(8px, 4.86%);
+  top: calc(var(--lecture-u, 1px) * 60);
+  width: clamp(150px, calc(var(--lecture-u, 1px) * 160), 180px);
+  height: clamp(104px, calc(var(--lecture-u, 1px) * 109), 124px);
+  padding:
+    calc(var(--lecture-u, 1px) * 19)
+    calc(var(--lecture-u, 1px) * 27);
+  grid-template-columns: repeat(3, max(22px, calc(var(--lecture-u, 1px) * 24)));
+  grid-template-rows: repeat(2, max(22px, calc(var(--lecture-u, 1px) * 24)));
+  column-gap: calc(var(--lecture-u, 1px) * 16);
+  row-gap: calc(var(--lecture-u, 1px) * 21);
+  border-radius: calc(var(--lecture-u, 1px) * 8);
+}
+
+.lecture-toolbar-wrap .drawing-options--colors button,
+.lecture-toolbar-wrap .drawing-options__custom {
+  width: max(22px, calc(var(--lecture-u, 1px) * 24));
+  height: max(22px, calc(var(--lecture-u, 1px) * 24));
+}
+
+.lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+  .lecture-toolbar__inner {
+  margin-left: calc(var(--lecture-u, 1px) * 39);
+}
+
+@media (max-width: 1100px) {
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__inner {
+    width: auto;
+    margin-left: calc(var(--lecture-u, 1px) * 40);
+    margin-right: calc(var(--lecture-u, 1px) * 28);
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__tools {
+    gap: clamp(18px, 2.4vw, calc(var(--lecture-u, 1px) * 30));
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__drawing-controls {
+    margin-left: auto;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__quick-palette {
+    gap: calc(var(--lecture-u, 1px) * 14);
+    margin-left: calc(var(--lecture-u, 1px) * 20);
+  }
+}
+
+@media (max-width: 980px) {
+  .lecture-toolbar.lecture-toolbar--figma {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__drawing-controls,
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__end-divider {
+    display: flex;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__end-divider {
+    display: block;
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__inner,
   .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
     .lecture-toolbar__inner {
-    gap: 18px;
+    width: max-content;
+    min-width: max-content;
+    margin-left: calc(var(--lecture-u, 1px) * 24);
+    margin-right: calc(var(--lecture-u, 1px) * 24);
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__tools {
+    gap: calc(var(--lecture-u, 1px) * 22);
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__drawing-controls {
+    margin-left: calc(var(--lecture-u, 1px) * 20);
+  }
+
+  .lecture-toolbar-wrap .drawing-options--thickness {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .lecture-toolbar-wrap .drawing-options--colors {
+    right: calc(var(--lecture-u, 1px) * 12);
+  }
+}
+
+@media (max-width: 760px) {
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__inner,
+  .lecture-toolbar.lecture-toolbar--figma.lecture-toolbar--panel
+    .lecture-toolbar__inner {
+    margin-left: calc(var(--lecture-u, 1px) * 14);
+    margin-right: calc(var(--lecture-u, 1px) * 18);
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__tools {
+    gap: calc(var(--lecture-u, 1px) * 20);
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__quick-palette {
+    gap: calc(var(--lecture-u, 1px) * 12);
+    margin-left: calc(var(--lecture-u, 1px) * 16);
+  }
+
+  .lecture-toolbar-wrap .drawing-options--colors {
+    right: calc(var(--lecture-u, 1px) * 8);
+  }
+}
+
+@media (max-width: 520px) {
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__tools {
+    gap: calc(var(--lecture-u, 1px) * 18);
+  }
+
+  .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__quick-palette {
+    gap: calc(var(--lecture-u, 1px) * 10);
+    margin-left: calc(var(--lecture-u, 1px) * 12);
+  }
+
+  .lecture-toolbar-wrap .drawing-options--thickness,
+  .lecture-toolbar-wrap .drawing-options--colors {
+    width: 150px;
   }
 }
