@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { getCurrentUser, oauthLogin } from "../api/auth.api.js";
+import { syncExistingWebPushSubscription } from "../../notifications/services/webPush.js";
 import "../styles/login.css";
 
 function OAuthCallbackPage() {
@@ -74,8 +75,14 @@ function OAuthCallbackPage() {
           localStorage.setItem("tikitaka_user", JSON.stringify(completeUser));
         }
 
+        await syncExistingWebPushSubscription().catch(() => null);
+
         sessionStorage.removeItem("tikitaka_oauth_signup");
-        navigate("/dashboard", { replace: true });
+        const notificationRedirect = sessionStorage.getItem(
+          "tikitaka_notification_redirect",
+        );
+        sessionStorage.removeItem("tikitaka_notification_redirect");
+        navigate(notificationRedirect || "/dashboard", { replace: true });
       } catch (error) {
         if (isMounted) {
           setErrorMessage(

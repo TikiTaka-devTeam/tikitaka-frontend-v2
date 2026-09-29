@@ -1,0 +1,13 @@
+.notification-redirect-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: #edf0f6;
+}
+
+.notification-redirect-page p {
+  margin: 0;
+  color: #576682;
+  font-size: 14px;
+}

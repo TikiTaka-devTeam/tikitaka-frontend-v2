@@ -2,6 +2,7 @@ import { useState } from "react";
 import hidePasswordIcon from "../../../assets/icons/HidePassword.svg";
 import watchPasswordIcon from "../../../assets/icons/WatchPassword.svg";
 import { getCurrentUser, login } from "../api/auth.api.js";
+import { syncExistingWebPushSubscription } from "../../notifications/services/webPush.js";
 import SocialLoginButtons from "./SocialLoginButtons.jsx";
 
 function LoginForm({ onSignUp }) {
@@ -62,8 +63,14 @@ function LoginForm({ onSignUp }) {
         localStorage.setItem("tikitaka_user", JSON.stringify(completeUser));
       }
 
+      await syncExistingWebPushSubscription().catch(() => null);
+
       setSuccessMessage("로그인되었습니다.");
-      window.location.assign("/");
+      const notificationRedirect = sessionStorage.getItem(
+        "tikitaka_notification_redirect",
+      );
+      sessionStorage.removeItem("tikitaka_notification_redirect");
+      window.location.assign(notificationRedirect || "/");
     } catch {
       setErrorMessage(
         "로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.",

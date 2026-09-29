@@ -19,16 +19,18 @@ import {
   logout,
   updateProfileImage,
 } from "../../auth/api/auth.api.js";
-import { getSystemNotices } from "../../notices/api/notices.api.js";
+import {
+  clearStoredPushSubscriptionId,
+  disableWebPush,
+  enableWebPush,
+  getWebPushState,
+} from "../../notifications/services/webPush.js";
+import {
+  getSystemNotice,
+  getSystemNotices,
+} from "../../notices/api/notices.api.js";
 import "../../spaces/styles/deleteStatusModal.css";
 import "../../spaces/styles/saveStatusModal.css";
-
-const MOCK_SYSTEM_NOTICE = {
-  system_notice_id: "mock-system-notice",
-  title: "서비스 공지사항 테스트",
-  content: "공지사항 출력용 목업입니다. 실제 공지사항은 서버에서 불러옵니다.",
-  created_at: "2026-09-02T00:00:00+09:00",
-};
 
 function readStoredUser() {
   try {
@@ -282,7 +284,9 @@ function PasswordContent({ onClose }) {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    await disableWebPush().catch(() => null);
+    clearStoredPushSubscriptionId();
     localStorage.removeItem("tikitaka_access_token");
     localStorage.removeItem("tikitaka_refresh_token");
     localStorage.removeItem("tikitaka_user");
@@ -424,30 +428,197 @@ function PasswordContent({ onClose }) {
   );
 }
 
+function PushNotificationContent({ onClose }) {
+  const [state, setState] = useState({
+    supported: true,
+    enabled: false,
+    permission: "default",
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getWebPushState()
+      .then((nextState) => {
+        if (isMounted) setState(nextState);
+      })
+      .catch(() => {
+        if (isMounted) setMessage("알림 상태를 확인하지 못했습니다.");
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleToggle = async () => {
+    if (isSaving || isLoading) return;
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      if (state.enabled) {
+        await disableWebPush();
+        setState((current) => ({ ...current, enabled: false }));
+        setMessage("웹 푸시 알림을 해제했습니다.");
+      } else {
+        await enableWebPush();
+        setState({ supported: true, enabled: true, permission: "granted" });
+        setMessage("웹 푸시 알림을 설정했습니다.");
+      }
+    } catch (error) {
+      setMessage(
+        error?.message || "웹 푸시 알림 설정을 변경하지 못했습니다.",
+      );
+      const nextState = await getWebPushState().catch(() => null);
+      if (nextState) setState(nextState);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const isPermissionDenied = state.permission === "denied";
+  const statusText = isLoading
+    ? "상태 확인 중"
+    : !state.supported
+      ? "지원하지 않는 브라우저"
+      : state.enabled
+        ? "켜짐"
+        : isPermissionDenied
+          ? "브라우저에서 차단됨"
+          : "꺼짐";
+
+  return (
+    <ModalBackdrop onClose={onClose} className="modal-backdrop--light">
+      <section
+        className="push-notification-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="push-notification-title"
+        aria-describedby="push-notification-description"
+      >
+        <header>
+          <h2 id="push-notification-title">웹 푸시 알림</h2>
+          <p id="push-notification-description">
+            브라우저가 닫혀 있어도 중요한 서비스 알림을 받습니다.
+          </p>
+        </header>
+        <div className="push-notification-dialog__divider" />
+        <div className="push-notification-dialog__body">
+          <div className="push-notification-dialog__status">
+            <span>현재 상태</span>
+            <strong className={state.enabled ? "is-enabled" : ""}>
+              {statusText}
+            </strong>
+          </div>
+          <p>
+            알림을 켜면 공지사항, 질문, 과제 및 강의자료 관련 알림이 이
+            브라우저의 시스템 알림으로 표시됩니다.
+          </p>
+          {isPermissionDenied ? (
+            <p className="push-notification-dialog__message" role="alert">
+              브라우저 사이트 설정에서 알림 권한을 허용한 후 다시 시도해주세요.
+            </p>
+          ) : message ? (
+            <p className="push-notification-dialog__message" role="status">
+              {message}
+            </p>
+          ) : null}
+        </div>
+        <ModalActions
+          className="push-notification-dialog__actions"
+          onCancel={onClose}
+          onConfirm={handleToggle}
+          cancelText="닫기"
+          confirmText={
+            isSaving
+              ? "처리 중"
+              : state.enabled
+                ? "알림 끄기"
+                : "알림 켜기"
+          }
+          confirmDisabled={
+            isLoading ||
+            isSaving ||
+            !state.supported ||
+            (isPermissionDenied && !state.enabled)
+          }
+        />
+      </section>
+    </ModalBackdrop>
+  );
+}
+
 function NoticesContent({ onClose }) {
   const [notices, setNotices] = useState([]);
   const [status, setStatus] = useState("loading");
+  const [selectedNoticeId, setSelectedNoticeId] = useState("");
+  const [selectedNotice, setSelectedNotice] = useState(null);
+  const [detailStatus, setDetailStatus] = useState("idle");
 
   useEffect(() => {
     let isMounted = true;
     getSystemNotices()
       .then(({ data }) => {
         if (!isMounted) return;
-        const systemNotices = Array.isArray(data) ? data : [];
-        setNotices(
-          systemNotices.length > 0 ? systemNotices : [MOCK_SYSTEM_NOTICE],
-        );
+        const systemNotices = Array.isArray(data?.system_notices)
+          ? data.system_notices
+          : [];
+        setNotices(systemNotices);
         setStatus("success");
       })
       .catch(() => {
         if (!isMounted) return;
-        setNotices([MOCK_SYSTEM_NOTICE]);
-        setStatus("success");
+        setNotices([]);
+        setStatus("error");
       });
     return () => {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!selectedNoticeId) return undefined;
+
+    const controller = new AbortController();
+
+    getSystemNotice(selectedNoticeId, { signal: controller.signal })
+      .then(({ data }) => {
+        if (controller.signal.aborted) return;
+        setSelectedNotice(data);
+        setDetailStatus("success");
+        setNotices((current) =>
+          current.map((notice) =>
+            notice.system_notice_id === selectedNoticeId
+              ? { ...notice, is_read: true }
+              : notice,
+          ),
+        );
+      })
+      .catch((error) => {
+        if (error.code !== "ERR_CANCELED") setDetailStatus("error");
+      });
+
+    return () => controller.abort();
+  }, [selectedNoticeId]);
+
+  const openDetail = (systemNoticeId) => {
+    setSelectedNotice(null);
+    setDetailStatus("loading");
+    setSelectedNoticeId(systemNoticeId);
+  };
+
+  const closeDetail = () => {
+    setSelectedNoticeId("");
+    setSelectedNotice(null);
+    setDetailStatus("idle");
+  };
 
   const formatNoticeDate = (value) => {
     if (!value) return "";
@@ -459,60 +630,109 @@ function NoticesContent({ onClose }) {
   };
 
   return (
-    <ModalBackdrop onClose={onClose} className="modal-backdrop--light">
-      <section
-        className="profile-notices-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="profile-notices-title"
-        aria-describedby="profile-notices-description"
+    <>
+      <ModalBackdrop
+        onClose={onClose}
+        closeOnEscape={!selectedNoticeId}
+        className="modal-backdrop--light"
       >
-        <header>
-          <h2 id="profile-notices-title">공지사항</h2>
-          <p id="profile-notices-description">
-            tikitaka의 업데이트와 서비스 안내를 확인합니다.
-          </p>
-        </header>
-        <div className="profile-notices-dialog__divider" />
-        <div className="profile-notices-dialog__body">
-          {status === "loading" ? (
-            <p className="profile-notices-dialog__status">
-              공지사항을 불러오는 중입니다.
+        <section
+          className="profile-notices-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="profile-notices-title"
+          aria-describedby="profile-notices-description"
+        >
+          <header>
+            <h2 id="profile-notices-title">공지사항</h2>
+            <p id="profile-notices-description">
+              tikitaka의 업데이트와 서비스 안내를 확인합니다.
             </p>
-          ) : null}
-          {status === "error" ? (
-            <p className="profile-notices-dialog__status" role="alert">
-              공지사항을 불러오지 못했습니다.
-            </p>
-          ) : null}
-          {status === "success" && notices.length === 0 ? (
-            <p className="profile-notices-dialog__status">
-              등록된 공지사항이 없습니다.
-            </p>
-          ) : null}
-          {notices.map((notice) => (
-            <article
-              className="profile-notice-card"
-              key={notice.system_notice_id}
-            >
-              <h3>{notice.title}</h3>
-              {notice.created_at ? (
-                <time dateTime={notice.created_at}>
-                  {formatNoticeDate(notice.created_at)}
-                </time>
+          </header>
+          <div className="profile-notices-dialog__divider" />
+          <div className="profile-notices-dialog__body">
+            {status === "loading" ? (
+              <p className="profile-notices-dialog__status">
+                공지사항을 불러오는 중입니다.
+              </p>
+            ) : null}
+            {status === "error" ? (
+              <p className="profile-notices-dialog__status" role="alert">
+                공지사항을 불러오지 못했습니다.
+              </p>
+            ) : null}
+            {status === "success" && notices.length === 0 ? (
+              <p className="profile-notices-dialog__status">
+                등록된 공지사항이 없습니다.
+              </p>
+            ) : null}
+            {notices.map((notice) => (
+              <button
+                type="button"
+                className="profile-notice-card"
+                key={notice.system_notice_id}
+                onClick={() => openDetail(notice.system_notice_id)}
+              >
+                <h3>{notice.title}</h3>
+                {notice.created_at ? (
+                  <time dateTime={notice.created_at}>
+                    {formatNoticeDate(notice.created_at)}
+                  </time>
+                ) : null}
+              </button>
+            ))}
+          </div>
+          <ModalActions
+            className="profile-notices-dialog__actions"
+            onConfirm={onClose}
+            confirmText="닫기"
+            showCancel={false}
+          />
+        </section>
+      </ModalBackdrop>
+
+      {selectedNoticeId ? (
+        <ModalBackdrop onClose={closeDetail} className="modal-backdrop--light">
+          <section
+            className="profile-system-notice-detail-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-system-notice-detail-title"
+          >
+            <header>
+              <h2 id="profile-system-notice-detail-title">
+                {selectedNotice?.title ?? "공지사항"}
+              </h2>
+            </header>
+            <div className="profile-system-notice-detail-dialog__divider" />
+            <div className="profile-system-notice-detail-dialog__body">
+              {detailStatus === "loading" ? (
+                <p className="profile-system-notice-detail-dialog__status">
+                  공지사항을 불러오는 중입니다.
+                </p>
               ) : null}
-              <p>{notice.content}</p>
-            </article>
-          ))}
-        </div>
-        <ModalActions
-          className="profile-notices-dialog__actions"
-          onConfirm={onClose}
-          confirmText="닫기"
-          showCancel={false}
-        />
-      </section>
-    </ModalBackdrop>
+              {detailStatus === "error" ? (
+                <p
+                  className="profile-system-notice-detail-dialog__status"
+                  role="alert"
+                >
+                  공지사항을 불러오지 못했습니다.
+                </p>
+              ) : null}
+              {detailStatus === "success" ? (
+                <p>{selectedNotice?.content ?? ""}</p>
+              ) : null}
+            </div>
+            <ModalActions
+              className="profile-system-notice-detail-dialog__actions"
+              onConfirm={closeDetail}
+              confirmText="닫기"
+              showCancel={false}
+            />
+          </section>
+        </ModalBackdrop>
+      ) : null}
+    </>
   );
 }
 
@@ -695,11 +915,20 @@ function LogoutContent({ onClose }) {
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
+
+    try {
+      await disableWebPush();
+    } catch {
+      /* Browser subscription cleanup must not prevent logout. */
+    }
+    clearStoredPushSubscriptionId();
+
     try {
       await logout();
     } catch {
       /* Local credentials still need to be cleared. */
     }
+
     localStorage.removeItem("tikitaka_access_token");
     localStorage.removeItem("tikitaka_refresh_token");
     localStorage.removeItem("tikitaka_user");
@@ -793,6 +1022,10 @@ function ProfileActionModal({ action, onClose, onProfileUpdated }) {
 
   if (action === "password") {
     return <PasswordContent onClose={onClose} />;
+  }
+
+  if (action === "push") {
+    return <PushNotificationContent onClose={onClose} />;
   }
 
   if (action === "notices") {

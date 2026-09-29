@@ -5,10 +5,9 @@ import userIcon from "../../../assets/icons/userIcon.png";
 import addImgIcon from "../../../assets/icons/addImg.svg";
 import { getCurrentUser, logout, updateProfileImage } from "../api/auth.api.js";
 import {
-  clearRegisteredDeviceToken,
-  sendPushTestNotification,
-  unregisterStoredDeviceToken,
-} from "../../notifications/api/push.api.js";
+  clearStoredPushSubscriptionId,
+  disableWebPush,
+} from "../../notifications/services/webPush.js";
 import "../styles/profileSetting.css";
 
 const PROFILE_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp"];
@@ -72,9 +71,7 @@ function ProfileSettingPage() {
   const [failedProfileImage, setFailedProfileImage] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUpdatingProfileImage, setIsUpdatingProfileImage] = useState(false);
-  const [isSendingTestPush, setIsSendingTestPush] = useState(false);
   const [profileImageError, setProfileImageError] = useState("");
-  const [testPushMessage, setTestPushMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -133,34 +130,21 @@ function ProfileSettingPage() {
     setIsLoggingOut(true);
 
     try {
-      await unregisterStoredDeviceToken();
+      await disableWebPush();
+    } catch {
+      // Browser subscription cleanup must not prevent logout.
+    }
+    clearStoredPushSubscriptionId();
+
+    try {
       await logout();
     } catch {
       // Even if the server request fails, clear local credentials.
     } finally {
-      clearRegisteredDeviceToken();
       localStorage.removeItem("tikitaka_access_token");
       localStorage.removeItem("tikitaka_refresh_token");
       localStorage.removeItem("tikitaka_user");
       window.location.replace("/login");
-    }
-  };
-
-  const handleSendTestPush = async () => {
-    if (isSendingTestPush) {
-      return;
-    }
-
-    setIsSendingTestPush(true);
-    setTestPushMessage("");
-
-    try {
-      await sendPushTestNotification();
-      setTestPushMessage("테스트 알림을 발송했습니다.");
-    } catch {
-      setTestPushMessage("테스트 알림 발송에 실패했습니다.");
-    } finally {
-      setIsSendingTestPush(false);
     }
   };
 
@@ -278,19 +262,6 @@ function ProfileSettingPage() {
           <h2>앱 설정</h2>
           <SettingRow label="다크모드" value="시스템 기본값" />
           <SettingRow label="알림 설정" />
-          <SettingRow
-            label={
-              isSendingTestPush ? "테스트 알림 발송 중" : "테스트 알림 보내기"
-            }
-            isAction
-            disabled={isSendingTestPush}
-            onClick={handleSendTestPush}
-          />
-          {testPushMessage ? (
-            <p className="profile-setting-message" role="status">
-              {testPushMessage}
-            </p>
-          ) : null}
         </div>
 
         <div className="profile-setting-group">

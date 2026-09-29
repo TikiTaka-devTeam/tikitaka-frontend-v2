@@ -4,6 +4,7 @@ import logoutIcon from "../../../assets/icons/profile-menu/logout.svg";
 import mailIcon from "../../../assets/icons/profile-menu/megaphone.svg";
 import megaphoneIcon from "../../../assets/icons/profile-menu/mail.svg";
 import userListIcon from "../../../assets/icons/profile-menu/chevron.svg";
+import notificationIcon from "../../../assets/icons/dashboard-notification.svg";
 import { useEffect, useState } from "react";
 import profileAvatar from "../../../assets/images/profile-avatar.svg";
 import { getCurrentUser } from "../../auth/api/auth.api.js";
@@ -22,11 +23,17 @@ const PROFILE_MENU_ITEMS = [
     icon: accessIcon,
   },
   {
+    id: "push",
+    title: "웹 푸시 알림",
+    description: "브라우저 시스템 알림을 설정합니다.",
+    icon: notificationIcon,
+    divided: true,
+  },
+  {
     id: "notices",
     title: "공지사항",
     description: "서비스 업데이트 및 공지사항을 확인합니다.",
     icon: megaphoneIcon,
-    divided: true,
   },
   {
     id: "inquiry",

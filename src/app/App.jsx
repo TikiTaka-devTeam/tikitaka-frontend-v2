@@ -24,6 +24,7 @@ import StudentAssignmentPage from "../features/assignments/pages/StudentAssignme
 import ProfessorAssignmentPage from "../features/assignments/pages/ProfessorAssignmentPage.jsx";
 import StudentLecturePage from "../features/lecture/pages/StudentLecturePage.jsx";
 import ProfessorLecturePage from "../features/lecture/pages/ProfessorLecturePage.jsx";
+import NotificationRedirectPage from "../features/notifications/pages/NotificationRedirectPage.jsx";
 
 function App() {
   const accessToken =
@@ -86,6 +87,11 @@ function App() {
         element={
           <SpaceMembersPage />
         }
+      />
+
+      <Route
+        path="/notification-redirect"
+        element={<NotificationRedirectPage />}
       />
 
       <Route
