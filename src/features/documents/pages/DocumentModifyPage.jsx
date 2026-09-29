@@ -42,6 +42,7 @@ GlobalWorkerOptions.workerSrc = pdfWorker;
 const MIN_PREVIEW_ZOOM = 0.5;
 const MAX_PREVIEW_ZOOM = 3;
 const PREVIEW_ZOOM_STEP = 0.25;
+const REVISION_COMPLETION_POLL_INTERVAL_MS = 2500;
 
 function getRevisionStorageKey(documentId) {
   return `tikitaka_document_revision:${documentId}`;
@@ -406,11 +407,13 @@ function DocumentModifyPage() {
     revisionSessionRef.current = mergedSession;
     setRevisionSession(mergedSession);
 
-    if (mergedSession.revision_id) {
+    if (mergedSession.revision_id && mergedSession.status === "EDITING") {
       localStorage.setItem(
         getRevisionStorageKey(documentId),
         mergedSession.revision_id,
       );
+    } else if (mergedSession.status) {
+      localStorage.removeItem(getRevisionStorageKey(documentId));
     }
 
     return mergedSession;
@@ -560,9 +563,8 @@ function DocumentModifyPage() {
 
           if (normalizedRevision.status === "PROCESSING") {
             updateRevisionSession(normalizedRevision);
-            localStorage.removeItem(getRevisionStorageKey(documentId));
             setRevisionSlides([]);
-            setNotice("강의자료 수정 내용을 저장하고 있습니다.");
+            setSaveModalStep("processing");
             return;
           }
 
@@ -701,6 +703,71 @@ function DocumentModifyPage() {
 
     return () => window.clearTimeout(timer);
   }, [notice]);
+
+  useEffect(() => {
+    const revisionId = revisionSession?.revision_id;
+
+    if (!documentId || !revisionId || revisionSession?.status !== "PROCESSING") {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let pollTimer;
+
+    const scheduleNextPoll = () => {
+      pollTimer = window.setTimeout(pollRevisionStatus, REVISION_COMPLETION_POLL_INTERVAL_MS);
+    };
+
+    const pollRevisionStatus = async () => {
+      try {
+        const serverRevision = await getDocumentRevision(documentId, revisionId);
+
+        if (cancelled) return;
+
+        const status = serverRevision?.status;
+        updateRevisionSession(serverRevision);
+
+        if (status === "COMPLETED") {
+          setSaveModalError("");
+          setSaveModalStep("complete");
+          return;
+        }
+
+        if (status === "FAILED") {
+          setSaveModalError("PDF 생성 또는 강의자료 반영에 실패했습니다. 기존 강의자료는 변경되지 않았습니다.");
+          setSaveModalStep("failed");
+          return;
+        }
+
+        if (status === "CANCELED") {
+          setSaveModalError("강의자료 저장 작업이 취소되었습니다. 기존 강의자료는 변경되지 않았습니다.");
+          setSaveModalStep("canceled");
+          return;
+        }
+
+        if (status === "EDITING") {
+          setSaveModalError("저장 요청이 반영되지 않아 편집 상태로 돌아왔습니다. 다시 저장해 주세요.");
+          setSaveModalStep("confirm");
+          return;
+        }
+
+        setSaveModalError("");
+        scheduleNextPoll();
+      } catch {
+        if (cancelled) return;
+
+        setSaveModalError("처리 상태를 확인하지 못했습니다. 자동으로 다시 확인하고 있습니다.");
+        scheduleNextPoll();
+      }
+    };
+
+    scheduleNextPoll();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(pollTimer);
+    };
+  }, [documentId, revisionSession?.revision_id, revisionSession?.status, updateRevisionSession]);
 
   useEffect(() => () => {
     window.clearTimeout(scrollEndTimerRef.current);
@@ -1066,13 +1133,14 @@ function DocumentModifyPage() {
       );
 
       updateRevisionSession(completionResponse);
-      localStorage.removeItem(getRevisionStorageKey(documentId));
       setCheckedPreviewPageIds([]);
       setCheckedRevisionPages([]);
       setDraggedRevisionPage(null);
       setActiveInsertPosition(null);
       setDragPreview(null);
-      setSaveModalStep("complete");
+      setSaveModalStep(completionResponse?.status === "COMPLETED"
+        ? "complete"
+        : "processing");
     } catch (error) {
       if (!error?.response || error.response.status === 409) {
         try {
@@ -1083,12 +1151,18 @@ function DocumentModifyPage() {
 
           if (serverPreview?.status === "PROCESSING") {
             updateRevisionSession(serverPreview);
-            localStorage.removeItem(getRevisionStorageKey(documentId));
+            setSaveModalStep("processing");
+          } else if (serverPreview?.status === "COMPLETED") {
+            updateRevisionSession(serverPreview);
             setSaveModalStep("complete");
+          } else if (serverPreview?.status === "FAILED") {
+            updateRevisionSession(serverPreview);
+            setSaveModalError("PDF 생성 또는 강의자료 반영에 실패했습니다. 기존 강의자료는 변경되지 않았습니다.");
+            setSaveModalStep("failed");
           } else if (serverPreview?.status === "CANCELED") {
             updateRevisionSession(serverPreview);
-            localStorage.removeItem(getRevisionStorageKey(documentId));
-            setSaveModalError("수정 세션이 만료되어 저장하지 못했습니다.");
+            setSaveModalError("강의자료 저장 작업이 취소되었습니다. 기존 강의자료는 변경되지 않았습니다.");
+            setSaveModalStep("canceled");
           } else {
             const restoredPages = hydrateRevisionPreview(
               serverPreview,
@@ -1781,7 +1855,7 @@ function DocumentModifyPage() {
           <div className="document-modify-panel-divider" />
           {isRevisionPanelLoading && (
             <p className="document-modify-upload-status" role="status">
-              강의자료가 렌더링 중입니다.
+              강의자료 렌더링 중입니다.
             </p>
           )}
           {!isRevisionPanelLoading && !hasReadyRevisionSlides && (
@@ -1860,11 +1934,11 @@ function DocumentModifyPage() {
           error={saveModalError}
           isSaving={isCompletingRevision}
           onCancel={() => {
-            if (isCompletingRevision) return;
+            if (isCompletingRevision || saveModalStep === "processing") return;
             setSaveModalStep(null);
             setSaveModalError("");
           }}
-          onConfirm={saveModalStep === "complete"
+          onConfirm={["complete", "failed", "canceled"].includes(saveModalStep)
             ? () => navigate(`/spaces/${spaceId}`)
             : completeDocumentRevision}
         />
