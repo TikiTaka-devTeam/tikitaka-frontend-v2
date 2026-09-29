@@ -124,6 +124,19 @@
   line-height: 14px;
 }
 
+.signup-inform-field.has-error > span,
+.signup-inform-role-row.has-error > span {
+  color: #e11d48;
+}
+
+.signup-inform-field.has-error > input,
+.signup-inform-field.has-error > select,
+.signup-inform-field.has-error .signup-inform-password,
+.signup-inform-field.has-error .signup-inform-phone input,
+.signup-inform-field.has-error .signup-inform-phone select {
+  border-color: #e11d48;
+}
+
 .signup-inform-password {
   display: flex;
   align-items: center;
@@ -282,6 +295,10 @@
   border-color: #2563eb;
   background: #2563eb;
   color: #ffffff;
+}
+
+.signup-inform-role-row > .signup-inform-field-error {
+  grid-column: 2;
 }
 
 .signup-inform-grid {
@@ -445,6 +462,10 @@
   .signup-inform-role-row {
     grid-template-columns: 1fr;
     gap: 9px;
+  }
+
+  .signup-inform-role-row > .signup-inform-field-error {
+    grid-column: 1;
   }
 
   .signup-inform-profile {

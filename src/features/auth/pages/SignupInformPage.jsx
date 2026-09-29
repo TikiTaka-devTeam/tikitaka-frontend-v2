@@ -63,6 +63,74 @@ const initialForm = {
 };
 
 const VERIFICATION_TIME_LIMIT = 300;
+const PASSWORD_SPECIAL_CHARACTER_PATTERN = /[!@#$%^&*(),.?":{}|<>_\-\\[\]/;'`~+=]/;
+
+function getFormErrors(form, options) {
+  const {
+    emailChecked,
+    isOAuthSignup,
+    phoneVerificationToken,
+    phoneVerified,
+  } = options;
+  const errors = {};
+
+  if (!form.name.trim()) {
+    errors.name = "이름을 입력해주세요.";
+  }
+
+  if (!form.email.trim()) {
+    errors.email = "이메일을 입력해주세요.";
+  } else if (!emailChecked) {
+    errors.email = "이메일 중복 확인을 완료해주세요.";
+  }
+
+  if (!isOAuthSignup) {
+    const passwordErrors = [];
+
+    if (form.password.length < 8) {
+      passwordErrors.push("8자 이상");
+    }
+
+    if (!PASSWORD_SPECIAL_CHARACTER_PATTERN.test(form.password)) {
+      passwordErrors.push("특수문자 1개 이상");
+    }
+
+    if (passwordErrors.length > 0) {
+      errors.password = `비밀번호에 ${passwordErrors.join(", ")}이 필요합니다.`;
+    }
+
+    if (!form.passwordConfirm) {
+      errors.passwordConfirm = "비밀번호 확인을 입력해주세요.";
+    } else if (form.password !== form.passwordConfirm) {
+      errors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
+    }
+  }
+
+  if (form.phoneNumber.trim().length !== 8) {
+    errors.phoneNumber = "휴대폰 번호 8자리를 입력해주세요.";
+  } else if (!phoneVerified || !phoneVerificationToken) {
+    errors.phoneNumber = "휴대폰 번호 인증을 완료해주세요.";
+  }
+
+  if (!form.role) {
+    errors.role = "역할을 선택해주세요.";
+  }
+
+  if (!form.univ) {
+    errors.univ = "학교를 선택해주세요.";
+  }
+
+  if (!form.major.trim()) {
+    errors.major = "1전공을 입력해주세요.";
+  }
+
+  if (!form.memberIdNumber.trim()) {
+    errors.memberIdNumber = "학번을 입력해주세요.";
+  }
+
+  return errors;
+}
+
 function formatPhoneNumber(prefix, number) {
   const digits = number.replace(/\D/g, "");
 
@@ -157,31 +225,28 @@ function SignupInformPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [phoneErrorMessage, setPhoneErrorMessage] = useState("");
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const passwordsMatch =
-    form.password.length > 0 && form.password === form.passwordConfirm;
-
-  const isValid = useMemo(
+  const formErrors = useMemo(
     () =>
-      form.name.trim() &&
-      form.email.trim() &&
-      emailChecked &&
-      (isOAuthSignup || (form.password.length >= 8 && passwordsMatch)) &&
-      form.phoneNumber.trim().length === 8 &&
-      phoneVerified &&
-      phoneVerificationToken &&
-      form.role &&
-      form.univ &&
-      form.major.trim() &&
-      form.memberIdNumber.trim(),
+      getFormErrors(form, {
+        emailChecked,
+        isOAuthSignup,
+        phoneVerificationToken,
+        phoneVerified,
+      }),
     [
       emailChecked,
       form,
       isOAuthSignup,
-      passwordsMatch,
       phoneVerificationToken,
       phoneVerified,
     ],
+  );
+
+  const isValid = useMemo(
+    () => Object.keys(formErrors).length === 0,
+    [formErrors],
   );
 
   useEffect(() => {
@@ -404,9 +469,10 @@ function SignupInformPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setSubmitAttempted(true);
 
     if (!isValid) {
-      setErrorMessage("필수 정보를 모두 입력해주세요.");
+      setErrorMessage("");
       return;
     }
 
@@ -488,17 +554,31 @@ function SignupInformPage() {
         <div className="title-line-thin" />
 
         <div className="signup-inform-scroll">
-          <label className="signup-inform-field">
+          <label
+            className={`signup-inform-field ${
+              submitAttempted && formErrors.name ? "has-error" : ""
+            }`}
+          >
             <span>이름</span>
             <input
               name="name"
               value={form.name}
               onChange={handleChange}
               placeholder="실명을 입력해주세요. 수업 시 사용되는 이름입니다."
+              aria-invalid={Boolean(submitAttempted && formErrors.name)}
             />
+            {submitAttempted && formErrors.name && (
+              <p className="signup-inform-field-error">{formErrors.name}</p>
+            )}
           </label>
 
-          <label className="signup-inform-field">
+          <label
+            className={`signup-inform-field ${
+              emailErrorMessage || (submitAttempted && formErrors.email)
+                ? "has-error"
+                : ""
+            }`}
+          >
             <span>이메일</span>
             <div className="signup-inform-inline">
               <input
@@ -507,6 +587,9 @@ function SignupInformPage() {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="이메일을 입력해주세요."
+                aria-invalid={Boolean(
+                  emailErrorMessage || (submitAttempted && formErrors.email),
+                )}
               />
               <button
                 className={`signup-inform-action ${
@@ -523,13 +606,21 @@ function SignupInformPage() {
                     : "중복 확인"}
               </button>
             </div>
-            {emailErrorMessage && (
-              <p className="signup-inform-field-error">{emailErrorMessage}</p>
+            {(emailErrorMessage || (submitAttempted && formErrors.email)) && (
+              <p className="signup-inform-field-error">
+                {emailErrorMessage || formErrors.email}
+              </p>
             )}
           </label>
 
           {!isOAuthSignup && (
-            <label className="signup-inform-field">
+            <label
+              className={`signup-inform-field ${
+                (form.password || submitAttempted) && formErrors.password
+                  ? "has-error"
+                  : ""
+              }`}
+            >
               <span>비밀번호</span>
               <div className="signup-inform-password">
                 <input
@@ -537,7 +628,10 @@ function SignupInformPage() {
                   type={showPassword ? "text" : "password"}
                   value={form.password}
                   onChange={handleChange}
-                  placeholder="비밀번호를 입력해주세요. (8자 이상)"
+                  placeholder="비밀번호를 입력해주세요. (8자 이상, 특수문자 1개 이상)"
+                  aria-invalid={Boolean(
+                    (form.password || submitAttempted) && formErrors.password,
+                  )}
                 />
                 <button
                   type="button"
@@ -552,16 +646,23 @@ function SignupInformPage() {
                   />
                 </button>
               </div>
-              {form.password && form.password.length < 8 && (
+              {(form.password || submitAttempted) && formErrors.password && (
                 <p className="signup-inform-field-error">
-                  비밀번호는 8자리 이상으로 입력해주세요.
+                  {formErrors.password}
                 </p>
               )}
             </label>
           )}
 
           {!isOAuthSignup && (
-            <label className="signup-inform-field">
+            <label
+              className={`signup-inform-field ${
+                (form.passwordConfirm || submitAttempted) &&
+                formErrors.passwordConfirm
+                  ? "has-error"
+                  : ""
+              }`}
+            >
               <span>비밀번호 확인</span>
               <div className="signup-inform-password">
                 <input
@@ -570,6 +671,10 @@ function SignupInformPage() {
                   value={form.passwordConfirm}
                   onChange={handleChange}
                   placeholder="확인을 위하여 위와 동일하게 입력해주세요."
+                  aria-invalid={Boolean(
+                    (form.passwordConfirm || submitAttempted) &&
+                      formErrors.passwordConfirm,
+                  )}
                 />
                 <button
                   type="button"
@@ -588,15 +693,23 @@ function SignupInformPage() {
                   />
                 </button>
               </div>
-              {form.passwordConfirm && !passwordsMatch && (
+              {(form.passwordConfirm || submitAttempted) &&
+                formErrors.passwordConfirm && (
                 <p className="signup-inform-field-error">
-                  비밀번호가 일치하지 않습니다.
+                  {formErrors.passwordConfirm}
                 </p>
               )}
             </label>
           )}
 
-          <div className="signup-inform-field">
+          <div
+            className={`signup-inform-field ${
+              phoneErrorMessage ||
+              (submitAttempted && formErrors.phoneNumber)
+                ? "has-error"
+                : ""
+            }`}
+          >
             <span>휴대폰 번호</span>
             <div className="signup-inform-phone">
               <select
@@ -614,6 +727,10 @@ function SignupInformPage() {
                 onChange={handleChange}
                 maxLength={8}
                 placeholder="- 없이 입력해주세요."
+                aria-invalid={Boolean(
+                  phoneErrorMessage ||
+                    (submitAttempted && formErrors.phoneNumber),
+                )}
               />
               <button
                 className={`signup-inform-action ${
@@ -630,8 +747,11 @@ function SignupInformPage() {
                     : "인증번호 전송"}
               </button>
             </div>
-            {phoneErrorMessage && (
-              <p className="signup-inform-field-error">{phoneErrorMessage}</p>
+            {(phoneErrorMessage ||
+              (submitAttempted && formErrors.phoneNumber)) && (
+              <p className="signup-inform-field-error">
+                {phoneErrorMessage || formErrors.phoneNumber}
+              </p>
             )}
             {phoneCodeSent && (
               <div className="signup-inform-verification">
@@ -679,7 +799,11 @@ function SignupInformPage() {
             )}
           </div>
 
-          <div className="signup-inform-role-row">
+          <div
+            className={`signup-inform-role-row ${
+              submitAttempted && formErrors.role ? "has-error" : ""
+            }`}
+          >
             <span>역할</span>
             <div className="signup-inform-role-options">
               <button
@@ -701,12 +825,24 @@ function SignupInformPage() {
                 교수
               </button>
             </div>
+            {submitAttempted && formErrors.role && (
+              <p className="signup-inform-field-error">{formErrors.role}</p>
+            )}
           </div>
 
           <div className="signup-inform-grid">
-            <label className="signup-inform-field">
+            <label
+              className={`signup-inform-field ${
+                submitAttempted && formErrors.univ ? "has-error" : ""
+              }`}
+            >
               <span>학교</span>
-              <select name="univ" value={form.univ} onChange={handleChange}>
+              <select
+                name="univ"
+                value={form.univ}
+                onChange={handleChange}
+                aria-invalid={Boolean(submitAttempted && formErrors.univ)}
+              >
                 <option value="">학교를 선택해주세요.</option>
                 {campusOptions.map((campus) => (
                   <option key={campus} value={campus}>
@@ -714,27 +850,50 @@ function SignupInformPage() {
                   </option>
                 ))}
               </select>
+              {submitAttempted && formErrors.univ && (
+                <p className="signup-inform-field-error">{formErrors.univ}</p>
+              )}
             </label>
 
-            <label className="signup-inform-field">
+            <label
+              className={`signup-inform-field ${
+                submitAttempted && formErrors.major ? "has-error" : ""
+              }`}
+            >
               <span>1전공</span>
               <input
                 name="major"
                 value={form.major}
                 onChange={handleChange}
                 placeholder="1전공을 입력해주세요. ex) 컴퓨터공학과"
+                aria-invalid={Boolean(submitAttempted && formErrors.major)}
               />
+              {submitAttempted && formErrors.major && (
+                <p className="signup-inform-field-error">{formErrors.major}</p>
+              )}
             </label>
           </div>
 
-          <label className="signup-inform-field">
+          <label
+            className={`signup-inform-field ${
+              submitAttempted && formErrors.memberIdNumber ? "has-error" : ""
+            }`}
+          >
             <span>학번</span>
             <input
               name="memberIdNumber"
               value={form.memberIdNumber}
               onChange={handleChange}
               placeholder="학번을 입력해주세요. 강의자에게 표시되는 학번입니다."
+              aria-invalid={Boolean(
+                submitAttempted && formErrors.memberIdNumber,
+              )}
             />
+            {submitAttempted && formErrors.memberIdNumber && (
+              <p className="signup-inform-field-error">
+                {formErrors.memberIdNumber}
+              </p>
+            )}
           </label>
 
           <div className="signup-inform-profile">
@@ -782,7 +941,7 @@ function SignupInformPage() {
           <button
             className="next-btn"
             type="submit"
-            disabled={!isValid || isSubmitting}
+            disabled={isSubmitting}
           >
             {isSubmitting ? "처리 중" : "다음"}
           </button>
