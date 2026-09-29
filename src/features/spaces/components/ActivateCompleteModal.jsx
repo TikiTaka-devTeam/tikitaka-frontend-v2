@@ -1,7 +1,7 @@
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
 
-import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
+import ConfirmCheckIcon from "../../../assets/icons/confirm-check.svg?react";
 
 import "../styles/activateStatusModal.css";
 
@@ -13,14 +13,11 @@ function ActivateCompleteModal({ onConfirm }) {
       describedBy="activate-complete-modal-description"
       className="activate-status-modal"
     >
-      <div className="activate-status-modal__icon-box" aria-hidden="true">
-        <span
-          className="activate-status-modal__check-icon"
-          style={{
-            WebkitMaskImage: `url(${confirmCheckIcon})`,
-            maskImage: `url(${confirmCheckIcon})`,
-          }}
-        />
+      <div
+        className="activate-status-modal__icon-box"
+        aria-hidden="true"
+      >
+        <ConfirmCheckIcon className="activate-status-modal__check-icon" />
       </div>
 
       <div className="activate-status-modal__text">

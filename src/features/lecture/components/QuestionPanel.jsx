@@ -1,168 +1,124 @@
 import {
-  useMemo,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 
-import CloseIcon from "../../../assets/icons/close.svg?react";
-import RecordStopIcon from "../../../assets/icons/record-stop.svg?react";
+import ProfessorQuestionPanel from "./ProfessorQuestionPanel";
 
-function QuestionList({
-  questions,
-  selectedQuestionId,
-  onSelectQuestion,
-}) {
-  if (!questions.length) {
-    return (
-      <div className="question-panel__empty">
-        등록된 질문이 없습니다.
-      </div>
-    );
-  }
+import "../styles/question-panel.css";
 
-  return (
-    <div className="question-panel__list">
-      {questions.map((question) => (
-        <button
-          type="button"
-          key={question.id}
-          className={
-            question.id === selectedQuestionId
-              ? "is-selected"
-              : ""
-          }
-          onClick={() =>
-            onSelectQuestion(question)
-          }
-        >
-          <span
-            className={`question-panel__status question-panel__status--${(
-              question.status ||
-              "PENDING"
-            ).toLowerCase()}`}
-          />
+const QUESTION_NOTIFICATION_EVENT =
+  "tikitaka:question-notification";
 
-          <span className="question-panel__list-text">
-            <strong>
-              {question.title}
-            </strong>
-
-            <small>
-              {question.status ===
-              "ANSWERED"
-                ? "답변 완료"
-                : "미답변"}
-            </small>
-          </span>
-        </button>
-      ))}
-    </div>
+function emitQuestionNotification(
+  hasNotification,
+) {
+  window.dispatchEvent(
+    new CustomEvent(
+      QUESTION_NOTIFICATION_EVENT,
+      {
+        detail: {
+          hasNotification,
+        },
+      },
+    ),
   );
 }
 
-function SimilarQuestionList({
-  questions,
-}) {
-  if (!questions.length) {
-    return null;
+function getQuestionTitle(
+  question,
+) {
+  return (
+    question?.title ||
+    question?.content ||
+    "질문"
+  );
+}
+
+function getQuestionId(
+  question,
+) {
+  const id =
+    question?.id ??
+    question?.question_id ??
+    question?.questionId;
+
+  return id == null
+    ? ""
+    : String(id);
+}
+
+function isAnswered(
+  question,
+) {
+  const status =
+    String(
+      question?.status ||
+        "",
+    ).toUpperCase();
+
+  if (
+    status === "ANSWERED" ||
+    status === "RESOLVED" ||
+    status === "COMPLETED"
+  ) {
+    return true;
   }
 
-  return (
-    <div className="question-panel__similar">
-      <strong>
-        비슷한 질문이 있어요
-      </strong>
-
-      <div className="question-panel__similar-list">
-        {questions.map((question) => {
-          const id =
-            question.question_id ??
-            question.questionId ??
-            question.id;
-
-          const likeCount =
-            question.like_count ??
-            question.likeCount ??
-            0;
-
-          return (
-            <article key={id}>
-              <h4>
-                {question.title}
-              </h4>
-
-              <p>
-                {question.content}
-              </p>
-
-              <span>
-                공감 {likeCount}
-              </span>
-            </article>
-          );
-        })}
-      </div>
-
-    </div>
+  return Boolean(
+    question?.answers
+      ?.length,
   );
 }
 
 function StudentQuestionComposer({
+  submitting,
   onSubmit,
 }) {
-  const [title, setTitle] =
-    useState("");
-
-  const [content, setContent] =
-    useState("");
+  const [
+    title,
+    setTitle,
+  ] = useState("");
 
   const [
-    submitting,
-    setSubmitting,
-  ] = useState(false);
+    content,
+    setContent,
+  ] = useState("");
 
-  async function submitQuestion(
-    payload,
-  ) {
-    setSubmitting(true);
-
-    try {
-      await onSubmit(payload);
-
-      setTitle("");
-      setContent("");
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const canSubmit =
+    Boolean(
+      title.trim(),
+    ) &&
+    Boolean(
+      content.trim(),
+    ) &&
+    !submitting;
 
   async function handleSubmit(
     event,
   ) {
     event.preventDefault();
 
-    const trimmedTitle =
-      title.trim();
-
-    const trimmedContent =
-      content.trim();
-
-    if (
-      !trimmedTitle ||
-      !trimmedContent
-    ) {
+    if (!canSubmit) {
       return;
     }
 
-    await submitQuestion({
-      title: trimmedTitle,
-      content: trimmedContent,
+    await onSubmit?.({
+      title:
+        title.trim(),
+
+      content:
+        content.trim(),
     });
   }
 
   return (
     <form
       className="question-panel__composer"
-      onSubmit={handleSubmit}
+      onSubmit={
+        handleSubmit
+      }
     >
       <label>
         <span>
@@ -173,7 +129,15 @@ function StudentQuestionComposer({
           value={title}
           maxLength={120}
           placeholder="질문 제목을 입력해주세요"
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(
+            event,
+          ) =>
+            setTitle(
+              event
+                .target
+                .value,
+            )
+          }
         />
       </label>
 
@@ -185,169 +149,295 @@ function StudentQuestionComposer({
         <textarea
           value={content}
           placeholder="질문 내용을 입력해주세요"
-          onChange={(event) => setContent(event.target.value)}
+          onChange={(
+            event,
+          ) =>
+            setContent(
+              event
+                .target
+                .value,
+            )
+          }
         />
       </label>
 
-      <button
-        type="submit"
-        className="question-panel__submit"
-        disabled={
-          !title.trim() ||
-          !content.trim() ||
-          submitting
-        }
-      >
-        {submitting ? "등록 중" : "등록"}
-      </button>
+      {title.trim() &&
+        content.trim() && (
+          <p className="question-panel__warning">
+            ※ 등록한 질문은 이후 수정/삭제 할 수 없습니다
+          </p>
+        )}
+
+      <div className="question-panel__composer-actions">
+        <button
+          type="submit"
+          className="question-panel__submit"
+          disabled={
+            !canSubmit
+          }
+        >
+          {submitting
+            ? "등록 중"
+            : "질문하기"}
+        </button>
+      </div>
     </form>
   );
 }
 
-function ProfessorAnswerEditor({
-  question,
-  onSubmitAnswer,
-  onVoiceStop,
+function QuestionList({
+  questions,
+  selectedQuestionId,
+  onSelectQuestion,
 }) {
-  const existingAnswer =
-    question?.answers?.[0] ??
-    null;
+  const scrollRef =
+    useRef(null);
 
-  const [mode, setMode] =
-    useState("TEXT");
+  const hasOverflow =
+    questions.length > 3;
 
-  const [content, setContent] =
-    useState(
-      existingAnswer?.content ??
-        "",
-    );
+  const [
+    atBottom,
+    setAtBottom,
+  ] = useState(
+    !hasOverflow,
+  );
 
-  const [saving, setSaving] =
-    useState(false);
+  const questionIdsKey =
+    questions
+      .map(
+        getQuestionId,
+      )
+      .join("|");
 
-  const voiceEnabled =
-    typeof onVoiceStop ===
-    "function";
+  function updateScrollState() {
+    const element =
+      scrollRef.current;
 
-  async function handleSubmit(
-    event,
-  ) {
-    event.preventDefault();
+    if (
+      !element ||
+      !hasOverflow
+    ) {
+      setAtBottom(
+        true,
+      );
 
-    const trimmed =
-      content.trim();
-
-    if (!trimmed) {
       return;
     }
 
-    setSaving(true);
+    const reachedBottom =
+      element.scrollTop +
+        element.clientHeight >=
+      element.scrollHeight -
+        2;
 
-    try {
-      await onSubmitAnswer({
-        answer:
-          existingAnswer,
+    setAtBottom(
+      reachedBottom,
+    );
+  }
 
-        content:
-          trimmed,
-      });
-    } finally {
-      setSaving(false);
+  useEffect(() => {
+    const element =
+      scrollRef.current;
+
+    if (element) {
+      element.scrollTop =
+        0;
     }
+
+    const frame =
+      window.requestAnimationFrame(
+        () => setAtBottom(
+          !hasOverflow || !element ||
+          element.scrollTop + element.clientHeight >= element.scrollHeight - 2,
+        ),
+      );
+
+    return () => {
+      window.cancelAnimationFrame(
+        frame,
+      );
+    };
+  }, [
+    questionIdsKey,
+    hasOverflow,
+  ]);
+
+  if (
+    !questions.length
+  ) {
+    return (
+      <div className="question-panel__empty">
+        등록된 질문이 없습니다.
+      </div>
+    );
+  }
+
+  const viewportClass =
+    `question-panel__list-viewport${
+      hasOverflow
+        ? " is-overflowing"
+        : ""
+    }${
+      atBottom
+        ? " is-at-bottom"
+        : ""
+    }`;
+
+  return (
+    <div
+      className={
+        viewportClass
+      }
+    >
+      <div
+        ref={
+          scrollRef
+        }
+        className="question-panel__list-scroll"
+        onScroll={
+          updateScrollState
+        }
+      >
+        <div className="question-panel__list">
+          {questions.map(
+            (
+              question,
+            ) => {
+              const answered =
+                isAnswered(
+                  question,
+                );
+
+              const selected =
+                String(
+                  question.id,
+                ) ===
+                String(
+                  selectedQuestionId,
+                );
+
+              return (
+                <button
+                  type="button"
+                  key={
+                    question.id
+                  }
+                  className={
+                    selected
+                      ? "is-selected"
+                      : ""
+                  }
+                  onClick={() =>
+                    onSelectQuestion?.(
+                      question,
+                    )
+                  }
+                >
+                  <span
+                    className={`question-panel__status${
+                      answered
+                        ? " question-panel__status--answered"
+                        : ""
+                    }`}
+                    aria-hidden="true"
+                  />
+
+                  <span className="question-panel__list-text">
+                    <strong>
+                      {getQuestionTitle(
+                        question,
+                      )}
+                    </strong>
+
+                    <small>
+                      {question.categories?.map((category) => category.name ?? category.category_name).filter(Boolean).join(", ") && (
+                        <>{question.categories.map((category) => category.name ?? category.category_name).filter(Boolean).join(", ")} · </>
+                      )}
+                      {answered
+                        ? "답변 완료"
+                        : "미답변"}
+                    </small>
+                  </span>
+                </button>
+              );
+            },
+          )}
+        </div>
+      </div>
+
+      {selectedQuestionId && (
+        <div
+          className="question-panel__list-fade"
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
+}
+
+function SimilarQuestionList({
+  questions,
+}) {
+  if (
+    !questions.length
+  ) {
+    return null;
   }
 
   return (
-    <div className="question-panel__answer-area">
-      <div className="question-panel__answer-tabs">
-        <button
-          type="button"
-          className={
-            mode === "TEXT"
-              ? "is-active"
-              : ""
-          }
-          onClick={() =>
-            setMode("TEXT")
-          }
-        >
-          텍스트 답변
-        </button>
+    <div className="question-panel__similar">
+      <strong>
+        비슷한 질문이 있어요
+      </strong>
 
-        <button
-          type="button"
-          className={
-            mode === "VOICE"
-              ? "is-active"
-              : ""
-          }
-          onClick={() =>
-            setMode("VOICE")
-          }
-        >
-          음성 답변
-        </button>
+      <div className="question-panel__similar-list">
+        {questions.map(
+          (
+            question,
+          ) => {
+            const id =
+              question
+                .question_id ??
+              question
+                .questionId ??
+              question.id;
+
+            const likeCount =
+              question
+                .like_count ??
+              question
+                .likeCount ??
+              0;
+
+            return (
+              <article
+                key={id}
+              >
+                <h4>
+                  {getQuestionTitle(
+                    question,
+                  )}
+                </h4>
+
+                {question
+                  .content && (
+                  <p>
+                    {
+                      question.content
+                    }
+                  </p>
+                )}
+
+                <span>
+                  공감{" "}
+                  {likeCount}
+                </span>
+              </article>
+            );
+          },
+        )}
       </div>
-
-      {mode === "TEXT" ? (
-        <form
-          className="question-panel__answer-form"
-          onSubmit={handleSubmit}
-        >
-          <textarea
-            value={content}
-            placeholder="답변을 입력해주세요"
-            onChange={(event) =>
-              setContent(
-                event.target.value,
-              )
-            }
-          />
-
-          <button
-            type="submit"
-            disabled={
-              !content.trim() ||
-              saving
-            }
-          >
-            {saving
-              ? "저장 중"
-              : existingAnswer
-                ? "답변 수정"
-                : "답변 등록"}
-          </button>
-        </form>
-      ) : (
-        <div className="question-panel__voice">
-          <button
-            type="button"
-            className="question-panel__record-stop"
-            aria-label="음성 녹음 정지"
-            disabled={!voiceEnabled}
-            onClick={onVoiceStop}
-          >
-            <RecordStopIcon />
-          </button>
-
-          <div
-            className="question-panel__waveform"
-            aria-hidden="true"
-          >
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -356,21 +446,18 @@ function StudentAnswer({
   question,
 }) {
   const answer =
-    question?.answers?.[0];
+    question?.answers
+      ?.[0];
 
   return (
     <div className="question-panel__answer-readonly">
-      <strong>
-        답변
-      </strong>
-
       {answer ? (
         <p>
           {answer.content}
         </p>
       ) : (
-        <p>
-          아직 등록된 답변이 없습니다.
+        <p className="question-panel__answer-empty">
+          아직 답변이 등록되지 않았습니다.
         </p>
       )}
     </div>
@@ -380,66 +467,249 @@ function StudentAnswer({
 export default function QuestionPanel({
   role,
   open,
-  createMode,
-  questions,
+  createMode =
+    false,
+  submitting =
+    false,
+  questions = [],
+  questionScope =
+    "SLIDE",
+  scopeLoading =
+    false,
   selectedQuestion,
   loading,
-  onClose,
   onSelectQuestion,
+  onQuestionScopeChange,
   onCheckSimilar,
   similarQuestionState,
   onCreateQuestion,
   onSubmitAnswer,
-  onVoiceStop,
+  onSubmitVoice,
+  onArchive,
 }) {
-  const selectedQuestionId =
-    selectedQuestion?.id ?? "";
+  const normalizedRole =
+    String(
+      role ||
+        "STUDENT",
+    ).toUpperCase();
 
-  const categories =
-    useMemo(
-      () =>
-        selectedQuestion
-          ?.categories ?? [],
-      [selectedQuestion],
-    );
+  const selectedQuestionId =
+    selectedQuestion
+      ?.id ??
+    "";
+
+  const knownQuestionIdsRef =
+    useRef(null);
+
+  useEffect(() => {
+    if (
+      loading ||
+      scopeLoading
+    ) {
+      return;
+    }
+
+    const nextQuestionIds =
+      new Set(
+        questions
+          .map(
+            getQuestionId,
+          )
+          .filter(
+            Boolean,
+          ),
+      );
+
+    if (
+      knownQuestionIdsRef
+        .current === null
+    ) {
+      knownQuestionIdsRef.current =
+        nextQuestionIds;
+
+      return;
+    }
+
+    const previousQuestionIds =
+      knownQuestionIdsRef.current;
+
+    const previousQuestionsRemain =
+      [...previousQuestionIds]
+        .every(
+          (id) =>
+            nextQuestionIds
+              .has(id),
+        );
+
+    const hasNewQuestion =
+      nextQuestionIds.size >
+        previousQuestionIds.size &&
+      previousQuestionsRemain &&
+      [...nextQuestionIds]
+        .some(
+          (id) =>
+            !previousQuestionIds
+              .has(id),
+        );
+
+    knownQuestionIdsRef.current =
+      nextQuestionIds;
+
+    if (
+      hasNewQuestion &&
+      !open
+    ) {
+      emitQuestionNotification(
+        true,
+      );
+    }
+  }, [
+    loading,
+    open,
+    questions,
+    scopeLoading,
+  ]);
+
+  useEffect(() => {
+    if (open) {
+      emitQuestionNotification(
+        false,
+      );
+    }
+  }, [
+    open,
+  ]);
 
   if (!open) {
     return null;
   }
 
-  return (
-    <aside className="question-panel">
-      <div className="question-panel__header">
-        <h2>
-          {createMode
-            ? "질문 등록"
-            : "질문 리스트"}
-        </h2>
+  if (
+    createMode &&
+    normalizedRole ===
+      "STUDENT"
+  ) {
+    return (
+      <aside className="question-panel question-panel--create">
+        <div className="question-panel__header">
+          <div className="question-panel__header-copy">
+            <h2>
+              질문하기
+            </h2>
 
-        <button
-          type="button"
-          aria-label="질문 패널 닫기"
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="question-panel__empty">
-          불러오는 중...
+            <p>
+              궁금한 점을 물어보세요
+            </p>
+          </div>
         </div>
-      ) : createMode &&
-        role === "STUDENT" ? (
+
         <StudentQuestionComposer
+          submitting={
+            submitting
+          }
           onSubmit={
             onCreateQuestion
           }
         />
-      ) : (
-        <>
+      </aside>
+    );
+  }
+
+  if (normalizedRole === "PROFESSOR") {
+    return <ProfessorQuestionPanel
+      selectedQuestion={selectedQuestion}
+      questions={questions}
+      questionScope={questionScope}
+      loading={loading || scopeLoading}
+      onQuestionScopeChange={onQuestionScopeChange}
+      onSubmitAnswer={onSubmitAnswer}
+      onSubmitVoice={onSubmitVoice}
+      renderList={(items) => <QuestionList questions={items} selectedQuestionId={selectedQuestionId} onSelectQuestion={onSelectQuestion} />}
+    />;
+  }
+
+  const panelLoading =
+    loading ||
+    scopeLoading;
+
+  const scopeSubtitle =
+    questionScope ===
+    "DOCUMENT"
+      ? "전체"
+      : "해당 페이지";
+
+  return (
+    <aside className="question-panel question-panel--list">
+      <div className="question-panel__header">
+        <div className="question-panel__header-copy">
+          <h2>
+            질문 리스트
+          </h2>
+
+          <p>
+            {scopeSubtitle}
+          </p>
+        </div>
+
+        <div className="question-panel__header-actions">
+          <button
+            type="button"
+            className="question-panel__archive"
+            onClick={
+              onArchive
+            }
+          >
+            질문 아카이브
+          </button>
+        </div>
+      </div>
+
+      <div className="question-panel__scope-row">
+        <button
+          type="button"
+          className={`question-panel__scope-button${
+            questionScope ===
+            "SLIDE"
+              ? " is-active"
+              : ""
+          }`}
+          onClick={() =>
+            onQuestionScopeChange?.(
+              "SLIDE",
+            )
+          }
+        >
+          해당페이지
+        </button>
+
+        <button
+          type="button"
+          className={`question-panel__scope-button${
+            questionScope ===
+            "DOCUMENT"
+              ? " is-active"
+              : ""
+          }`}
+          onClick={() =>
+            onQuestionScopeChange?.(
+              "DOCUMENT",
+            )
+          }
+        >
+          전체
+        </button>
+      </div>
+
+      <div className="question-panel__scroll">
+        {panelLoading ? (
+          <div className="question-panel__empty">
+            불러오는 중...
+          </div>
+        ) : (
           <QuestionList
-            questions={questions}
+            questions={
+              questions
+            }
             selectedQuestionId={
               selectedQuestionId
             }
@@ -447,87 +717,82 @@ export default function QuestionPanel({
               onSelectQuestion
             }
           />
+        )}
 
-          {selectedQuestion && (
-            <section className="question-panel__detail">
-              <h3>
-                {
-                  selectedQuestion.title
-                }
-              </h3>
+        {selectedQuestion && <>
+        <div className="question-panel__divider" />
 
-              <p>
-                {
-                  selectedQuestion.content
-                }
-              </p>
+        <section className="question-panel__answer-section">
+          <h3 className="question-panel__answer-heading">
+            답변
+          </h3>
 
-              {categories.length >
-                0 && (
-                <div className="question-panel__categories">
-                  {categories.map(
-                    (category) => {
-                      const id =
-                        category.category_id ??
-                        category.categoryId ??
-                        category.id;
+          {!selectedQuestion ? (
+            <p className="question-panel__answer-empty">
+              아직 답변이 등록되지 않았습니다.
+            </p>
+          ) : (
+            <>
+              {onCheckSimilar && (
+                <div className="question-panel__detail-question">
+                  {normalizedRole ===
+                    "STUDENT" &&
+                    onCheckSimilar && (
+                      <button
+                        type="button"
+                        className="question-panel__similar-trigger"
+                        disabled={
+                          similarQuestionState
+                            ?.questionId ===
+                            selectedQuestion.id &&
+                          similarQuestionState
+                            ?.status ===
+                            "loading"
+                        }
+                        onClick={() =>
+                          onCheckSimilar(
+                            selectedQuestion.id,
+                          )
+                        }
+                      >
+                        {similarQuestionState
+                          ?.questionId ===
+                            selectedQuestion.id &&
+                        similarQuestionState
+                          ?.status ===
+                          "loading"
+                          ? "AI 유사 질문 확인 중"
+                          : "AI 유사 질문 확인"}
+                      </button>
+                    )}
 
-                      return (
-                        <span
-                          key={id}
-                        >
-                          {
-                            category.name
-                          }
-                        </span>
-                      );
-                    },
-                  )}
+                  {normalizedRole ===
+                    "STUDENT" &&
+                    similarQuestionState
+                      ?.questionId ===
+                      selectedQuestion.id &&
+                    similarQuestionState
+                      ?.status ===
+                      "success" &&
+                    similarQuestionState
+                      ?.questions
+                      ?.length >
+                      0 && (
+                      <SimilarQuestionList
+                        questions={
+                          similarQuestionState.questions
+                        }
+                      />
+                    )}
                 </div>
               )}
 
-              {role === "STUDENT" && similarQuestionState?.questionId === selectedQuestion.id && (
-                similarQuestionState.status === "loading" ? (
-                  <p>AI 유사 질문을 확인하는 중입니다.</p>
-                ) : similarQuestionState.status === "error" ? (
-                  <div className="question-panel__similar">
-                    <p>AI 유사 질문을 확인하지 못했습니다. AI 분석이 끝난 뒤 다시 시도해 주세요.</p>
-                    <button type="button" onClick={() => onCheckSimilar(selectedQuestion.id)}>다시 확인</button>
-                  </div>
-                ) : similarQuestionState.questions.length > 0 ? (
-                  <SimilarQuestionList questions={similarQuestionState.questions} />
-                ) : (
-                  <p>유사 질문이 없습니다.</p>
-                )
-              )}
-
-              {role ===
-              "PROFESSOR" ? (
-                <ProfessorAnswerEditor
-                  key={
-                    selectedQuestion.id
-                  }
-                  question={
-                    selectedQuestion
-                  }
-                  onSubmitAnswer={
-                    onSubmitAnswer
-                  }
-                  onVoiceStop={
-                    onVoiceStop
-                  }
-                />
-              ) : (
-                <StudentAnswer
-                  question={
-                    selectedQuestion
-                  }
-                />
-              )}
-            </section>
+              <StudentAnswer question={selectedQuestion} />
+            </>
           )}
-        </>
-      )}
+        </section>
+        </>}
+      </div>
     </aside>
   );
 }

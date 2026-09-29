@@ -1,3 +1,8 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import PenIcon from "../../../assets/icons/pen.svg";
 import PenColorSvg from "../../../assets/icons/pen-color.svg?raw";
 
@@ -14,9 +19,14 @@ import KeyboardIcon from "../../../assets/icons/keyboard.svg";
 import QuestionIcon from "../../../assets/icons/question.svg";
 import QuestionListIcon from "../../../assets/icons/question-list.svg";
 import FixerIcon from "../../../assets/icons/fixer.svg";
+import FixerActiveIcon from "../../../assets/icons/fixer-active.svg";
 import ColorAddIcon from "../../../assets/icons/color-add.svg";
 
 import "../styles/lecture-toolbar.css";
+import "../styles/lecture-question-toolbar.css";
+
+const QUESTION_NOTIFICATION_EVENT =
+  "tikitaka:question-notification";
 
 const OPTION_TOOLS = new Set([
   "PEN",
@@ -108,6 +118,99 @@ function isSameColor(
   );
 }
 
+function isDarkSvgPaint(
+  value,
+) {
+  const paint =
+    String(
+      value || "",
+    )
+      .trim()
+      .toUpperCase();
+
+  if (
+    paint === "NONE" ||
+    paint === "TRANSPARENT" ||
+    paint === "CURRENTCOLOR" ||
+    paint.startsWith("URL(")
+  ) {
+    return true;
+  }
+
+  if (
+    paint === "BLACK"
+  ) {
+    return true;
+  }
+
+  const shortHex =
+    /^#([0-9A-F]{3})$/.exec(
+      paint,
+    );
+
+  if (shortHex) {
+    const [
+      red,
+      green,
+      blue,
+    ] =
+      shortHex[1]
+        .split("")
+        .map((value) =>
+          Number.parseInt(
+            `${value}${value}`,
+            16,
+          ),
+        );
+
+    return (
+      Math.max(
+        red,
+        green,
+        blue,
+      ) <= 90
+    );
+  }
+
+  const longHex =
+    /^#([0-9A-F]{6})$/.exec(
+      paint,
+    );
+
+  if (longHex) {
+    const hex =
+      longHex[1];
+
+    const red =
+      Number.parseInt(
+        hex.slice(0, 2),
+        16,
+      );
+
+    const green =
+      Number.parseInt(
+        hex.slice(2, 4),
+        16,
+      );
+
+    const blue =
+      Number.parseInt(
+        hex.slice(4, 6),
+        16,
+      );
+
+    return (
+      Math.max(
+        red,
+        green,
+        blue,
+      ) <= 90
+    );
+  }
+
+  return false;
+}
+
 function getActiveSvgMarkup(
   svg,
   color,
@@ -122,19 +225,25 @@ function getActiveSvgMarkup(
       color,
     );
 
-  return svg
-    .replace(
-      /fill=(["'])#FFFFFF\1/gi,
-      `fill="${safeColor}"`,
-    )
-    .replace(
-      /fill=(["'])#FFF\1/gi,
-      `fill="${safeColor}"`,
-    )
-    .replace(
-      /fill=(["'])white\1/gi,
-      `fill="${safeColor}"`,
-    );
+  return svg.replace(
+    /\b(fill|stroke)=(["'])([^"']+)\2/gi,
+    (
+      match,
+      attribute,
+      quote,
+      paint,
+    ) => {
+      if (
+        isDarkSvgPaint(
+          paint,
+        )
+      ) {
+        return match;
+      }
+
+      return `${attribute}=${quote}${safeColor}${quote}`;
+    },
+  );
 }
 
 function emitDrawingOptions(
@@ -162,9 +271,47 @@ export default function LectureToolbar({
   onToolChange,
   onColorChange,
   onUnsupportedTool,
+  onViewAllQuestions,
 }) {
+  const [
+    hasQuestionNotification,
+    setHasQuestionNotification,
+  ] = useState(false);
+
+  useEffect(() => {
+    function handleQuestionNotification(
+      event,
+    ) {
+      setHasQuestionNotification(
+        Boolean(
+          event?.detail
+            ?.hasNotification,
+        ),
+      );
+    }
+
+    window.addEventListener(
+      QUESTION_NOTIFICATION_EVENT,
+      handleQuestionNotification,
+    );
+
+    return () => {
+      window.removeEventListener(
+        QUESTION_NOTIFICATION_EVENT,
+        handleQuestionNotification,
+      );
+    };
+  }, []);
+
+  const normalizedRole =
+    String(
+      role ||
+        "STUDENT",
+    ).toUpperCase();
+
   const tailTools =
-    role === "PROFESSOR"
+    normalizedRole ===
+    "PROFESSOR"
       ? [
           {
             id: "FIXER",
@@ -200,6 +347,11 @@ export default function LectureToolbar({
       activeTool,
     );
 
+  const drawingColor =
+    normalizeColor(
+      activeColor,
+    );
+
   function handleToolClick(
     tool,
   ) {
@@ -209,6 +361,15 @@ export default function LectureToolbar({
       );
 
       return;
+    }
+
+    if (
+      tool.id ===
+      "Q_LIST"
+    ) {
+      setHasQuestionNotification(
+        false,
+      );
     }
 
     onToolChange?.(
@@ -277,7 +438,13 @@ export default function LectureToolbar({
               uiOnly,
             }) => {
               const isActive =
-                activeTool === id;
+                activeTool === id || (id === "Q_LIST" && panelOpen);
+
+              const showNotification =
+                id ===
+                  "Q_LIST" &&
+                hasQuestionNotification &&
+                !isActive;
 
               return (
                 <div
@@ -292,11 +459,15 @@ export default function LectureToolbar({
                         : ""
                     }`}
                     data-tool={id}
-                    aria-label={label}
+                    aria-label={
+                      label
+                    }
                     aria-pressed={
                       isActive
                     }
-                    title={label}
+                    title={
+                      label
+                    }
                     onClick={() =>
                       handleToolClick({
                         id,
@@ -315,20 +486,29 @@ export default function LectureToolbar({
                             __html:
                               getActiveSvgMarkup(
                                 activeSvg,
-                                activeColor,
+                                drawingColor,
                                 dynamicFill,
                               ),
                           }}
                         />
                       ) : (
                         <img
-                          src={icon}
+                          src={
+                            id === "FIXER" && isActive ? FixerActiveIcon : icon
+                          }
                           alt=""
                           draggable="false"
                           aria-hidden="true"
                         />
                       )}
                     </span>
+
+                    {showNotification && (
+                      <span
+                        className="lecture-toolbar__question-notification"
+                        aria-hidden="true"
+                      />
+                    )}
                   </button>
                 </div>
               );
@@ -336,12 +516,12 @@ export default function LectureToolbar({
           )}
         </div>
 
+        <span className="lecture-toolbar__end-divider" aria-hidden="true" />
+        {normalizedRole === "PROFESSOR" && panelOpen && !showDrawingControls && (
+          <button type="button" className="lecture-toolbar__all-questions" onClick={onViewAllQuestions}>질문 전체보기</button>
+        )}
         {showDrawingControls && (
           <>
-            <span
-              className="lecture-toolbar__end-divider"
-              aria-hidden="true"
-            />
 
             <div className="lecture-toolbar__drawing-controls">
               <button
@@ -352,12 +532,20 @@ export default function LectureToolbar({
                   handleThicknessClick
                 }
               >
-                <span className="lecture-toolbar__thickness-preview" />
+                <span
+                  className="lecture-toolbar__thickness-preview"
+                  style={{
+                    background:
+                      drawingColor,
+                  }}
+                />
               </button>
 
               <div className="lecture-toolbar__quick-palette">
-                {QUICK_COLORS.map(
-                  (swatch) => {
+                {(panelOpen ? [drawingColor] : QUICK_COLORS).map(
+                  (
+                    swatch,
+                  ) => {
                     const isSelected =
                       isSameColor(
                         activeColor,
@@ -367,7 +555,9 @@ export default function LectureToolbar({
                     return (
                       <button
                         type="button"
-                        key={swatch}
+                        key={
+                          swatch
+                        }
                         className={`lecture-toolbar__quick-swatch${
                           isSelected
                             ? " is-active"

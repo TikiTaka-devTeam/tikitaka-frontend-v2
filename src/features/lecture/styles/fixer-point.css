@@ -1,0 +1,11 @@
+.fixer-point { position: absolute; z-index: 9; display: flex; flex-direction: var(--fixer-side); align-items: center; gap: 10px; pointer-events: auto; }
+.fixer-point__marker { display: block; flex: 0 0 25px; }
+.fixer-point__bubble { width: var(--fixer-bubble-width); height: 35px; display: flex; align-items: center; box-sizing: border-box; padding: 0 9px 0 14px; gap: 8px; border: 1px solid #dee3ed; border-radius: 18px; background: white; box-shadow: 0 10px 26px #14244712; }
+.fixer-point__bubble input, .fixer-point__bubble > span { flex: 1; min-width: 0; padding: 0; border: 0; outline: 0; background: transparent; color: #131a29; font: 500 12px/15px "Tikitaka UI", sans-serif; }
+.fixer-point__bubble > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.fixer-point__bubble input::placeholder { color: #cbcbcb; }
+.fixer-point__bubble button { display: grid; place-items: center; flex: 0 0 20px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.fixer-point__bubble button img { display: block; }
+.fixer-point__bubble button:disabled { cursor: default; }
+.fixer-point.is-checked { opacity: .5; }
+.fixer-point:focus-within .fixer-point__bubble { border-color: #758094; }

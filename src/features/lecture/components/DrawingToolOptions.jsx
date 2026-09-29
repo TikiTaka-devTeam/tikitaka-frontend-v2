@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -8,19 +9,11 @@ import ColorAddIcon from "../../../assets/icons/color-add.svg";
 import ThicknessTrackIcon from "../../../assets/icons/thickness-track.svg";
 import ThicknessThumbIcon from "../../../assets/icons/thickness-thumb.svg";
 
+import {
+  getToolThicknessConfig,
+} from "../utils/lectureData.js";
+
 import "../styles/drawing-tool-options.css";
-
-const PEN_PRESETS = [
-  0.003,
-  0.0045,
-  0.007,
-];
-
-const HIGHLIGHTER_PRESETS = [
-  0.008,
-  0.012,
-  0.018,
-];
 
 const COLORS = [
   "#EF4444",
@@ -30,45 +23,43 @@ const COLORS = [
   "#6366F1",
 ];
 
-const THICKNESS_MM_SCALE =
-  66.6666667;
+const SUPPORTED_TOOLS =
+  new Set([
+    "PEN",
+    "HIGHLIGHTER",
+    "ERASER",
+  ]);
 
 const TRACK_WIDTH = 106;
 const THUMB_SIZE = 13;
 
+const ERASER_TRACK_HEIGHT = 180;
+const ERASER_THUMB_SIZE = 17;
+
 function formatThickness(
-  ratio,
+  value,
 ) {
-  const millimeters =
-    Number(ratio) *
-    THICKNESS_MM_SCALE;
+  const numericValue =
+    Number(value);
 
-  return `${millimeters.toFixed(
-    1,
-  )} mm`;
-}
-
-function getThicknessConfig(
-  tool,
-) {
   if (
-    tool === "HIGHLIGHTER"
+    !Number.isFinite(
+      numericValue,
+    )
   ) {
-    return {
-      min: 0.006,
-      max: 0.025,
-      step: 0.0005,
-      presets:
-        HIGHLIGHTER_PRESETS,
-    };
+    return "0 mm";
   }
 
-  return {
-    min: 0.002,
-    max: 0.012,
-    step: 0.0005,
-    presets: PEN_PRESETS,
-  };
+  const digits =
+    Number.isInteger(
+      numericValue,
+    )
+      ? 0
+      : 1;
+
+  return `${numericValue.toFixed(
+    digits,
+  )} mm`;
 }
 
 function getThicknessProgress(
@@ -92,8 +83,14 @@ function getThicknessProgress(
     1,
     Math.max(
       0,
-      (numericValue - min) /
-        (max - min),
+      (
+        numericValue -
+        min
+      ) /
+        (
+          max -
+          min
+        ),
     ),
   );
 }
@@ -112,7 +109,278 @@ function isSameColor(
   );
 }
 
-export default function DrawingToolOptions({
+function getAnchorSelector(
+  tool,
+  panel,
+) {
+  if (
+    tool === "ERASER"
+  ) {
+    return '.lecture-toolbar__button[data-tool="ERASER"]';
+  }
+
+  if (
+    panel ===
+    "THICKNESS"
+  ) {
+    return ".lecture-toolbar__thickness-button";
+  }
+
+  if (
+    panel ===
+    "COLOR"
+  ) {
+    return '.lecture-toolbar__quick-swatch[aria-label="색상 더보기"]';
+  }
+
+  return null;
+}
+
+function getAnchorGap(
+  tool,
+) {
+  return (
+    tool === "ERASER"
+      ? 15
+      : 5
+  );
+}
+
+function useAnchoredPanelPosition({
+  tool,
+  panel,
+  panelRef,
+}) {
+  const [
+    position,
+    setPosition,
+  ] = useState(null);
+
+  const positionKey = `${tool}:${panel}`;
+  const [previousPositionKey, setPreviousPositionKey] = useState(positionKey);
+  if (previousPositionKey !== positionKey) {
+    setPreviousPositionKey(positionKey);
+    setPosition(null);
+  }
+
+  useLayoutEffect(() => {
+    if (!panel) {
+      return undefined;
+    }
+
+    const panelElement =
+      panelRef.current;
+
+    if (!panelElement) {
+      return undefined;
+    }
+
+    const toolbarWrap =
+      panelElement.closest(
+        ".lecture-toolbar-wrap",
+      );
+
+    if (!toolbarWrap) {
+      return undefined;
+    }
+
+    const selector =
+      getAnchorSelector(
+        tool,
+        panel,
+      );
+
+    if (!selector) {
+      return undefined;
+    }
+
+    const anchorElement =
+      toolbarWrap.querySelector(
+        selector,
+      );
+
+    if (!anchorElement) {
+      return undefined;
+    }
+
+    let animationFrameId =
+      null;
+
+    function updatePosition() {
+      const offsetParent =
+        panelElement.offsetParent;
+
+      if (!offsetParent) {
+        return;
+      }
+
+      const parentRect =
+        offsetParent.getBoundingClientRect();
+
+      const wrapRect =
+        toolbarWrap.getBoundingClientRect();
+
+      const anchorRect =
+        anchorElement.getBoundingClientRect();
+
+      const panelRect =
+        panelElement.getBoundingClientRect();
+
+      const wrapStyle =
+        window.getComputedStyle(
+          toolbarWrap,
+        );
+
+      const lectureUnit =
+        Number.parseFloat(
+          wrapStyle.getPropertyValue(
+            "--lecture-u",
+          ),
+        ) || 1;
+
+      const gap =
+        getAnchorGap(
+          tool,
+        ) *
+        lectureUnit;
+
+      const wrapLeft =
+        wrapRect.left -
+        parentRect.left +
+        offsetParent.scrollLeft;
+
+      const wrapRight =
+        wrapRect.right -
+        parentRect.left +
+        offsetParent.scrollLeft;
+
+      const centeredLeft =
+        anchorRect.left -
+        parentRect.left +
+        offsetParent.scrollLeft +
+        anchorRect.width /
+          2 -
+        panelRect.width /
+          2;
+
+      const minimumLeft =
+        wrapLeft;
+
+      const maximumLeft =
+        Math.max(
+          minimumLeft,
+          wrapRight -
+            panelRect.width,
+        );
+
+      const left =
+        Math.min(
+          maximumLeft,
+          Math.max(
+            minimumLeft,
+            centeredLeft,
+          ),
+        );
+
+      const top =
+        anchorRect.bottom -
+        parentRect.top +
+        offsetParent.scrollTop +
+        gap;
+
+      setPosition({
+        left,
+        top,
+      });
+    }
+
+    function scheduleUpdate() {
+      if (
+        animationFrameId !==
+        null
+      ) {
+        window.cancelAnimationFrame(
+          animationFrameId,
+        );
+      }
+
+      animationFrameId =
+        window.requestAnimationFrame(
+          updatePosition,
+        );
+    }
+
+    scheduleUpdate();
+
+    window.addEventListener(
+      "resize",
+      scheduleUpdate,
+    );
+
+    window.addEventListener(
+      "scroll",
+      scheduleUpdate,
+      true,
+    );
+
+    let resizeObserver =
+      null;
+
+    if (
+      typeof ResizeObserver !==
+      "undefined"
+    ) {
+      resizeObserver =
+        new ResizeObserver(
+          scheduleUpdate,
+        );
+
+      resizeObserver.observe(
+        toolbarWrap,
+      );
+
+      resizeObserver.observe(
+        anchorElement,
+      );
+
+      resizeObserver.observe(
+        panelElement,
+      );
+    }
+
+    return () => {
+      if (
+        animationFrameId !==
+        null
+      ) {
+        window.cancelAnimationFrame(
+          animationFrameId,
+        );
+      }
+
+      window.removeEventListener(
+        "resize",
+        scheduleUpdate,
+      );
+
+      window.removeEventListener(
+        "scroll",
+        scheduleUpdate,
+        true,
+      );
+
+      resizeObserver?.disconnect();
+    };
+  }, [
+    tool,
+    panel,
+    panelRef,
+  ]);
+
+  return position;
+}
+
+function DrawingToolOptionsContent({
   tool,
   thickness,
   color,
@@ -127,9 +395,8 @@ export default function DrawingToolOptions({
   const colorInputRef =
     useRef(null);
 
-  useEffect(() => {
-    setOpenPanel(null);
-  }, [tool]);
+  const panelRef =
+    useRef(null);
 
   useEffect(() => {
     function handleOptionsEvent(
@@ -142,16 +409,11 @@ export default function DrawingToolOptions({
         event.detail ?? {};
 
       if (
-        eventTool !== tool
-      ) {
-        return;
-      }
-
-      if (
-        ![
-          "PEN",
-          "HIGHLIGHTER",
-        ].includes(tool)
+        eventTool !== tool ||
+        !SUPPORTED_TOOLS.has(
+          tool,
+        ) ||
+        tool === "ERASER"
       ) {
         return;
       }
@@ -177,14 +439,56 @@ export default function DrawingToolOptions({
     };
   }, [tool]);
 
-  if (
-    ![
-      "PEN",
-      "HIGHLIGHTER",
-    ].includes(tool)
-  ) {
-    return null;
-  }
+  const visiblePanel =
+    tool === "ERASER"
+      ? "ERASER"
+      : openPanel;
+
+  const panelPosition =
+    useAnchoredPanelPosition({
+      tool,
+      panel:
+        visiblePanel,
+      panelRef,
+    });
+
+  const anchoredPanelStyle =
+    panelPosition
+      ? {
+          position:
+            "absolute",
+
+          left:
+            `${panelPosition.left}px`,
+
+          top:
+            `${panelPosition.top}px`,
+
+          right:
+            "auto",
+
+          bottom:
+            "auto",
+
+          transform:
+            "none",
+        }
+      : {
+          position:
+            "absolute",
+
+          right:
+            "auto",
+
+          bottom:
+            "auto",
+
+          transform:
+            "none",
+
+          visibility:
+            "hidden",
+        };
 
   const {
     min,
@@ -192,7 +496,9 @@ export default function DrawingToolOptions({
     step,
     presets,
   } =
-    getThicknessConfig(tool);
+    getToolThicknessConfig(
+      tool,
+    );
 
   const progress =
     getThicknessProgress(
@@ -201,12 +507,91 @@ export default function DrawingToolOptions({
       max,
     );
 
+  if (
+    tool === "ERASER"
+  ) {
+    const minimumCenter =
+      ERASER_THUMB_SIZE /
+      2;
+
+    const maximumCenter =
+      ERASER_TRACK_HEIGHT -
+      ERASER_THUMB_SIZE /
+        2;
+
+    const thumbCenter =
+      minimumCenter +
+      progress *
+        (
+          maximumCenter -
+          minimumCenter
+        );
+
+    const thumbCenterPercent =
+      (
+        thumbCenter /
+        ERASER_TRACK_HEIGHT
+      ) *
+      100;
+
+    return (
+      <div
+        ref={panelRef}
+        className="drawing-options drawing-options--eraser drawing-options--figma-eraser"
+        style={
+          anchoredPanelStyle
+        }
+      >
+        <div className="drawing-options__eraser-slider">
+          <span
+            className="drawing-options__eraser-track"
+            aria-hidden="true"
+          />
+
+          <span
+            className="drawing-options__eraser-thumb"
+            style={{
+              top:
+                `${thumbCenterPercent}%`,
+            }}
+            aria-hidden="true"
+          />
+
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={
+              thickness
+            }
+            onChange={(
+              event,
+            ) =>
+              onThicknessChange(
+                Number(
+                  event.target
+                    .value,
+                ),
+              )
+            }
+            aria-label={`지우개 굵기 ${formatThickness(
+              thickness,
+            )}`}
+          />
+        </div>
+      </div>
+    );
+  }
+
   const minimumCenter =
-    THUMB_SIZE / 2;
+    THUMB_SIZE /
+    2;
 
   const maximumCenter =
     TRACK_WIDTH -
-    THUMB_SIZE / 2;
+    THUMB_SIZE /
+      2;
 
   const thumbCenter =
     minimumCenter +
@@ -217,8 +602,10 @@ export default function DrawingToolOptions({
       );
 
   const thumbCenterPercent =
-    (thumbCenter /
-      TRACK_WIDTH) *
+    (
+      thumbCenter /
+      TRACK_WIDTH
+    ) *
     100;
 
   if (
@@ -226,7 +613,13 @@ export default function DrawingToolOptions({
     "THICKNESS"
   ) {
     return (
-      <div className="drawing-options drawing-options--thickness drawing-options--figma-thickness">
+      <div
+        ref={panelRef}
+        className="drawing-options drawing-options--thickness drawing-options--figma-thickness"
+        style={
+          anchoredPanelStyle
+        }
+      >
         <strong className="drawing-options__thickness-label">
           {formatThickness(
             thickness,
@@ -266,7 +659,9 @@ export default function DrawingToolOptions({
             min={min}
             max={max}
             step={step}
-            value={thickness}
+            value={
+              thickness
+            }
             onChange={(
               event,
             ) =>
@@ -277,7 +672,14 @@ export default function DrawingToolOptions({
                 ),
               )
             }
-            aria-label="필기 굵기"
+            aria-label={`${
+              tool ===
+              "HIGHLIGHTER"
+                ? "형광펜"
+                : "펜"
+            } 굵기 ${formatThickness(
+              thickness,
+            )}`}
           />
         </div>
 
@@ -289,10 +691,15 @@ export default function DrawingToolOptions({
             ) => (
               <button
                 type="button"
-                key={preset}
-                className={
-                  thickness ===
+                key={
                   preset
+                }
+                className={
+                  Math.abs(
+                    thickness -
+                      preset,
+                  ) <
+                  0.001
                     ? "is-active"
                     : ""
                 }
@@ -307,7 +714,8 @@ export default function DrawingToolOptions({
               >
                 <span
                   className={`drawing-options__preset-line ${
-                    index === 0
+                    index ===
+                    0
                       ? "drawing-options__preset-line--thin"
                       : index ===
                           1
@@ -324,10 +732,17 @@ export default function DrawingToolOptions({
   }
 
   if (
-    openPanel === "COLOR"
+    openPanel ===
+    "COLOR"
   ) {
     return (
-      <div className="drawing-options drawing-options--colors">
+      <div
+        ref={panelRef}
+        className="drawing-options drawing-options--colors"
+        style={
+          anchoredPanelStyle
+        }
+      >
         {COLORS.map(
           (swatch) => {
             const isSelected =
@@ -339,7 +754,9 @@ export default function DrawingToolOptions({
             return (
               <button
                 type="button"
-                key={swatch}
+                key={
+                  swatch
+                }
                 className={
                   isSelected
                     ? "is-active"
@@ -372,7 +789,9 @@ export default function DrawingToolOptions({
           }
         >
           <img
-            src={ColorAddIcon}
+            src={
+              ColorAddIcon
+            }
             alt=""
             draggable="false"
             aria-hidden="true"
@@ -380,7 +799,9 @@ export default function DrawingToolOptions({
         </button>
 
         <input
-          ref={colorInputRef}
+          ref={
+            colorInputRef
+          }
           className="drawing-options__native-color-input"
           type="color"
           value={
@@ -407,4 +828,27 @@ export default function DrawingToolOptions({
   }
 
   return null;
+}
+
+export default function DrawingToolOptions(
+  props,
+) {
+  const {
+    tool,
+  } = props;
+
+  if (
+    !SUPPORTED_TOOLS.has(
+      tool,
+    )
+  ) {
+    return null;
+  }
+
+  return (
+    <DrawingToolOptionsContent
+      key={tool}
+      {...props}
+    />
+  );
 }

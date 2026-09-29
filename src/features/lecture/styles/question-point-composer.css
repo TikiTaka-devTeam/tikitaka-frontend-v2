@@ -1,0 +1,104 @@
+.question-point {
+  position: absolute;
+  z-index: 12;
+
+  width: 0;
+  height: 0;
+
+  pointer-events: none;
+}
+
+.question-point__marker {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 35px;
+  height: 35px;
+
+  padding: 0;
+
+  transform: translate(-50%, -50%);
+
+  display: block;
+
+  box-sizing: border-box;
+
+  border: 0;
+  outline: 0;
+
+  border-radius:
+    18px
+    18px
+    18px
+    3px;
+
+  background: #2e6bff;
+
+  box-shadow:
+    0 10px 26px
+    rgba(20, 36, 71, 0.07);
+
+  pointer-events: auto;
+
+  cursor: pointer;
+}
+
+.question-point__marker--draft {
+  pointer-events: none;
+}
+
+.question-point__bubble {
+  position: absolute;
+
+  right: 27.5px;
+  top: 0;
+
+  width: 250px;
+  height: 35px;
+
+  padding: 0 14px;
+
+  transform: translateY(-50%);
+
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+
+  border: 1px solid #d8dbe7;
+
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 10px 26px
+    rgba(20, 36, 71, 0.07);
+
+  color: #424f6b;
+
+  font-family:
+    "Tikitaka UI",
+    sans-serif;
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+
+  text-align: left;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  pointer-events: auto;
+
+  cursor: pointer;
+}
+
+.question-point__bubble--draft {
+  pointer-events: none;
+}
