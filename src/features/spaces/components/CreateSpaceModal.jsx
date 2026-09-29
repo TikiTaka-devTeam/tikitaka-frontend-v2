@@ -23,9 +23,7 @@ function createTimeBlock(id) {
     id,
     days: [],
     startTime: "",
-    startPeriod: "AM",
     endTime: "",
-    endPeriod: "PM",
   };
 }
 
@@ -50,36 +48,7 @@ function isValidTime(value) {
 
   const minute = Number(digits.slice(2, 4));
 
-  return hour >= 1 && hour <= 12 && minute >= 0 && minute <= 59;
-}
-
-function convert24HourToUiTime(value) {
-  if (!value) {
-    return {
-      time: "",
-      period: "AM",
-    };
-  }
-
-  const [hourText, minuteText] = String(value).split(":");
-
-  const hour24 = Number(hourText);
-
-  if (Number.isNaN(hour24) || !minuteText) {
-    return {
-      time: "",
-      period: "AM",
-    };
-  }
-
-  const period = hour24 >= 12 ? "PM" : "AM";
-
-  const hour12 = hour24 % 12 || 12;
-
-  return {
-    time: `${String(hour12).padStart(2, "0")} : ${minuteText}`,
-    period,
-  };
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
 }
 
 function createInitialTimeBlocks(initialData) {
@@ -97,10 +66,8 @@ function createInitialTimeBlocks(initialData) {
     return schedules.map((schedule, index) => ({
       id: index + 1,
       days: Array.isArray(schedule.days) ? schedule.days : [],
-      startTime: schedule.startTime ?? "",
-      startPeriod: schedule.startPeriod ?? "AM",
-      endTime: schedule.endTime ?? "",
-      endPeriod: schedule.endPeriod ?? "PM",
+      startTime: formatTimeInput(schedule.startTime ?? ""),
+      endTime: formatTimeInput(schedule.endTime ?? ""),
     }));
   }
 
@@ -128,80 +95,18 @@ function createInitialTimeBlocks(initialData) {
     }
   });
 
-  return Array.from(groupedSchedules.values()).map((schedule, index) => {
-    const start = convert24HourToUiTime(schedule.startTime);
-
-    const end = convert24HourToUiTime(schedule.endTime);
-
-    return {
-      id: index + 1,
-      days: schedule.days,
-      startTime: start.time,
-      startPeriod: start.period,
-      endTime: end.time,
-      endPeriod: end.period,
-    };
-  });
-}
-
-function PeriodSelector({ value, isOpen, onToggle, onChange }) {
-  return (
-    <div
-      className="create-space-modal__period"
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          onToggle(false);
-        }
-      }}
-    >
-      <button
-        type="button"
-        className="create-space-modal__period-trigger"
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        onClick={() => onToggle(!isOpen)}
-      >
-        {value}
-      </button>
-
-      {isOpen && (
-        <div
-          className="create-space-modal__period-dropdown"
-          role="listbox"
-          aria-label="오전 오후 선택"
-        >
-          {["AM", "PM"].map((period) => (
-            <button
-              key={period}
-              type="button"
-              role="option"
-              aria-selected={value === period}
-              className={`create-space-modal__period-option ${
-                value === period ? "is-selected" : ""
-              }`}
-              onClick={() => {
-                onChange(period);
-
-                onToggle(false);
-              }}
-            >
-              {period}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  return Array.from(groupedSchedules.values()).map((schedule, index) => ({
+    id: index + 1,
+    days: schedule.days,
+    startTime: formatTimeInput(schedule.startTime),
+    endTime: formatTimeInput(schedule.endTime),
+  }));
 }
 
 function TimePicker({
   value,
   placeholder,
-  period,
-  isPeriodOpen,
-  onPeriodToggle,
   onTimeChange,
-  onPeriodChange,
 }) {
   return (
     <div className="create-space-modal__time-picker">
@@ -216,13 +121,6 @@ function TimePicker({
           onTimeChange(formatTimeInput(event.target.value));
         }}
       />
-
-      <PeriodSelector
-        value={period}
-        isOpen={isPeriodOpen}
-        onToggle={onPeriodToggle}
-        onChange={onPeriodChange}
-      />
     </div>
   );
 }
@@ -234,8 +132,6 @@ function TimeScheduleBlock({
   onToggleDay,
   onChange,
 }) {
-  const [openPeriod, setOpenPeriod] = useState(null);
-
   return (
     <div
       className={`create-space-modal__time-box ${
@@ -276,17 +172,9 @@ function TimeScheduleBlock({
       <div className="create-space-modal__time-row">
         <TimePicker
           value={block.startTime}
-          placeholder="10 : 30"
-          period={block.startPeriod}
-          isPeriodOpen={openPeriod === "start"}
-          onPeriodToggle={(open) => {
-            setOpenPeriod(open ? "start" : null);
-          }}
+          placeholder="09 : 00"
           onTimeChange={(value) => {
             onChange(block.id, "startTime", value);
-          }}
-          onPeriodChange={(value) => {
-            onChange(block.id, "startPeriod", value);
           }}
         />
 
@@ -294,17 +182,9 @@ function TimeScheduleBlock({
 
         <TimePicker
           value={block.endTime}
-          placeholder="12 : 00"
-          period={block.endPeriod}
-          isPeriodOpen={openPeriod === "end"}
-          onPeriodToggle={(open) => {
-            setOpenPeriod(open ? "end" : null);
-          }}
+          placeholder="16 : 00"
           onTimeChange={(value) => {
             onChange(block.id, "endTime", value);
-          }}
-          onPeriodChange={(value) => {
-            onChange(block.id, "endPeriod", value);
           }}
         />
       </div>
@@ -426,15 +306,11 @@ function CreateSpaceModal({ initialData = null, onClose, onSave }) {
 
       classroom: classroom.trim(),
 
-      schedules: timeBlocks.map(
-        ({ days, startTime, startPeriod, endTime, endPeriod }) => ({
-          days,
-          startTime,
-          startPeriod,
-          endTime,
-          endPeriod,
-        }),
-      ),
+      schedules: timeBlocks.map(({ days, startTime, endTime }) => ({
+        days,
+        startTime,
+        endTime,
+      })),
     });
   };
 

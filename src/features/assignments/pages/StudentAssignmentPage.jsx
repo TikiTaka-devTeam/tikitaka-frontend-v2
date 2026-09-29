@@ -271,7 +271,7 @@ function StudentAssignmentPage() {
 
   const spaceName =
     location.state?.spaceName ??
-    "실무중심산학협력프로젝트1";
+    "Space";
 
   const [
     assignments,

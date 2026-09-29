@@ -315,14 +315,14 @@
 }
 
 .create-space-modal__time-picker {
-  width: 113px;
+  width: 76px;
   height: 47px;
 
   padding: 0 10px;
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
   border: 1px solid #e0e5f2;
   border-radius: 10px;
@@ -346,6 +346,7 @@
   font-size: 16px;
   font-weight: 500;
   line-height: normal;
+  text-align: center;
 }
 
 .create-space-modal__time-input.has-value {
@@ -365,89 +366,6 @@
   font-size: 18px;
   font-weight: 500;
   line-height: normal;
-}
-
-
-.create-space-modal__period {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-
-  z-index: 20;
-}
-
-.create-space-modal__period-trigger {
-  padding: 0;
-
-  border: 0;
-
-  background: transparent;
-
-  color: #212326;
-
-  font-size: 16px;
-  font-weight: 500;
-  line-height: normal;
-
-  cursor: pointer;
-}
-
-.create-space-modal__period-dropdown {
-  position: absolute;
-
-  top: 24px;
-  right: -10px;
-
-  width: 52px;
-  height: 62px;
-
-  padding: 6px 0;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  gap: 4px;
-
-  border-radius: 10px;
-
-  background: #ffffff;
-
-  box-shadow:
-    0 8px 20px rgba(10, 26, 56, 0.16);
-
-  z-index: 30;
-}
-
-.create-space-modal__period-option {
-  width: 36px;
-  height: 21px;
-
-  padding: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 0;
-  border-radius: 8px;
-
-  background: transparent;
-
-  color: #b2b8c4;
-
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 17px;
-
-  cursor: pointer;
-}
-
-.create-space-modal__period-option.is-selected {
-  background: #ebeef5;
-  color: #212326;
 }
 
 

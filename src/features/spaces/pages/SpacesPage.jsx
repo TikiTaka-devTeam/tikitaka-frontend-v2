@@ -264,31 +264,20 @@ function getFallbackSpaces(status) {
   return status === "ACTIVE" ? ACTIVE_SPACE_MOCKS : [];
 }
 
-function convertTo24Hour(time, period) {
+function formatScheduleTime(time) {
   const digits = String(time).replace(/\D/g, "").slice(0, 4);
 
-  const hourText = digits.slice(0, 2);
-
+  const hour = digits.slice(0, 2);
   const minute = digits.slice(2, 4);
 
-  let hour = Number(hourText);
-
-  if (period === "AM" && hour === 12) {
-    hour = 0;
-  }
-
-  if (period === "PM" && hour !== 12) {
-    hour += 12;
-  }
-
-  return `${String(hour).padStart(2, "0")}:${minute}`;
+  return `${hour}:${minute}`;
 }
 
 function createSpaceRequestData(formData) {
   const schedules = (formData?.schedules ?? []).flatMap((schedule) => {
-    const startTime = convertTo24Hour(schedule.startTime, schedule.startPeriod);
+    const startTime = formatScheduleTime(schedule.startTime);
 
-    const endTime = convertTo24Hour(schedule.endTime, schedule.endPeriod);
+    const endTime = formatScheduleTime(schedule.endTime);
 
     return (schedule.days ?? [])
       .map((day) => ({
@@ -382,20 +371,20 @@ function SpacesPage() {
   );
 
   useEffect(() => {
-    let isCancelled = false;
+    const controller = new AbortController();
 
     const status = selectedTab === "active" ? "ACTIVE" : "ARCHIVED";
 
-    getSpaces(status)
+    getSpaces(status, { signal: controller.signal })
       .then((data) => {
-        if (isCancelled) {
+        if (controller.signal.aborted) {
           return;
         }
 
         setSpaces(getSpaceList(data, status));
       })
       .catch((error) => {
-        if (isCancelled) {
+        if (controller.signal.aborted || error.code === "ERR_CANCELED") {
           return;
         }
 
@@ -404,7 +393,7 @@ function SpacesPage() {
         setSpaces(getFallbackSpaces(status));
       })
       .finally(() => {
-        if (isCancelled) {
+        if (controller.signal.aborted) {
           return;
         }
 
@@ -412,7 +401,7 @@ function SpacesPage() {
       });
 
     return () => {
-      isCancelled = true;
+      controller.abort();
     };
   }, [selectedTab]);
 

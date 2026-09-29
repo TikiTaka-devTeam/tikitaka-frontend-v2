@@ -19,9 +19,11 @@ function getAuthConfig() {
   };
 }
 
-export async function getSpaces(status = "ACTIVE") {
+export async function getSpaces(status = "ACTIVE", config = {}) {
   const response = await axios.get(`${API_BASE_URL}/spaces`, {
+    ...config,
     params: {
+      ...config.params,
       status,
     },
     ...getAuthConfig(),

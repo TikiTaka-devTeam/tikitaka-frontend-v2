@@ -70,9 +70,7 @@ function SpaceLecturePage() {
   const location = useLocation();
   const { spaceId } = useParams();
   const isProfessor = readUserRole() === "PROFESSOR";
-  const spaceName =
-    location.state?.spaceName || "실무중심산학협력프로젝트1";
-
+  const spaceName = location.state?.spaceName || "Space";
   const [materialModalStep, setMaterialModalStep] = useState(null);
   const [pendingMaterial, setPendingMaterial] = useState(null);
   const [materialSaveError, setMaterialSaveError] = useState("");

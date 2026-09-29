@@ -148,7 +148,7 @@ function SpaceMembersPage() {
   const userRole = readUserRole();
   const isProfessor = userRole === "PROFESSOR";
   const isStudent = userRole === "STUDENT";
-  const spaceName = location.state?.spaceName || "실무중심산학협력프로젝트1";
+  const spaceName = location.state?.spaceName || "Space";
   const [currentUser, setCurrentUser] = useState(() => readStoredUser());
   const [members, setMembers] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
