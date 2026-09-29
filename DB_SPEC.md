@@ -152,12 +152,13 @@ WHERE status IN ('PENDING', 'APPROVED');
 
 #### `document_revisions`
 
-`id`, `document_id`, `editor_id`, `base_document_version`, `preview_version`, 임시 PDF 정보, `status`, `operation_cursor_sequence`, timestamps.
+`id`, `document_id`, `editor_id`, `base_document_version`, `preview_version`, 임시 PDF 정보, `status VARCHAR(20) DEFAULT EDITING`, `operation_cursor_sequence`, timestamps.
 
 - 상태: `EDITING|PROCESSING|COMPLETED|FAILED|CANCELED`.
-- 문서당 활성 revision 하나만 허용하는 partial UNIQUE index가 필요하다.
+- 문서당 `EDITING` 또는 `PROCESSING` 상태의 revision은 하나만 허용한다.
+- complete 호출 직후 `PROCESSING`, 최종 PDF와 Slide 교체 완료 후 `COMPLETED`로 변경한다.
 - complete 성공 시에만 document version과 최종 slide 구성을 반영한다.
-- 실패 시 기존 document, slide, object를 유지한다.
+- 최종 PDF·썸네일 생성, S3 업로드 또는 실제 Slide 구성 반영 실패 시 `FAILED`로 변경하고 기존 document, slide, object를 유지한다.
 
 #### `revision_slides`
 
@@ -334,7 +335,7 @@ API 기준 type은 `QUESTION_CREATED|ASSIGNMENT_CLOSED|SPACE_JOIN_REQUESTED|NOTI
 - 질문/공지 `view_count`가 재조회마다 증가하는지, 사용자별 최초 조회만 증가하는지 정해야 한다. 후자라면 별도 view event 또는 unique read 모델이 필요하다.
 - OAuth `signup_token`이 stateless signed token인지 서버 저장형인지 정한다. 저장형이면 만료·소비 컬럼이 있는 별도 테이블이 필요하다.
 - QST-019의 operation별 부분 성공을 허용하는지, 전체 transaction인지 정해야 한다. 멱등성을 원하면 operation ID 기록도 필요하다.
-- MAT-012의 `PROCESSING` 완료 확인 방식(polling endpoint/WebSocket/notification)을 추가한다.
+- MAT-012의 `PROCESSING` 완료 여부는 MAT-008을 주기적으로 조회하여 확인한다.
 - 필기 version 충돌의 HTTP status, error body, 최신 version/stroke 반환 여부를 정의한다.
 - `FIXER` check API가 일방향 완료인지 토글인지 정의한다.
 - SYS-NOT-002의 상세 응답과 읽음 처리 시점을 정의한다.

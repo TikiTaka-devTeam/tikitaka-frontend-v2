@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import backIcon from "../../../assets/icons/go-back.svg";
 import totalQuestionIcon from "../../../assets/icons/questions/total-question.svg";
@@ -32,7 +32,6 @@ import {
 import QuestionComposer from "../components/QuestionComposer.jsx";
 import QuestionCategoryManager from "../components/QuestionCategoryManager.jsx";
 import SpaceQuestionDetail from "../components/SpaceQuestionDetail.jsx";
-import { MOCK_QUESTION_CATEGORIES } from "../mocks/questionCategoryMocks.js";
 import "../styles/spaceQuestions.css";
 
 const SORT_OPTIONS = [
@@ -135,6 +134,7 @@ export default function SpaceQuestionsPage() {
   const { spaceId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const spaceName = location.state?.spaceName || "Space";
   const userRole = readUserRole();
   const isProfessor = userRole === "PROFESSOR";
@@ -160,7 +160,9 @@ export default function SpaceQuestionsPage() {
   const [isComposing, setIsComposing] = useState(false);
   const [isManagingCategories, setIsManagingCategories] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [selectedQuestionId, setSelectedQuestionId] = useState("");
+  const [selectedQuestionId, setSelectedQuestionId] = useState(
+    () => searchParams.get("questionId") ?? "",
+  );
   const [questionLikeOverrides, setQuestionLikeOverrides] = useState(() => readQuestionLikeOverrides(spaceId));
   const [questionMenuId, setQuestionMenuId] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -360,13 +362,8 @@ export default function SpaceQuestionsPage() {
         view !== "mine" || Boolean(mineCategoryIds?.[document.document_id]?.has(category.category_id))),
     }))
     .filter((document) => document.categories.length > 0);
-  const displayCategoryGroups = categoryGroups.length > 0 ? categoryGroups : [{
-    document_id: "mock-question-categories",
-    title: "",
-    categories: MOCK_QUESTION_CATEGORIES,
-    isMock: true,
-  }];
   const isCategoryLoading = (!currentCategoryData && !categoryError) || (view === "mine" && !isProfessor && !currentMineCategoryData && !mineCategoryError);
+  const shouldShowCategorySection = view !== "all" || Boolean(selectedDocumentId);
 
   function changeView(nextView) {
     setIsManagingCategories(false);
@@ -551,19 +548,19 @@ export default function SpaceQuestionsPage() {
           </aside>
 
           {isManagingCategories ? <QuestionCategoryManager
-            key={`${spaceId}-${refreshKey}-${currentCategoryData ? "loaded" : "mock"}`}
+            key={`${spaceId}-${refreshKey}-${currentCategoryData ? "loaded" : "loading"}`}
             documents={currentCategoryData?.documents ?? []}
             onCancel={() => setIsManagingCategories(false)}
-          /> : selectedQuestionId ? <SpaceQuestionDetail
-            key={selectedQuestionId}
-            questionId={selectedQuestionId}
-            role={userRole}
-            onBack={() => setSelectedQuestionId("")}
             onCategoriesChanged={() => {
               setCategoryData(null);
               setCategoryError("");
               setRefreshKey((value) => value + 1);
             }}
+          /> : selectedQuestionId ? <SpaceQuestionDetail
+            key={selectedQuestionId}
+            questionId={selectedQuestionId}
+            role={userRole}
+            onBack={() => setSelectedQuestionId("")}
             onUpdated={handleQuestionUpdated}
           /> : <section className="space-questions-content" aria-labelledby="space-questions-title">
             <div className="space-questions-content__heading">
@@ -584,6 +581,7 @@ export default function SpaceQuestionsPage() {
                 <span>답변 대기</span>
               </div>
             </div>}
+            {shouldShowCategorySection && <>
             <div className="space-questions-categories" aria-label="질문 카테고리">
               <button
                 type="button"
@@ -591,8 +589,8 @@ export default function SpaceQuestionsPage() {
                 disabled={selectedCategories.length === 0}
                 onClick={() => setSelectedCategories([])}
               >Clear</button>
-              {displayCategoryGroups.map((document) => <div className="space-questions-categories__group" key={document.document_id}>
-                {!selectedDocumentId && !document.isMock && <span className="space-questions-categories__document">{document.title}</span>}
+              {categoryGroups.map((document) => <div className="space-questions-categories__group" key={document.document_id}>
+                {!selectedDocumentId && <span className="space-questions-categories__document">{document.title}</span>}
                 {splitCategoryRows(document.categories).map((row, rowIndex) => <div className="space-questions-categories__row" key={row[0].category_id}>
                   {rowIndex === 0 && <span className="space-questions-categories__label">{document.categories.some((category) => category.source === "MANUAL") ? "카테고리" : "AI 카테고리"}</span>}
                   {/* 세 번째 줄부터 홀수 번째 줄은 첫 줄의 라벨 자리를 비워 같은 x축에서 시작한다. */}
@@ -606,10 +604,12 @@ export default function SpaceQuestionsPage() {
                   >{category.name}</button>)}
                 </div>)}
               </div>)}
+              {!isCategoryLoading && !categoryError && categoryGroups.length === 0 && (view !== "mine" || (mySummary?.total_count ?? 0) > 0) && <p className="space-questions-category-status">등록된 카테고리가 없습니다.</p>}
             </div>
             {isCategoryLoading && <p className="space-questions-category-status" role="status">카테고리를 불러오는 중입니다.</p>}
             {categoryError && <p className="space-questions-category-error" role="alert">{categoryError}</p>}
             {view === "mine" && mineCategoryError && <p className="space-questions-category-error" role="alert">{mineCategoryError}</p>}
+            </>}
             <div className="space-questions-sort" aria-label="질문 정렬">
               {SORT_OPTIONS.map((option) => <button key={option.value} type="button" className={sort === option.value ? "is-active" : ""} aria-pressed={sort === option.value} onClick={() => changeSort(option.value)}>{option.label}</button>)}
             </div>

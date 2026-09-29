@@ -15,7 +15,6 @@ import stepLineColored from "../../../assets/icons/questions/line-between-circle
 import questionSubmitIcon from "../../../assets/icons/questions/question-submit.svg";
 import { getQuestionDetail, getSimilarQuestions } from "../../lecture/api/questionApi.js";
 import { createSpaceQuestion } from "../api/spaceQuestionsApi.js";
-import { MOCK_QUESTION_PREVIEW_CATEGORIES } from "../mocks/questionCategoryMocks.js";
 import "../styles/questionComposer.css";
 
 const STEP_LABELS = ["강의자료 연결", "질문 작성", "등록", "AI 유사 질문 확인"];
@@ -155,9 +154,7 @@ export default function QuestionComposer({ spaceId, documents, documentError, on
 
   const previewTitle = createdQuestion?.title ?? draft.title;
   const previewContent = createdQuestion?.content ?? draft.content;
-  const previewCategories = createdQuestion?.categories?.length
-    ? createdQuestion.categories
-    : MOCK_QUESTION_PREVIEW_CATEGORIES;
+  const previewCategories = createdQuestion?.categories ?? [];
   const createdAt = createdQuestion?.created_at ? new Date(createdQuestion.created_at) : new Date();
   const createdAtText = Number.isNaN(createdAt.getTime()) ? "" : `${createdAt.getMonth() + 1}월 ${createdAt.getDate()}일 ${createdAt.getHours()}:${String(createdAt.getMinutes()).padStart(2, "0")}`;
 

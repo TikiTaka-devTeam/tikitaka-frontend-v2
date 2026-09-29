@@ -437,7 +437,7 @@ function SpaceNoticePage() {
 
   const spaceName =
     location.state?.spaceName ||
-    "실무중심산학협력프로젝트1";
+    "Space";
 
   const showCreateButton =
     useMemo(
@@ -465,6 +465,12 @@ function SpaceNoticePage() {
     searchParams.get(
       "noticeId",
     );
+
+  const targetNoticeId =
+    !isCreateMode &&
+    !isEditMode
+      ? editNoticeId
+      : null;
 
   const [
     notices,
@@ -753,6 +759,137 @@ function SpaceNoticePage() {
       editingNotice,
       isEditMode,
       setSearchParams,
+    ],
+  );
+
+  useEffect(
+    () => {
+      if (
+        !targetNoticeId ||
+        isLoading
+      ) {
+        return undefined;
+      }
+
+      let isCancelled =
+        false;
+
+      async function loadTargetNotice() {
+        setSelectedNoticeId(
+          targetNoticeId,
+        );
+
+        setSelectedNotice(
+          null,
+        );
+
+        setDetailLoading(
+          true,
+        );
+
+        setErrorMessage(
+          "",
+        );
+
+        try {
+          const response =
+            await getSpaceNoticeDetail(
+              targetNoticeId,
+            );
+
+          if (
+            isCancelled
+          ) {
+            return;
+          }
+
+          setSelectedNotice(
+            normalizeNoticeDetail(
+              response,
+            ),
+          );
+
+          setNotices(
+            (current) => {
+              let wasUnread =
+                false;
+
+              const next =
+                current.map(
+                  (notice) => {
+                    if (
+                      notice.id !==
+                      targetNoticeId
+                    ) {
+                      return notice;
+                    }
+
+                    wasUnread =
+                      !notice.isRead;
+
+                    return {
+                      ...notice,
+                      isRead: true,
+                    };
+                  },
+                );
+
+              if (
+                wasUnread
+              ) {
+                setUnreadCount(
+                  (count) =>
+                    Math.max(
+                      0,
+                      count - 1,
+                    ),
+                );
+              }
+
+              return next;
+            },
+          );
+        } catch (
+          error
+        ) {
+          if (
+            isCancelled
+          ) {
+            return;
+          }
+
+          setSelectedNotice(
+            null,
+          );
+
+          setErrorMessage(
+            error?.response?.data
+              ?.message ??
+              error?.response?.data
+                ?.detail ??
+              "공지사항을 불러오지 못했습니다.",
+          );
+        } finally {
+          if (
+            !isCancelled
+          ) {
+            setDetailLoading(
+              false,
+            );
+          }
+        }
+      }
+
+      loadTargetNotice();
+
+      return () => {
+        isCancelled =
+          true;
+      };
+    },
+    [
+      isLoading,
+      targetNoticeId,
     ],
   );
 

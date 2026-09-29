@@ -104,6 +104,7 @@
 .document-revision-save-modal__icon-box img { display: block; }
 .document-revision-save-modal__icon-box img.is-note { width: 24px; height: 24px; }
 .document-revision-save-modal__icon-box img.is-complete { width: 18px; height: 13px; }
+.document-revision-save-modal__spinner { width: 24px; height: 24px; border: 3px solid #ccd9ff; border-top-color: #2e6bff; border-radius: 50%; animation: document-revision-save-spin .8s linear infinite; }
 .document-revision-save-modal__text { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .document-revision-save-modal__text h2, .document-revision-save-modal__text p { margin: 0; line-height: normal; }
 .document-revision-save-modal__text h2 { color: #25283c; font-size: 16px; font-weight: 700; }
@@ -112,6 +113,7 @@
 .document-revision-save-modal__actions { gap: 12px; }
 .document-revision-save-modal__actions.is-complete { width: 244px; gap: 0; }
 .document-revision-save-modal__actions.is-complete .modal-actions__button { width: 244px; }
+@keyframes document-revision-save-spin { to { transform: rotate(360deg); } }
 .modal-backdrop.document-modify-help-backdrop { display: block; padding: 0; overflow: hidden; background: rgba(9,13,20,.74); }
 .document-modify-help { position: absolute; inset: 0; overflow: hidden; color: #fff; pointer-events: none; }
 .document-modify-help-close { position: absolute; top: 34px; right: 24px; z-index: 1; width: 36px; height: 36px; padding: 10px; border: 0; border-radius: 18px; background: rgba(255,255,255,.14); cursor: pointer; pointer-events: auto; }

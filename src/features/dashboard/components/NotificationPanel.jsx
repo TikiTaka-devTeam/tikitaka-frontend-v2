@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   getNotifications,
@@ -6,9 +7,10 @@ import {
   markNotificationAsRead,
 } from "../../notifications/api/notifications.api.js";
 import {
-  COURSES,
-  NOTIFICATIONS as MOCK_NOTIFICATIONS,
-} from "../data/dashboard.js";
+  getNotificationDestination,
+  resolveNotificationSpaceName,
+} from "../../notifications/utils/notificationNavigation.js";
+import { getCourseColor } from "../utils/courseColor.js";
 
 const NOTIFICATION_GROUPS = ["오늘", "어제", "이전"];
 
@@ -20,10 +22,6 @@ function isToday(value) {
     date.getMonth() === today.getMonth() &&
     date.getDate() === today.getDate()
   );
-}
-
-function getCourseColor(spaceId) {
-  return COURSES.find((course) => course.spaceId === spaceId)?.color || "blue";
 }
 
 function formatCreatedAt(value) {
@@ -39,6 +37,10 @@ function formatCreatedAt(value) {
 function normalizeNotification(notification) {
   return {
     id: notification.notification_id,
+    type: notification.type,
+    spaceId: notification.space_id,
+    spaceName: notification.space_name,
+    targetId: notification.target_id,
     group: isToday(notification.created_at) ? "오늘" : "이전",
     color: getCourseColor(notification.space_id),
     title: notification.message,
@@ -48,14 +50,9 @@ function normalizeNotification(notification) {
 }
 
 function NotificationPanel({ onClose }) {
+  const navigate = useNavigate();
   const panelRef = useRef(null);
-  const [notifications, setNotifications] = useState(() =>
-    MOCK_NOTIFICATIONS.map((notification) => ({
-      ...notification,
-      isMock: true,
-      isRead: false,
-    })),
-  );
+  const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -66,13 +63,16 @@ function NotificationPanel({ onClose }) {
     getNotifications()
       .then(({ data }) => {
         if (!isMounted) return;
-        const items = Array.isArray(data) ? data : [];
+        const items = Array.isArray(data?.notifications)
+          ? data.notifications
+          : [];
         setNotifications(items.map(normalizeNotification));
         setErrorMessage("");
       })
       .catch(() => {
-        if (isMounted)
-          setErrorMessage("알림을 불러오지 못해 목업 데이터를 표시합니다.");
+        if (!isMounted) return;
+        setNotifications([]);
+        setErrorMessage("알림을 불러오지 못했습니다.");
       })
       .finally(() => {
         if (isMounted) setIsLoading(false);
@@ -91,16 +91,11 @@ function NotificationPanel({ onClose }) {
 
   const markAsRead = async (notificationId) => {
     const previousNotifications = notifications;
-    const notification = notifications.find(
-      (item) => item.id === notificationId,
-    );
     setNotifications((items) =>
       items.map((item) =>
         item.id === notificationId ? { ...item, isRead: true } : item,
       ),
     );
-
-    if (notification?.isMock) return;
 
     try {
       await markNotificationAsRead(notificationId);
@@ -110,13 +105,26 @@ function NotificationPanel({ onClose }) {
     }
   };
 
+  const handleNotificationClick = async (notification) => {
+    const [, spaceName] = await Promise.all([
+      markAsRead(notification.id),
+      resolveNotificationSpaceName(notification).catch(() => ""),
+    ]);
+
+    const destination = getNotificationDestination(notification);
+    if (!destination) return;
+
+    onClose();
+    navigate(destination, {
+      state: spaceName ? { spaceName } : undefined,
+    });
+  };
+
   const markAllAsRead = async () => {
     const previousNotifications = notifications;
     setNotifications((items) =>
       items.map((item) => ({ ...item, isRead: true })),
     );
-
-    if (notifications.every((notification) => notification.isMock)) return;
 
     try {
       await markAllNotificationsAsRead();
@@ -152,7 +160,7 @@ function NotificationPanel({ onClose }) {
             {errorMessage}
           </p>
         ) : null}
-        {!isLoading && notifications.length === 0 ? (
+        {!isLoading && !errorMessage && notifications.length === 0 ? (
           <p className="dashboard-notifications__status">
             새로운 알림이 없습니다.
           </p>
@@ -178,7 +186,7 @@ function NotificationPanel({ onClose }) {
                   >
                     <button
                       type="button"
-                      onClick={() => markAsRead(notification.id)}
+                      onClick={() => handleNotificationClick(notification)}
                     >
                       <span
                         className={`dashboard-notification__dot dashboard-notification__dot--${notification.color}`}

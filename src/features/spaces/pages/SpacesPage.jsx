@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 import BrandLogo from "../../../components/common/BrandLogo.jsx";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
-import { COURSES, WEEK_DAYS } from "../../dashboard/data/dashboard.js";
 
 import ActivateCompleteModal from "../components/ActivateCompleteModal.jsx";
 import ActivateConfirmModal from "../components/ActivateConfirmModal.jsx";
@@ -51,42 +50,6 @@ const DAY_API_VALUES = {
   토: "SATURDAY",
   일: "SUNDAY",
 };
-
-const MOCK_PROFESSORS = {
-  "internet-protocol": "박태근",
-  "capstone-design": "김승훈",
-  "operating-system": "김승훈",
-  "data-visualization": "이서연",
-  "problem-solving-design": "최지훈",
-  "embedded-system": "한유진",
-};
-
-const ACTIVE_SPACE_MOCKS = COURSES.map((course) => {
-  const day = WEEK_DAYS[course.day];
-
-  return {
-    id: `mock-${course.spaceId}`,
-    name: course.title,
-    semester: "2026-1",
-    professor: MOCK_PROFESSORS[course.spaceId] ?? "",
-    schedule: `${day} ${course.start} - ${course.end}`,
-    room: course.room,
-    classroom: course.room,
-    schedules: [
-      {
-        day: DAY_API_VALUES[day],
-        start_time: course.start,
-        end_time: course.end,
-      },
-    ],
-    color: course.color.toUpperCase(),
-    status: "ACTIVE",
-    archived: false,
-    participationStatus: "APPROVED",
-    isPending: false,
-    isMock: true,
-  };
-});
 
 function readUserRole() {
   const getRoleFromUser = (user) => {
@@ -251,44 +214,23 @@ function normalizeSpacesResponse(data, status) {
 }
 
 function getSpaceList(data, status) {
-  const normalizedSpaces = normalizeSpacesResponse(data, status);
-
-  if (status === "ACTIVE" && normalizedSpaces.length === 0) {
-    return ACTIVE_SPACE_MOCKS;
-  }
-
-  return normalizedSpaces;
+  return normalizeSpacesResponse(data, status);
 }
 
-function getFallbackSpaces(status) {
-  return status === "ACTIVE" ? ACTIVE_SPACE_MOCKS : [];
-}
-
-function convertTo24Hour(time, period) {
+function formatScheduleTime(time) {
   const digits = String(time).replace(/\D/g, "").slice(0, 4);
 
-  const hourText = digits.slice(0, 2);
-
+  const hour = digits.slice(0, 2);
   const minute = digits.slice(2, 4);
 
-  let hour = Number(hourText);
-
-  if (period === "AM" && hour === 12) {
-    hour = 0;
-  }
-
-  if (period === "PM" && hour !== 12) {
-    hour += 12;
-  }
-
-  return `${String(hour).padStart(2, "0")}:${minute}`;
+  return `${hour}:${minute}`;
 }
 
 function createSpaceRequestData(formData) {
   const schedules = (formData?.schedules ?? []).flatMap((schedule) => {
-    const startTime = convertTo24Hour(schedule.startTime, schedule.startPeriod);
+    const startTime = formatScheduleTime(schedule.startTime);
 
-    const endTime = convertTo24Hour(schedule.endTime, schedule.endPeriod);
+    const endTime = formatScheduleTime(schedule.endTime);
 
     return (schedule.days ?? [])
       .map((day) => ({
@@ -328,6 +270,8 @@ function SpacesPage() {
   const [spaces, setSpaces] = useState([]);
 
   const [isSpacesLoading, setIsSpacesLoading] = useState(true);
+
+  const [spacesError, setSpacesError] = useState("");
 
   const [spaceModalStep, setSpaceModalStep] = useState(null);
 
@@ -370,10 +314,12 @@ function SpacesPage() {
         const data = await getSpaces(status);
 
         setSpaces(getSpaceList(data, status));
+        setSpacesError("");
       } catch (error) {
         console.error("Space 목록 조회 실패:", error);
 
-        setSpaces(getFallbackSpaces(status));
+        setSpaces([]);
+        setSpacesError("Space 목록을 불러오지 못했습니다.");
       } finally {
         setIsSpacesLoading(false);
       }
@@ -382,29 +328,31 @@ function SpacesPage() {
   );
 
   useEffect(() => {
-    let isCancelled = false;
+    const controller = new AbortController();
 
     const status = selectedTab === "active" ? "ACTIVE" : "ARCHIVED";
 
-    getSpaces(status)
+    getSpaces(status, { signal: controller.signal })
       .then((data) => {
-        if (isCancelled) {
+        if (controller.signal.aborted) {
           return;
         }
 
         setSpaces(getSpaceList(data, status));
+        setSpacesError("");
       })
       .catch((error) => {
-        if (isCancelled) {
+        if (controller.signal.aborted || error.code === "ERR_CANCELED") {
           return;
         }
 
         console.error("Space 목록 조회 실패:", error);
 
-        setSpaces(getFallbackSpaces(status));
+        setSpaces([]);
+        setSpacesError("Space 목록을 불러오지 못했습니다.");
       })
       .finally(() => {
-        if (isCancelled) {
+        if (controller.signal.aborted) {
           return;
         }
 
@@ -412,7 +360,7 @@ function SpacesPage() {
       });
 
     return () => {
-      isCancelled = true;
+      controller.abort();
     };
   }, [selectedTab]);
 
@@ -877,7 +825,7 @@ function SpacesPage() {
                       : space.id
                   }
                   space={space}
-                  canManage={isProfessor && !space.isMock}
+                  canManage={isProfessor}
                   onArchive={handleArchive}
                   onActivate={handleActivate}
                   onEdit={handleEdit}
@@ -897,7 +845,15 @@ function SpacesPage() {
           </p>
         )}
 
-        {!isSpacesLoading && spaces.length === 0 && <SpaceEmptyState />}
+        {!isSpacesLoading && spacesError && (
+          <p className="spaces-loading" role="alert">
+            {spacesError}
+          </p>
+        )}
+
+        {!isSpacesLoading && !spacesError && spaces.length === 0 && (
+          <SpaceEmptyState />
+        )}
       </div>
 
       {isProfessor && spaceModalStep === "create" && (

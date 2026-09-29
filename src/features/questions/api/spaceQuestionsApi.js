@@ -40,6 +40,11 @@ export async function createDocumentQuestionCategory(documentId, name) {
   return response.data;
 }
 
+export async function updateQuestionCategory(categoryId, name) {
+  const response = await apiClient.patch(`/categories/${categoryId}`, { name });
+  return response.data;
+}
+
 export async function deleteQuestionCategory(categoryId) {
   const response = await apiClient.delete(`/categories/${categoryId}`);
   return response.data;
