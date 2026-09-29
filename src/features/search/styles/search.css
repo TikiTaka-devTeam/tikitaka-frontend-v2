@@ -72,7 +72,11 @@
 .search-result-card__chevron { flex: 0 0 6px; width: 6px; height: 10px; margin-left: 10px; }
 
 .search-section__empty { margin: 28px auto 0; color: rgba(90,97,112,.62); font-size: 16px; text-align: center; }
+.search-section--recent .search-section__empty,
+.search-section--recent-questions .search-section__empty { margin-top: 40px; }
+.search-section--recent-documents .search-section__empty { margin-top: 80px; }
 .search-overview.is-fixed { position: relative; min-height: 834px; }
+.search-overview.is-fixed > .search-page__status { position: absolute; inset: 0; width: 100%; margin: 0; display: grid; place-items: center; }
 .search-overview.is-fixed .search-section { position: absolute; left: 0; right: 0; margin-top: 0; }
 .search-overview.is-fixed .search-section--recent { top: 122px; }
 .search-overview.is-fixed .search-section--recent-documents { top: 302px; }

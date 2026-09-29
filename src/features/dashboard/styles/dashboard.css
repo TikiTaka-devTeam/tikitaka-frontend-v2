@@ -245,6 +245,19 @@
   text-align: center;
 }
 
+.dashboard-timetable__status {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 75px;
+  left: 75px;
+  margin: 0;
+  color: #758094;
+  font-size: 13px;
+  text-align: center;
+  transform: translateY(-50%);
+}
+
 .dashboard-course {
   --course-bg: rgba(229, 240, 255, 0.88);
   --course-color: #2e66f5;
@@ -254,7 +267,7 @@
   top: var(--course-top);
   width: 120px;
   height: var(--course-height);
-  min-height: 42px;
+  min-height: 0;
   padding: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.82);

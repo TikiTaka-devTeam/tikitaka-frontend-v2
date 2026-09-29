@@ -10,7 +10,7 @@ import {
   getNotificationDestination,
   resolveNotificationSpaceName,
 } from "../../notifications/utils/notificationNavigation.js";
-import { COURSES } from "../data/dashboard.js";
+import { getCourseColor } from "../utils/courseColor.js";
 
 const NOTIFICATION_GROUPS = ["오늘", "어제", "이전"];
 
@@ -22,10 +22,6 @@ function isToday(value) {
     date.getMonth() === today.getMonth() &&
     date.getDate() === today.getDate()
   );
-}
-
-function getCourseColor(spaceId) {
-  return COURSES.find((course) => course.spaceId === spaceId)?.color || "blue";
 }
 
 function formatCreatedAt(value) {

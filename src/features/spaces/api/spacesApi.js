@@ -1,89 +1,49 @@
-import axios from "axios";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? "";
-
-function getAccessToken() {
-  return localStorage.getItem("tikitaka_access_token");
-}
-
-function getAuthConfig() {
-  const accessToken = getAccessToken();
-
-  return {
-    headers: accessToken
-      ? {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      : {},
-  };
-}
+import { apiClient } from "../../../lib/api/client.js";
 
 export async function getSpaces(status = "ACTIVE", config = {}) {
-  const response = await axios.get(`${API_BASE_URL}/spaces`, {
+  const response = await apiClient.get("/spaces", {
     ...config,
     params: {
       ...config.params,
       status,
     },
-    ...getAuthConfig(),
   });
 
   return response.data;
 }
 
 export async function createSpace(spaceData) {
-  const response = await axios.post(
-    `${API_BASE_URL}/spaces`,
-    spaceData,
-    getAuthConfig(),
-  );
+  const response = await apiClient.post("/spaces", spaceData);
 
   return response.data;
 }
 
 export async function updateSpace(spaceId, spaceData) {
-  const response = await axios.patch(
-    `${API_BASE_URL}/spaces/${spaceId}`,
-    spaceData,
-    getAuthConfig(),
-  );
+  const response = await apiClient.patch(`/spaces/${spaceId}`, spaceData);
 
   return response.data;
 }
 
 export async function archiveSpace(spaceId) {
-  const response = await axios.patch(
-    `${API_BASE_URL}/spaces/${spaceId}/archive`,
-    null,
-    getAuthConfig(),
-  );
+  const response = await apiClient.patch(`/spaces/${spaceId}/archive`);
 
   return response.data;
 }
 
 export async function restoreSpace(spaceId) {
-  const response = await axios.patch(
-    `${API_BASE_URL}/spaces/${spaceId}/restore`,
-    null,
-    getAuthConfig(),
-  );
+  const response = await apiClient.patch(`/spaces/${spaceId}/restore`);
 
   return response.data;
 }
 
 export async function deleteSpace(spaceId) {
-  await axios.delete(`${API_BASE_URL}/spaces/${spaceId}`, getAuthConfig());
+  await apiClient.delete(`/spaces/${spaceId}`);
 }
 
 export async function joinSpace(spaceCode) {
-  const response = await axios.post(
-    `${API_BASE_URL}/spaces/join`,
-    {
-      space_code: spaceCode,
-    },
-    getAuthConfig(),
-  );
+  const response = await apiClient.post("/spaces/join", {
+    space_code: spaceCode,
+  });
 
   return response.data;
 }

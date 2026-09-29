@@ -1,13 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SPACES_PATH, TASKS } from "../data/dashboard.js";
 
-export function NextClassCard({ selectedCourse }) {
+export function NextClassCard({
+  selectedCourse,
+  nextCourse,
+  isLoading,
+  errorMessage,
+}) {
   const navigate = useNavigate();
-  const title = selectedCourse?.title ?? "인터넷프로토콜";
-  const schedule = selectedCourse
-    ? `${selectedCourse.start} – ${selectedCourse.end} · ${selectedCourse.room}`
-    : "10:30 – 12:00 · 공학관 204호";
+  const displayedCourse = selectedCourse ?? nextCourse;
+
+  let description = "예정된 강의가 없습니다.";
+
+  if (isLoading) {
+    description = "강의 정보를 불러오는 중입니다.";
+  } else if (errorMessage) {
+    description = errorMessage;
+  } else if (displayedCourse) {
+    description = `${displayedCourse.start} – ${displayedCourse.end}${
+      displayedCourse.room ? ` · ${displayedCourse.room}` : ""
+    }`;
+  }
+
+  const handleOpenSpace = () => {
+    if (!displayedCourse) return;
+
+    navigate(`/spaces/${displayedCourse.spaceId}`, {
+      state: { spaceName: displayedCourse.title },
+    });
+  };
 
   return (
     <section
@@ -17,23 +38,34 @@ export function NextClassCard({ selectedCourse }) {
       <span className="dashboard-card__eyebrow">
         {selectedCourse ? "선택한 강의" : "다음 강의"}
       </span>
-      {selectedCourse ? null : (
-        <span className="dashboard-next-class__badge">15분 후</span>
-      )}
-      <h2 id="next-class-title">{title}</h2>
-      <p>{schedule}</p>
-      <button type="button" onClick={() => navigate(SPACES_PATH)}>
-        To Space
-      </button>
+      {!selectedCourse && nextCourse?.startsInLabel ? (
+        <span className="dashboard-next-class__badge">
+          {nextCourse.startsInLabel}
+        </span>
+      ) : null}
+      <h2 id="next-class-title">
+        {displayedCourse?.title ?? "강의 정보 없음"}
+      </h2>
+      <p>{description}</p>
+      {displayedCourse ? (
+        <button type="button" onClick={handleOpenSpace}>
+          To Space
+        </button>
+      ) : null}
     </section>
   );
 }
 
-export function TaskSummaryCard({ selectedCourse }) {
+export function TaskSummaryCard({
+  selectedCourse,
+  tasks,
+  isLoading,
+  errorMessage,
+}) {
   const [readTaskIds, setReadTaskIds] = useState(() => new Set());
   const visibleTasks = selectedCourse
-    ? TASKS.filter((task) => task.spaceId === selectedCourse.spaceId)
-    : [...TASKS].sort(
+    ? tasks.filter((task) => task.spaceId === selectedCourse.spaceId)
+    : [...tasks].sort(
         (firstTask, secondTask) =>
           new Date(firstTask.dueAt).getTime() -
           new Date(secondTask.dueAt).getTime(),
@@ -64,6 +96,14 @@ export function TaskSummaryCard({ selectedCourse }) {
         </strong>
       </header>
       <ul aria-live="polite">
+        {isLoading ? (
+          <li className="dashboard-tasks__empty">과제를 불러오는 중입니다.</li>
+        ) : null}
+        {!isLoading && errorMessage ? (
+          <li className="dashboard-tasks__empty" role="alert">
+            {errorMessage}
+          </li>
+        ) : null}
         {visibleTasks.map((task) => (
           <li
             className={readTaskIds.has(task.id) ? "is-read" : ""}
@@ -79,11 +119,11 @@ export function TaskSummaryCard({ selectedCourse }) {
                 aria-hidden="true"
               />
               <span className="dashboard-task__title">{task.title}</span>
-              <time>{task.due}</time>
+              <time dateTime={task.dueAt}>{task.due}</time>
             </button>
           </li>
         ))}
-        {visibleTasks.length === 0 ? (
+        {!isLoading && !errorMessage && visibleTasks.length === 0 ? (
           <li className="dashboard-tasks__empty">등록된 할 일이 없습니다.</li>
         ) : null}
       </ul>

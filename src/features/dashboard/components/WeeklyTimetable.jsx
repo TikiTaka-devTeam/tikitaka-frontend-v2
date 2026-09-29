@@ -1,5 +1,6 @@
-import { COURSES, WEEK_DAYS } from "../data/dashboard.js";
 import { getCoursePosition } from "../utils/timetable.js";
+
+const WEEK_DAYS = ["월", "화", "수", "목", "금"];
 
 const TIMES = [
   "09:00",
@@ -42,7 +43,14 @@ function CourseBlock({ course, isSelected, onSelect }) {
   );
 }
 
-function WeeklyTimetable({ semesterLabel, selectedCourseId, onCourseSelect }) {
+function WeeklyTimetable({
+  semesterLabel,
+  courses,
+  selectedCourseId,
+  onCourseSelect,
+  isLoading,
+  errorMessage,
+}) {
   const todayIndex = new Date().getDay() - 1;
 
   return (
@@ -90,7 +98,7 @@ function WeeklyTimetable({ semesterLabel, selectedCourseId, onCourseSelect }) {
         </time>
       ))}
 
-      {COURSES.map((course) => (
+      {courses.map((course) => (
         <CourseBlock
           course={course}
           isSelected={course.id === selectedCourseId}
@@ -98,6 +106,22 @@ function WeeklyTimetable({ semesterLabel, selectedCourseId, onCourseSelect }) {
           key={course.id}
         />
       ))}
+
+      {isLoading ? (
+        <p className="dashboard-timetable__status" role="status">
+          시간표를 불러오는 중입니다.
+        </p>
+      ) : null}
+      {!isLoading && errorMessage ? (
+        <p className="dashboard-timetable__status" role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
+      {!isLoading && !errorMessage && courses.length === 0 ? (
+        <p className="dashboard-timetable__status">
+          등록된 시간표가 없습니다.
+        </p>
+      ) : null}
     </section>
   );
 }
