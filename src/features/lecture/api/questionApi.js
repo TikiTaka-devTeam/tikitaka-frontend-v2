@@ -82,6 +82,18 @@ export async function deleteAnswer(answerId) {
   return response.data;
 }
 
+export async function createQuestionComment(
+  questionId,
+  payload,
+) {
+  const response = await apiClient.post(
+    `/questions/${questionId}/comments`,
+    payload,
+  );
+
+  return response.data;
+}
+
 export async function likeQuestion(questionId) {
   const response = await apiClient.post(
     `/questions/${questionId}/likes`,

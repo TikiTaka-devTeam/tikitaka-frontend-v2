@@ -5,36 +5,20 @@ import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 import deleteCategoryIcon from "../../../assets/icons/questions/delete-category.svg";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
-import { MOCK_QUESTION_CATEGORIES } from "../mocks/questionCategoryMocks.js";
+import {
+  createDocumentQuestionCategory,
+  deleteQuestionCategory,
+  updateQuestionCategory,
+} from "../api/spaceQuestionsApi.js";
 import "../styles/questionCategoryManager.css";
 
-const MOCK_DOCUMENT_TITLES = [
-  "Ch4. GPIO와 인터럽트",
-  "Ch5. 타이머와 PWM",
-  "Ch6. ADC와 센서 인터페이스",
-  "Ch7. UART · SPI · I²C",
-];
-
 function createInitialGroups(documents) {
-  const hasApiCategories = (documents ?? []).some((document) => document.categories?.length > 0);
-  if (hasApiCategories) {
-    return documents.map((document) => ({
-      id: document.document_id ?? document.id,
-      title: document.title,
-      categories: (document.categories ?? []).map((category) => ({
-        id: category.category_id ?? category.id,
-        name: category.name ?? category.category_name ?? "",
-        state: "unchanged",
-      })),
-    }));
-  }
-
-  return MOCK_DOCUMENT_TITLES.map((title, documentIndex) => ({
-    id: `mock-category-document-${documentIndex + 1}`,
-    title,
-    categories: MOCK_QUESTION_CATEGORIES.slice(0, documentIndex === 0 ? 10 : 3).map((category, categoryIndex) => ({
-      id: `${category.category_id}-${documentIndex}-${categoryIndex}`,
-      name: category.name,
+  return (documents ?? []).map((document) => ({
+    id: document.document_id ?? document.id,
+    title: document.title,
+    categories: (document.categories ?? []).map((category) => ({
+      id: category.category_id ?? category.id,
+      name: category.name ?? category.category_name ?? "",
       state: "unchanged",
     })),
   }));
@@ -52,12 +36,14 @@ function splitRows(categories, groupId) {
   return rows;
 }
 
-export default function QuestionCategoryManager({ documents, onCancel }) {
+export default function QuestionCategoryManager({ documents, onCancel, onCategoriesChanged }) {
   const nextCategoryIdRef = useRef(0);
   const [groups, setGroups] = useState(() => createInitialGroups(documents));
   const [expandedIds, setExpandedIds] = useState(() => [createInitialGroups(documents)[0]?.id].filter(Boolean));
   const [editingId, setEditingId] = useState("");
   const [modal, setModal] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   function updateCategory(groupId, categoryId, updater) {
     setGroups((current) => current.map((group) => group.id === groupId
@@ -73,7 +59,11 @@ export default function QuestionCategoryManager({ documents, onCancel }) {
 
   function editCategory(groupId, category) {
     if (category.state === "deleted") {
-      updateCategory(groupId, category.id, (current) => ({ ...current, state: "unchanged" }));
+      updateCategory(groupId, category.id, (current) => ({
+        ...current,
+        state: current.previousState ?? "unchanged",
+        previousState: undefined,
+      }));
       return;
     }
     setEditingId(category.id);
@@ -94,29 +84,65 @@ export default function QuestionCategoryManager({ documents, onCancel }) {
         : group));
       return;
     }
-    updateCategory(groupId, category.id, (current) => ({ ...current, state: "deleted" }));
+    updateCategory(groupId, category.id, (current) => ({
+      ...current,
+      state: "deleted",
+      previousState: current.state,
+    }));
     if (editingId === category.id) setEditingId("");
   }
 
   function addCategory(groupId) {
     nextCategoryIdRef.current += 1;
-    const id = `mock-new-category-${groupId}-${nextCategoryIdRef.current}`;
+    const id = `new-category-${groupId}-${nextCategoryIdRef.current}`;
     setGroups((current) => current.map((group) => group.id === groupId
       ? { ...group, categories: [...group.categories, { id, name: "", state: "new" }] }
       : group));
     setEditingId(id);
   }
 
-  function saveMockChanges() {
-    setGroups((current) => current.map((group) => ({
-      ...group,
-      categories: group.categories
-        .filter((category) => category.state !== "deleted")
-        .map((category) => ({ ...category, state: "unchanged" })),
-    })));
-    setEditingId("");
-    setModal("success");
+  async function saveChanges() {
+    if (isSaving) return;
+
+    const changes = groups.flatMap((group) => group.categories
+      .filter((category) => category.state !== "unchanged")
+      .map((category) => ({ ...category, documentId: group.id })));
+
+    if (changes.some((category) => category.state !== "deleted" && !category.name.trim())) {
+      setModal("");
+      setSaveError("카테고리 이름을 입력해 주세요.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError("");
+    try {
+      await Promise.all(changes.map((category) => {
+        if (category.state === "new") {
+          return createDocumentQuestionCategory(category.documentId, category.name.trim());
+        }
+        if (category.state === "modified") {
+          return updateQuestionCategory(category.id, category.name.trim());
+        }
+        return deleteQuestionCategory(category.id);
+      }));
+      setEditingId("");
+      setModal("success");
+    } catch (cause) {
+      setModal("");
+      setSaveError(cause.response?.data?.message ?? cause.response?.data?.detail ?? "카테고리를 저장하지 못했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
   }
+
+  function finishSave() {
+    setModal("");
+    onCategoriesChanged?.();
+  }
+
+  const hasDeletedCategories = groups.some((group) =>
+    group.categories.some((category) => category.state === "deleted"));
 
   return (
     <section className="space-questions-content question-category-manager" aria-labelledby="question-category-manager-title">
@@ -126,6 +152,7 @@ export default function QuestionCategoryManager({ documents, onCancel }) {
       </header>
 
       <div className="question-category-manager__groups">
+        {groups.length === 0 && <p className="question-category-manager__empty">등록된 강의자료가 없습니다.</p>}
         {groups.map((group) => {
           const isExpanded = expandedIds.includes(group.id);
           return <section className="question-category-manager__group" key={group.id}>
@@ -161,27 +188,34 @@ export default function QuestionCategoryManager({ documents, onCancel }) {
         })}
       </div>
 
+      {saveError && <p className="question-category-manager__error" role="alert">{saveError}</p>}
+
       <div className="question-category-manager__actions">
-        <button type="button" onClick={onCancel}>취소</button>
-        <button type="button" className="is-primary" onClick={() => setModal("confirm")}>저장</button>
+        <button type="button" disabled={isSaving} onClick={onCancel}>취소</button>
+        <button type="button" className="is-primary" disabled={isSaving} onClick={() => { setSaveError(""); setModal("confirm"); }}>{isSaving ? "저장 중" : "저장"}</button>
       </div>
 
       {modal && <CompactModal
-        onClose={() => setModal("")}
+        onClose={isSaving ? undefined : () => setModal("")}
         labelledBy="category-manager-modal-title"
         describedBy="category-manager-modal-description"
         className="question-category-manager-modal"
       >
         <div className="compact-modal__icon" aria-hidden="true"><span className="question-category-manager-modal__check" style={{ WebkitMaskImage: `url("${confirmCheckIcon}")`, maskImage: `url("${confirmCheckIcon}")` }} /></div>
         <div className="compact-modal__text">
-          <h2 id="category-manager-modal-title">{modal === "success" ? "수정되었습니다" : "카테고리를 수정하시겠습니까?"}</h2>
-          <p id="category-manager-modal-description">{modal === "success" ? "카테고리가 수정되었습니다" : "수정된 카테고리를 저장합니다"}</p>
+          <h2 id="category-manager-modal-title">{modal === "success" ? "수정되었습니다" : "카테고리 변경사항을 저장하시겠습니까?"}</h2>
+          <p id="category-manager-modal-description">{modal === "success"
+            ? "카테고리가 수정되었습니다"
+            : hasDeletedCategories
+              ? "삭제한 카테고리와 모든 질문의 연결이 함께 제거됩니다."
+              : "수정된 카테고리를 저장합니다"}</p>
         </div>
         <ModalActions
           onCancel={() => setModal("")}
-          onConfirm={modal === "success" ? () => setModal("") : saveMockChanges}
+          onConfirm={modal === "success" ? finishSave : saveChanges}
           cancelText="취소"
-          confirmText={modal === "success" ? "확인" : "저장"}
+          confirmText={modal === "success" ? "확인" : isSaving ? "저장 중" : "저장"}
+          confirmDisabled={isSaving}
           showCancel={modal !== "success"}
         />
       </CompactModal>}
