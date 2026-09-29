@@ -515,6 +515,9 @@ file: 운영체제_1주차_추가자료.pdf
 ```
 
 - **프론트엔드 유의사항:**
+  - `status`는 `EDITING`, `PROCESSING`, `COMPLETED`, `FAILED`, `CANCELED` 중 하나다.
+  - MAT-012 호출 후에는 동일한 `revision_id`로 이 API를 주기적으로 호출하여 최종 처리 상태를 확인한다.
+  - `PROCESSING`이면 조회를 계속하고, `COMPLETED`, `FAILED`, `CANCELED`이면 조회를 중단한다.
   - `DELETE_PENDING` 페이지도 기존 위치에 유지하여 표시한다.
   - 페이지 새로고침, 네트워크 오류 또는 편집 작업 충돌 후 이미 보유한 `revision_id`로 호출한다.
   - 응답 상태가 `CANCELED`이면 해당 응답의 PDF URL과 페이지 데이터를 사용하지 않고 저장된 `revision_id`를 제거한 뒤 MAT-006을 한 번 호출하여 새 수정 세션을 생성한다.
@@ -674,9 +677,11 @@ file: 운영체제_1주차_추가자료.pdf
   - 요청 후 즉시 완료된 것이 아니라 비동기 처리 중인 상태다.
   - 요청에는 프론트가 보유한 최신 `preview_version`을 `base_preview_version`으로 전달하고, 최종 강의자료명을 `title`로 전달한다.
   - `PROCESSING` 상태에서는 추가 편집을 차단한다.
-  - `202 Accepted` 응답 후 문서별로 저장한 `revision_id`를 제거하고 저장 완료가 아닌 저장 요청 접수 상태로 안내한다.
+  - `202 Accepted` 응답 후 문서별로 저장한 `revision_id`를 제거하고 저장 완료가 아닌 PDF 생성 및 반영 대기 상태로 안내한다.
+  - 응답의 `revision_id`는 화면이 유지되는 동안 보관하고 MAT-008을 주기적으로 호출한다.
+  - MAT-008이 `COMPLETED`를 반환하면 강의자료를 다시 조회한 뒤 저장 완료로 안내한다.
+  - MAT-008이 `FAILED`를 반환하면 기존 강의자료가 유지되었음을 안내하고, `CANCELED`를 반환하면 저장 취소로 안내한다.
   - 저장 요청 중 네트워크 오류 또는 `409`가 발생하면 MAT-008을 호출하여 실제 세션이 `EDITING`인지 `PROCESSING`인지 확인한 후 화면 상태를 결정한다.
-  - 처리 완료 여부 확인 방식은 명세서에 구체 형식 없음.
   - 완료 요청을 중복 전송하지 않도록 버튼을 비활성화한다.
 
 ### MAT-013 - 수정 세션 취소
@@ -784,12 +789,12 @@ file: 운영체제_1주차_추가자료.pdf
 ### QST-001
 - **Method/Endpoint/권한·용도:** `GET /api/v1/spaces/{space_id}/questions` / 강의 참여자 / 전체 질문
 - **입력:** Path `space_id`; Query `sort,document_id,category_id,cursor,size`; body 없음.
-- **Response JSON:** `{"questions":[{"question_id":"uuid","title":"CPU 스케줄링이 왜 필요한가요?","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":{"slide_id":"uuid","page_number":3,"thumbnail_url":"https://example.com/thumbnails/slide-3.png"},"categories":[{"category_id":"uuid","name":"CPU 스케줄링"},{"category_id":"uuid","name":"프로세스 관리"}],"created_at":"2026-08-11T10:59:00+09:00","view_count":32,"like_count":4,"status":"ANSWERED"}],"total_count":24,"next_cursor":"cursor-value","has_next":true}`
+- **Response JSON:** `{"questions":[{"question_id":"uuid","title":"CPU 스케줄링이 왜 필요한가요?","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":{"slide_id":"uuid","page_number":3,"thumbnail_url":"https://example.com/thumbnails/slide-3.png"},"categories":[{"category_id":"uuid","name":"CPU 스케줄링"},{"category_id":"uuid","name":"프로세스 관리"}],"created_at":"2026-08-11T10:59:00+09:00","view_count":32,"like_count":4,"liked":false,"status":"ANSWERED"}],"total_count":24,"next_cursor":"cursor-value","has_next":true}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** 커서·필터 조합별 캐시 분리.
 
 ### QST-002
 - **Method/Endpoint/권한·용도:** `GET /api/v1/spaces/{space_id}/questions/mine` / 학생 / 내 질문
-- **입력:** QST-001과 같은 Query. **Response JSON:** QST-001 구조(예시는 `view_count` 없이 `total_count:12,next_cursor:null,has_next:false`).
+- **입력:** QST-001과 같은 Query. **Response JSON:** `{"questions":[{"question_id":"uuid","title":"CPU 스케줄링이 왜 필요한가요?","document":{"document_id":"uuid","title":"운영체제 3주차"},"slide":{"slide_id":"uuid","page_number":3,"thumbnail_url":"https://example.com/thumbnails/slide-3.png"},"categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"created_at":"2026-08-11T10:59:00+09:00","like_count":4,"liked":false,"status":"ANSWERED"}],"total_count":12,"next_cursor":null,"has_next":false}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** 학생 전용.
 
 ### QST-003
@@ -825,20 +830,20 @@ file: 운영체제_1주차_추가자료.pdf
 ### QST-008
 - **Method/Endpoint/권한·용도:** `POST /api/v1/questions/{question_id}/similar` / 강의 참여자 / 등록된 질문의 유사 질문 조회
 - **입력:** Path `question_id`; body 없음.
-- **Response JSON:** `{"question_id":"uuid","similar_questions":[{"question_id":"uuid-2","title":"CPU 스케줄링의 목적이 무엇인가요?","content":"스케줄링이 필요한 이유가 궁금합니다.","categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"status":"ANSWERED","like_count":8,"similarity":0.92}]}`
+- **Response JSON:** `{"question_id":"uuid","similar_questions":[{"question_id":"uuid-2","title":"CPU 스케줄링의 목적이 무엇인가요?","content":"스케줄링이 필요한 이유가 궁금합니다.","categories":[{"category_id":"uuid","name":"CPU 스케줄링"}],"status":"ANSWERED","like_count":8,"liked":false,"similarity":0.92}]}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** 질문 등록 후 반환된 `question_id`로 호출한다. AI 처리 상태가 `COMPLETED`일 때만 조회 가능하다.
 
 ### QST-009~017
 
 | ID | Method / Endpoint | 권한·용도 | Request JSON | Response JSON | 상태/오류·FE |
 |---|---|---|---|---|---|
-| QST-009 | `DELETE /api/v1/questions/{question_id}` | 교수 / 소프트 삭제 | body 없음 | `{"question_id":"uuid","is_deleted":true,"deleted_at":"2026-08-11T12:00:00"}` | 오류 명세서에 구체 형식 없음; 목록 제거 |
-| QST-010 | `POST /api/v1/questions/{question_id}/answers` | 교수·권한 조교 / 공식 답변 | `{"content":"CPU 사용률을 높이고 프로세스를 효율적으로 실행하기 위해 필요합니다."}` | `{"answer_id":"uuid","question_id":"uuid","content":"...","created_at":"2026-08-11T11:40:00"}` | 오류: 명세서에 구체 형식 없음; 작성 후 상세 갱신 |
-| QST-011 | `PATCH /api/v1/answers/{answer_id}` | 답변 작성자 / 수정 | `{"content":"수정된 공식 답변입니다."}` | `{"answer_id":"uuid","content":"수정된 공식 답변입니다.","updated_at":"2026-08-11T11:45:00"}` | 오류: 명세서에 구체 형식 없음 |
+| QST-009 | `DELETE /api/v1/questions/{question_id}` | 교수 / 소프트 삭제 | body 없음 | `{"question_id":"uuid","is_deleted":true,"deleted_at":"2026-08-11T12:00:00+09:00"}` | 오류 명세서에 구체 형식 없음; 목록 제거 |
+| QST-010 | `POST /api/v1/questions/{question_id}/answers` | 교수·권한 조교 / 공식 답변 | `{"content":"CPU 사용률을 높이고 프로세스를 효율적으로 실행하기 위해 필요합니다."}` | `{"answer_id":"uuid","question_id":"uuid","content":"CPU 사용률을 높이고 프로세스를 효율적으로 실행하기 위해 필요합니다.","created_at":"2026-08-11T11:40:00+09:00"}` | 오류: 명세서에 구체 형식 없음; 작성 후 상세 갱신 |
+| QST-011 | `PATCH /api/v1/answers/{answer_id}` | 답변 작성자 / 수정 | `{"content":"수정된 공식 답변입니다."}` | `{"answer_id":"uuid","content":"수정된 공식 답변입니다.","updated_at":"2026-08-11T11:45:00+09:00"}` | 오류: 명세서에 구체 형식 없음 |
 | QST-012 | `DELETE /api/v1/answers/{answer_id}` | 작성자·교수 / 소프트 삭제 | body 없음 | `{"answer_id":"uuid","is_deleted":true}` | 오류: 명세서에 구체 형식 없음 |
-| QST-013 | `POST /api/v1/questions/{question_id}/comments` | 교수·권한 조교 / 댓글·대댓글 | `{"content":"추가 설명입니다.","parent_comment_id":null}` | `{"comment_id":"uuid","question_id":"uuid","parent_comment_id":null,"content":"추가 설명입니다.","created_at":"2026-08-11T12:00:00"}` | 대댓글은 parent UUID |
-| QST-014 | `PATCH /api/v1/question-comments/{comment_id}` | 작성자 / 수정 | `{"content":"수정된 댓글입니다."}` | `{"comment_id":"uuid","content":"수정된 댓글입니다.","updated_at":"2026-08-11T12:10:00"}` | 오류: 명세서에 구체 형식 없음 |
-| QST-015 | `DELETE /api/v1/question-comments/{comment_id}` | 작성자·교수 / 소프트 삭제 | body 없음 | `{"comment_id":"uuid","is_deleted":true}` | 오류: 명세서에 구체 형식 없음 |
+| QST-013 | `POST /api/v1/questions/{question_id}/comments` | 교수·권한 조교 / 댓글·대댓글 | `{"content":"추가 설명입니다.","parent_comment_id":null}` | `{"comment_id":"uuid","question_id":"uuid","parent_comment_id":null,"content":"추가 설명입니다.","created_at":"2026-08-11T12:00:00+09:00"}` | 대댓글은 parent UUID |
+| QST-014 | `PATCH /api/v1/question-comments/{comment_id}` | 댓글 작성자 / 수정 | `{"content":"수정된 댓글입니다."}` | `{"comment_id":"uuid","content":"수정된 댓글입니다.","updated_at":"2026-08-11T12:10:00+09:00"}` | 오류: 명세서에 구체 형식 없음 |
+| QST-015 | `DELETE /api/v1/question-comments/{comment_id}` | 댓글 작성자·교수 / 소프트 삭제 | body 없음 | `{"comment_id":"uuid","is_deleted":true}` | 오류: 명세서에 구체 형식 없음 |
 | QST-016 | `POST /api/v1/questions/{question_id}/likes` | 강의 참여자 / 공감 | body 없음 | `{"question_id":"uuid","liked":true,"like_count":5}` | 낙관 업데이트 롤백 필요 |
 | QST-017 | `DELETE /api/v1/questions/{question_id}/likes` | 강의 참여자 / 공감 취소 | body 없음 | `{"question_id":"uuid","liked":false,"like_count":4}` | 낙관 업데이트 롤백 필요 |
 
@@ -922,6 +927,38 @@ file: 운영체제_1주차_추가자료.pdf
 - **입력:** body 없음. **Response JSON:** `{"updated_count":5}`
 - **오류:** 명세서에 구체 형식 없음. **FE:** 본인의 미읽음만.
 
+## 11-1. Web Push API
+
+> Firebase 패키지를 사용하지 않고 브라우저 Push API와 VAPID를 사용한다. Push Subscription의 `endpoint`, `p256dh`, `auth`는 브라우저가 생성한 값을 전달한다.
+
+### PUSH-001
+- **Method/Endpoint/권한·용도:** `GET /api/v1/push/vapid-public-key` / 로그인 사용자 / Push 구독 생성용 VAPID Public Key 조회
+- **입력:** 인증, body 없음.
+- **Response JSON:** `{"public_key":"..."}`
+
+### PUSH-002
+- **Method/Endpoint/권한·용도:** `POST /api/v1/push/subscriptions` / 로그인 사용자 / 현재 브라우저·기기의 Push Subscription 등록
+- **Request JSON:** `{"endpoint":"https://fcm.googleapis.com/fcm/send/...","p256dh":"...","auth":"..."}`
+- **Response JSON:** `{"subscription_id":"uuid","created_at":"2026-08-11T10:00:00+09:00"}`
+- **동작:** `endpoint` 기준 upsert. 동일 endpoint 재등록 시 현재 로그인 사용자와 최신 구독 정보로 갱신하고 `subscription_id`를 반환한다.
+
+### PUSH-003
+- **Method/Endpoint/권한·용도:** `DELETE /api/v1/push/subscriptions/{subscription_id}` / 로그인 사용자 / 현재 사용자의 Push Subscription 삭제
+- **입력:** Path `subscription_id`, 인증, body 없음.
+- **Response JSON:** `{"message":"Push 구독이 해제되었습니다."}`
+- **오류:** 구독이 없으면 `404 Not Found`. **FE:** 이미 해제된 상태로 처리한다.
+
+### PUSH-004
+- **Method/Endpoint/권한·용도:** `DELETE /api/v1/push/subscriptions` / 로그인 사용자 / subscription ID 유실 시 endpoint 기준 구독 삭제
+- **Request JSON:** `{"endpoint":"https://fcm.googleapis.com/fcm/send/..."}`
+- **Response JSON:** `{"message":"Push 구독이 해제되었습니다."}`
+- **오류:** endpoint 구독이 없으면 `404 Not Found`. **FE:** 이미 해제된 상태로 처리한다.
+
+### Web Push Payload
+- **Payload JSON:** `{"notification_id":"uuid","type":"NOTICE_CREATED","title":"Tikitaka","message":"새 공지사항이 등록되었습니다.","space_id":"uuid","target_id":"uuid"}`
+- **FE:** `title`은 시스템 알림 제목, `message`는 본문으로 표시한다. 클릭 시 `notification_id`로 NTF-002를 호출하고 `type`, `space_id`, `target_id`로 관련 화면에 이동한다.
+- **서버:** Push Service가 만료 endpoint에 대해 `404/410`을 반환하면 해당 Push Subscription을 삭제한다.
+
 ## 12. 필기 API
 
 ### NTE-001 / NTE-003
@@ -971,8 +1008,7 @@ file: 운영체제_1주차_추가자료.pdf
 1. 인증 Header 형식과 공통 오류 JSON.
 2. SCH-001의 공지 배열명이 정상 예시 `announcements`, 빈 결과 설명 `notices`로 불일치.
 3. SYS-NOT-002 응답 JSON 전체.
-4. MAT-012 `PROCESSING` 이후 완료 조회 방식.
-5. 필기 `base_version` 충돌 HTTP 상태·응답·재시도 정책.
-6. 다운로드 URL 만료, 파일명/Content-Disposition 정책.
-7. multipart 최대 파일 수·크기·MIME 제한.
-8. `semester`가 예시에서 문자열(`"2"`)인 반면 대시보드 Query는 숫자처럼 사용됨.
+4. 필기 `base_version` 충돌 HTTP 상태·응답·재시도 정책.
+5. 다운로드 URL 만료, 파일명/Content-Disposition 정책.
+6. multipart 최대 파일 수·크기·MIME 제한.
+7. `semester`가 예시에서 문자열(`"2"`)인 반면 대시보드 Query는 숫자처럼 사용됨.
