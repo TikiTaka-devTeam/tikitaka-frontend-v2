@@ -21,6 +21,35 @@ function harness(t, fetchSnapshot = async () => ({ version: 0, strokes: [] })) {
   return { sync, states, errors, latest: () => states.at(-1) };
 }
 
+test("live broadcasts reuse saved paths; only saved changes invalidate them", async (t) => {
+  const h = harness(t, async () => ({ version: 1, strokes: [saved("existing")] }));
+  await h.sync.refresh();
+  const strokes = h.latest().strokes;
+  assert.equal(h.latest().ready, true);
+  h.sync.receive(event("STROKE_START", { client_stroke_id: "c", point, tool: "PEN" }));
+  for (let chunk = 1; chunk <= 100; chunk += 1) {
+    h.sync.receive(event("STROKE_POINTS", { client_stroke_id: "c", chunk_seq: chunk, points: [point] }));
+    assert.strictEqual(h.latest().strokes, strokes);
+  }
+  assert.equal(h.latest().liveStrokes[0].points.length, 101);
+  h.sync.receive(event("SHARED_STROKES_SYNCED", { version: 2, created_strokes: [saved("new", "c")] }));
+  assert.notStrictEqual(h.latest().strokes, strokes);
+  assert.equal(h.latest().liveStrokes.length, 0);
+  assert.equal(h.latest().strokes.length, 2);
+});
+
+test("preview state is not authoritative until the subscribed snapshot is ready", async (t) => {
+  let resolve;
+  const h = harness(t, () => new Promise((done) => { resolve = done; }));
+  const pending = h.sync.refresh();
+  assert.equal(h.latest().ready, false);
+  h.sync.receive(event("SHARED_STROKES_SYNCED", { version: 2, deleted_stroke_ids: ["old"] }));
+  resolve({ version: 1, strokes: [saved("old")] });
+  await pending;
+  assert.equal(h.latest().ready, true);
+  assert.deepEqual(h.latest().strokes, []);
+});
+
 test("live strokes do not advance version; saved and deleted events do", async (t) => {
   const h = harness(t);
   await h.sync.refresh();

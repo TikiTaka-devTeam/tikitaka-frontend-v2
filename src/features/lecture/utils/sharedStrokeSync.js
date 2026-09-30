@@ -18,11 +18,18 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
   let refreshTask = null;
   let retryTimer = null;
   let generation = 0;
+  let savedStrokes = [];
+  let savedDirty = true;
 
   function emit() {
+    if (savedDirty) {
+      savedStrokes = sortStrokes(permanent.values());
+      savedDirty = false;
+    }
     if (!disposed) onChange({
       version,
-      strokes: sortStrokes(permanent.values()),
+      ready: !initializing,
+      strokes: savedStrokes,
       liveStrokes: sortStrokes([...temporary.values()].map((entry) => entry.stroke)),
       completed: new Set(completed.keys()),
     });
@@ -47,6 +54,7 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
         permanent.set(item.stroke_id, normalizeStroke(item));
       }
       version = event.version;
+      savedDirty = true;
       return true;
     }
     if (!id || completed.has(id)) return true;
@@ -103,6 +111,7 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
         if (requestGeneration !== generation) continue;
         version = Number(snapshot.version);
         permanent = new Map((snapshot.strokes ?? []).map((s) => [s.stroke_id, normalizeStroke(s)]));
+        savedDirty = true;
         temporary.clear();
         const events = buffer;
         buffer = [];

@@ -18,6 +18,7 @@ import {
   normalizeQuestion,
   normalizeStroke,
 } from "../utils/lectureData";
+import { rememberStrokePreview } from "../utils/strokePreviewCache.js";
 
 function getStrokeArray(
   response,
@@ -138,10 +139,21 @@ export default function useLectureSlideData({
   ] = useState([]);
 
   const [strokeSlideId, setStrokeSlideId] = useState(currentSlideId);
-  if (strokeSlideId !== currentSlideId) {
+  const scope = `${documentId}:${normalizedRole}`;
+  const [strokeScope, setStrokeScope] = useState(scope);
+  const [strokePreviews, setStrokePreviews] = useState(() => new Map());
+  if (strokeSlideId !== currentSlideId || strokeScope !== scope) {
+    const previews = strokeScope !== scope
+      ? new Map()
+      : strokeSlideId
+        ? rememberStrokePreview(strokePreviews, strokeSlideId, privateStrokes, sharedStrokes)
+        : strokePreviews;
+    const preview = previews.get(currentSlideId);
+    setStrokePreviews(previews);
+    setStrokeScope(scope);
     setStrokeSlideId(currentSlideId);
-    setPrivateStrokes([]);
-    setSharedStrokes([]);
+    setPrivateStrokes(preview?.privateStrokes ?? []);
+    setSharedStrokes(preview?.sharedStrokes ?? []);
   }
 
   const [

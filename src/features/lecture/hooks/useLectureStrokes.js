@@ -78,14 +78,19 @@ export default function useLectureStrokes({
       slideId: currentSlideId, spaceId,
       fetchSnapshot: () => getSharedStrokes(currentSlideId),
       onError: reportError,
-      onChange: ({ version, strokes, liveStrokes: live, completed }) => {
+      onChange: ({ version, ready, strokes, liveStrokes: live, completed }) => {
         if (sessionRef.current !== session) return;
-        sharedVersionsRef.current.set(currentSlideId, version);
-        setSharedStrokes((previous) => sortStrokes([
-          ...strokes,
-          ...previous.filter((stroke) => String(stroke.id).startsWith("local-") &&
-            stroke.slideId === currentSlideId && !completed.has(stroke.clientStrokeId)),
-        ]));
+        // Cached notes remain visible until the subscribed snapshot is ready.
+        // Live points must not recreate (and repaint) the saved layer.
+        if (ready && session.savedStrokes !== strokes) {
+          session.savedStrokes = strokes;
+          sharedVersionsRef.current.set(currentSlideId, version);
+          setSharedStrokes((previous) => sortStrokes([
+            ...strokes,
+            ...previous.filter((stroke) => String(stroke.id).startsWith("local-") &&
+              stroke.slideId === currentSlideId && !completed.has(stroke.clientStrokeId)),
+          ]));
+        }
         setLiveStrokes(live.filter((stroke) => !session.ownDraftIds.has(stroke.id.slice(5))));
       },
     });

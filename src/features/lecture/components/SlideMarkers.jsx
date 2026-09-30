@@ -119,7 +119,7 @@ export default function SlideMarkers({
           />
         )}
 
-      {activeTool === "FIXER" && fixers.map((fixer) => (
+      {activeTool === "FIXER" && fixers.filter((fixer) => !fixer.isChecked).map((fixer) => (
         <FixerBubble key={fixer.id} fixer={fixer} pageWidth={pageWidth} onCheck={onFixerSelect} />
       ))}
 

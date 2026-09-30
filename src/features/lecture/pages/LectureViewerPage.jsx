@@ -14,6 +14,8 @@ import PdfSlideStage from "../components/PdfSlideStage";
 import SlidePagination from "../components/SlidePagination";
 import QuestionPanel from "../components/QuestionPanel";
 import DownloadModal from "../components/DownloadModal";
+import DocumentChangesModal from "../components/DocumentChangesModal.jsx";
+import { getSlideQuestionMarkers } from "../utils/questionNavigation.js";
 
 import {
   getDocumentDownloadUrl,
@@ -137,6 +139,7 @@ export default function LectureViewerPage({
 
   const {
     spaceId,
+    changeReview,
     documentId,
     documentTitle,
     spaceName,
@@ -185,11 +188,24 @@ export default function LectureViewerPage({
     slides[currentIndex] ??
     null;
 
-  const deletedSlides = slides.filter((slide) => slide.status === "PLACEHOLDER");
-  const deletedPageNotice = currentSlide?.status === "PLACEHOLDER" ? {
-    index: deletedSlides.findIndex((slide) => slide.id === currentSlide.id) + 1,
-    total: deletedSlides.length,
+  const pendingChanges = changeReview.changes.filter((change) => !change.reviewed);
+  const changeIndex = changeReview.changes.findIndex((change) => change.id === String(currentSlideId));
+  const currentChange = changeReview.changes[changeIndex];
+  const pageChangeNotice = currentChange && !currentChange.reviewed ? {
+    kind: currentChange.kind,
+    index: changeIndex + 1,
+    total: changeReview.changes.length,
   } : null;
+
+  function moveToChange(id) {
+    const index = slides.findIndex((slide) => String(slide.id) === id);
+    if (index >= 0) movePage(index);
+  }
+
+  function acknowledgePageChange() {
+    const nextId = changeReview.acknowledge(currentSlideId);
+    if (nextId) moveToChange(nextId);
+  }
 
   const activeThicknessMm =
     thicknessByTool[
@@ -306,6 +322,13 @@ export default function LectureViewerPage({
     useLectureQuestions({
       documentId,
       currentSlideId,
+      slides,
+      onQuestionSlideChange: (index) => {
+        clearQuestionDraft();
+        setFixerDraftPoint(null);
+        resetStrokeHistory();
+        setCurrentIndex(index);
+      },
       role,
 
       questions,
@@ -588,7 +611,11 @@ export default function LectureViewerPage({
       nextIndex,
     );
 
-    setPanelOpen(false);
+    // Keep the question list visible while browsing slides. A question being
+    // composed still closes because its point belongs to the previous slide.
+    if (createQuestionMode) {
+      setPanelOpen(false);
+    }
 
     resetQuestionState();
 
@@ -670,7 +697,6 @@ export default function LectureViewerPage({
           <div className="lecture-workspace__main">
             <div className="lecture-toolbar-wrap">
               <LectureToolbar
-                onViewAllQuestions={() => navigate(`/spaces/${spaceId}/questions`)}
                 role={role}
                 activeTool={
                   activeTool
@@ -745,7 +771,8 @@ export default function LectureViewerPage({
             </div>
 
             <PdfSlideStage
-              deletedPageNotice={deletedPageNotice}
+              pageChangeNotice={pageChangeNotice}
+              onAcknowledgePageChange={acknowledgePageChange}
               key={`${documentId}:${currentSlideId}`}
               role={role}
               pdfUrl={pdfUrl}
@@ -775,7 +802,7 @@ export default function LectureViewerPage({
                 handleLiveStroke
               }
               questions={
-                questions
+                getSlideQuestionMarkers(questions, selectedQuestion, currentSlideId)
               }
               selectedQuestionId={
                 selectedQuestion
@@ -856,6 +883,7 @@ export default function LectureViewerPage({
           </div>
 
           <QuestionPanel
+            onArchive={() => navigate(`/spaces/${spaceId}/questions`)}
             onSubmitVoice={handleSubmitVoice}
             role={role}
             open={
@@ -926,6 +954,16 @@ export default function LectureViewerPage({
               1,
           )
         }
+      />
+
+      <DocumentChangesModal
+        count={pendingChanges.length}
+        open={changeReview.modalOpen}
+        onClose={changeReview.closeModal}
+        onMove={() => {
+          changeReview.closeModal();
+          if (pendingChanges[0]) moveToChange(pendingChanges[0].id);
+        }}
       />
 
       <DownloadModal

@@ -271,7 +271,6 @@ export default function LectureToolbar({
   onToolChange,
   onColorChange,
   onUnsupportedTool,
-  onViewAllQuestions,
 }) {
   const [
     hasQuestionNotification,
@@ -517,9 +516,6 @@ export default function LectureToolbar({
         </div>
 
         <span className="lecture-toolbar__end-divider" aria-hidden="true" />
-        {normalizedRole === "PROFESSOR" && panelOpen && !showDrawingControls && (
-          <button type="button" className="lecture-toolbar__all-questions" onClick={onViewAllQuestions}>질문 전체보기</button>
-        )}
         {showDrawingControls && (
           <>
 
