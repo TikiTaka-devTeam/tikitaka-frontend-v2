@@ -1,6 +1,5 @@
 import DrawingCursor from "./DrawingCursor";
 import SlideMarkers from "./SlideMarkers";
-import { useState } from "react";
 import CheckCircleIcon from "../../../assets/icons/check-circle.svg";
 import "../styles/slide-change-notice.css";
 
@@ -13,7 +12,8 @@ export default function PdfSlideStage({
   pdfUrl,
 
   pageNumber,
-  deletedPageNotice,
+  pageChangeNotice,
+  onAcknowledgePageChange,
 
   zoom,
 
@@ -77,7 +77,6 @@ export default function PdfSlideStage({
 
   onFixerDraftSubmit,
 }) {
-  const [noticeDismissed, setNoticeDismissed] = useState(false);
   const {
     containerRef,
 
@@ -105,6 +104,7 @@ export default function PdfSlideStage({
     strokeCanvasRef,
 
     draftCanvasRef,
+    liveCanvasRef,
 
     drawingCursorRef,
 
@@ -243,6 +243,13 @@ export default function PdfSlideStage({
             />
 
             <canvas
+              ref={liveCanvasRef}
+              className="pdf-stage__stroke-canvas"
+              aria-hidden="true"
+              style={{ pointerEvents: "none" }}
+            />
+
+            <canvas
               ref={
                 draftCanvasRef
               }
@@ -260,11 +267,11 @@ export default function PdfSlideStage({
               }
             />
 
-            {deletedPageNotice && !noticeDismissed && (
-              <div className="slide-change-notice">
-                <span>※ 이 페이지는 삭제된 페이지 입니다.</span>
-                <strong>({deletedPageNotice.index} / {deletedPageNotice.total})</strong>
-                <button type="button" aria-label="삭제된 페이지 안내 닫기" onClick={() => setNoticeDismissed(true)}><img src={CheckCircleIcon} alt="" /></button>
+            {pageChangeNotice && (
+              <div className="slide-change-notice" role="status">
+                <span>※ 이 페이지는 {pageChangeNotice.kind === "DELETED" ? "삭제된" : "수정된"} 페이지 입니다.</span>
+                <strong>({pageChangeNotice.index} / {pageChangeNotice.total})</strong>
+                <button type="button" aria-label="현재 변경 확인 및 다음 변경으로 이동" onClick={onAcknowledgePageChange}><img src={CheckCircleIcon} alt="" /></button>
               </div>
             )}
             <SlideMarkers

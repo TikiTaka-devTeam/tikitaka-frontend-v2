@@ -1,6 +1,9 @@
 import {
+  useEffect,
+  useRef,
   useState,
 } from "react";
+import { findQuestionSlideIndex } from "../utils/questionNavigation.js";
 
 import {
   createAnswer,
@@ -100,6 +103,8 @@ export default function useLectureQuestions({
   documentId,
 
   currentSlideId,
+  slides,
+  onQuestionSlideChange,
 
   role,
 
@@ -172,6 +177,11 @@ export default function useLectureQuestions({
     previousSlideId,
     setPreviousSlideId,
   ] = useState(currentSlideId);
+
+  const selectionRequestRef = useRef(0);
+  useEffect(() => () => {
+    selectionRequestRef.current += 1;
+  }, [documentId, currentSlideId]);
 
   // Reset before children render with a different slide's question state.
   if (!Object.is(previousSlideId, currentSlideId)) {
@@ -310,6 +320,7 @@ export default function useLectureQuestions({
       return;
     }
 
+    selectionRequestRef.current += 1;
     setQuestionScope(
       nextScope,
     );
@@ -578,6 +589,19 @@ export default function useLectureQuestions({
       return;
     }
 
+    if (
+      normalizedRole === "PROFESSOR" &&
+      String(selectedQuestion?.id) === String(questionId)
+    ) {
+      selectionRequestRef.current += 1;
+      setSelectedQuestion(null);
+      setSimilarQuestionState(null);
+      return;
+    }
+
+    const requestId = ++selectionRequestRef.current;
+    setSelectedQuestion(null);
+
     setQuestionPoint(
       null,
     );
@@ -608,6 +632,8 @@ export default function useLectureQuestions({
           questionId,
         );
 
+      if (requestId !== selectionRequestRef.current) return;
+
       const normalized =
         normalizeQuestion(
           response,
@@ -616,13 +642,28 @@ export default function useLectureQuestions({
       const detail = {
         ...question,
         ...normalized,
+        slide: normalized.slide ?? question.slide,
       };
+
+      const targetIndex = findQuestionSlideIndex(slides, detail);
+      if (targetIndex < 0) {
+        setToast?.("질문이 작성된 페이지를 현재 강의자료에서 찾을 수 없습니다.");
+        return;
+      }
+      const targetSlideId = slides[targetIndex].id;
+      const changesSlide = String(targetSlideId) !== String(currentSlideId);
+      if (changesSlide) {
+        // Preserve this selection across the intentional navigation. Ordinary
+        // pagination still clears selection via the slide-change reset above.
+        setPreviousSlideId(targetSlideId);
+        onQuestionSlideChange(targetIndex);
+      }
 
       setSelectedQuestion(
         detail,
       );
 
-      setQuestions?.(
+      if (!changesSlide) setQuestions?.(
         (previous) =>
           mergeQuestion(
             previous,
@@ -638,9 +679,7 @@ export default function useLectureQuestions({
           ),
       );
     } catch (error) {
-      setSelectedQuestion(
-        question,
-      );
+      if (requestId !== selectionRequestRef.current) return;
 
       setToast?.(
         error?.response
@@ -759,6 +798,7 @@ export default function useLectureQuestions({
   }
 
   function cancelQuestionPoint() {
+    selectionRequestRef.current += 1;
     setQuestionPoint(
       null,
     );
@@ -769,6 +809,7 @@ export default function useLectureQuestions({
   }
 
   function resetQuestionState() {
+    selectionRequestRef.current += 1;
     setQuestionPoint(
       null,
     );

@@ -12,6 +12,7 @@ import {
 import {
   getDocumentSlides,
 } from "../api/lectureApi";
+import useDocumentChanges from "./useDocumentChanges.js";
 
 import {
   extractPdfUrl,
@@ -70,6 +71,9 @@ export default function useLectureDocument({
           ?.pdf_url ??
         "",
     );
+
+  const changeReview = useDocumentChanges({ spaceId, documentId });
+  const { observeSlides } = changeReview;
 
   const documentTitle =
     documentTitleProp ??
@@ -207,6 +211,9 @@ export default function useLectureDocument({
             response,
           );
 
+        // Only a successful server response establishes the comparison baseline.
+        observeSlides(normalized.slides);
+
         if (
           !normalized.pdfUrl
         ) {
@@ -271,6 +278,7 @@ export default function useLectureDocument({
     documentId,
     initialSlideId,
     setToast,
+    observeSlides,
   ]);
 
   const currentSlide =
@@ -290,6 +298,7 @@ export default function useLectureDocument({
     slides.length;
 
   return {
+    changeReview,
     spaceId,
     documentId,
     documentTitle,

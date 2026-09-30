@@ -193,8 +193,8 @@ function QuestionList({
   const scrollRef =
     useRef(null);
 
-  const hasOverflow =
-    questions.length > 3;
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const [fadeOpacity, setFadeOpacity] = useState(0);
 
   const [
     atBottom,
@@ -215,8 +215,7 @@ function QuestionList({
       scrollRef.current;
 
     if (
-      !element ||
-      !hasOverflow
+      !element
     ) {
       setAtBottom(
         true,
@@ -230,6 +229,11 @@ function QuestionList({
         element.clientHeight >=
       element.scrollHeight -
         2;
+
+    const remaining = element.scrollHeight - element.clientHeight - element.scrollTop;
+
+    setHasOverflow(element.scrollHeight > element.clientHeight + 2);
+    setFadeOpacity(Math.min(1, Math.max(0, remaining / 64)));
 
     setAtBottom(
       reachedBottom,
@@ -245,22 +249,29 @@ function QuestionList({
         0;
     }
 
-    const frame =
-      window.requestAnimationFrame(
-        () => setAtBottom(
-          !hasOverflow || !element ||
-          element.scrollTop + element.clientHeight >= element.scrollHeight - 2,
-        ),
-      );
+    let frame;
+    const measure = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        if (!element) return;
+        setHasOverflow(element.scrollHeight > element.clientHeight + 2);
+        const remaining = element.scrollHeight - element.clientHeight - element.scrollTop;
+        setAtBottom(remaining <= 2);
+        setFadeOpacity(Math.min(1, Math.max(0, remaining / 64)));
+      });
+    };
+    const observer = new ResizeObserver(measure);
+    if (element) observer.observe(element);
+    measure();
 
     return () => {
+      observer.disconnect();
       window.cancelAnimationFrame(
         frame,
       );
     };
   }, [
     questionIdsKey,
-    hasOverflow,
   ]);
 
   if (
@@ -366,10 +377,11 @@ function QuestionList({
         </div>
       </div>
 
-      {selectedQuestionId && (
+      {selectedQuestionId && hasOverflow && (
         <div
           className="question-panel__list-fade"
           aria-hidden="true"
+          style={{ opacity: fadeOpacity }}
         />
       )}
     </div>
@@ -617,6 +629,7 @@ export default function QuestionPanel({
 
   if (normalizedRole === "PROFESSOR") {
     return <ProfessorQuestionPanel
+      onArchive={onArchive}
       selectedQuestion={selectedQuestion}
       questions={questions}
       questionScope={questionScope}
@@ -639,7 +652,7 @@ export default function QuestionPanel({
       : "해당 페이지";
 
   return (
-    <aside className="question-panel question-panel--list">
+    <aside className={`question-panel question-panel--list question-panel--student-list${selectedQuestion ? " is-question-selected" : ""}`}>
       <div className="question-panel__header">
         <div className="question-panel__header-copy">
           <h2>

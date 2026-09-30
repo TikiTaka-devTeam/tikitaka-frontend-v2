@@ -23,7 +23,8 @@ export function FixerBubble({ fixer, pageWidth, onCheck }) {
     try { await onCheck?.(fixer); }
     finally { setChecking(false); }
   }
-  return <div className={`fixer-point${fixer.isChecked ? " is-checked" : ""}`} style={pointStyle({ x: fixer.xRatio, y: fixer.yRatio }, pageWidth)}>
+  if (fixer.isChecked) return null;
+  return <div className="fixer-point" style={pointStyle({ x: fixer.xRatio, y: fixer.yRatio }, pageWidth)}>
     <img className="fixer-point__marker" src={FixerIcon} alt="수정 메모" />
     <div className="fixer-point__bubble">
       <span title={fixer.content}>{fixer.content}</span>

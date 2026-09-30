@@ -4,6 +4,8 @@ import {
   useRef,
 } from "react";
 
+import FixerCursorIcon from "../../../assets/icons/fixer-active.svg";
+
 import {
   createUuid,
 } from "../utils/lectureData.js";
@@ -82,6 +84,8 @@ export default function useDrawingInteraction({
 
   const draftCanvasRef =
     useRef(null);
+  const liveCanvasRef = useRef(null);
+  const paintedSavedRef = useRef(null);
 
   const drawingCursorRef =
     useRef(null);
@@ -129,7 +133,6 @@ export default function useDrawingInteraction({
         [
           ...sharedStrokes,
           ...privateStrokes,
-          ...liveStrokes,
         ].filter(
           (stroke) =>
             !stroke.isDeleted,
@@ -137,22 +140,23 @@ export default function useDrawingInteraction({
       [
         privateStrokes,
         sharedStrokes,
-        liveStrokes,
       ],
     );
 
   useEffect(() => {
-    redrawStrokeCanvas(
-      strokeCanvasRef.current,
-      visibleStrokes,
-      pageSize.width,
-      pageSize.height,
-    );
-  }, [
-    pageSize.height,
-    pageSize.width,
-    visibleStrokes,
-  ]);
+    // Paint both layers in the same frame when a live stroke becomes saved,
+    // avoiding a double-opacity highlighter frame. Reuse unchanged saved paths.
+    const frame = requestAnimationFrame(() => {
+      const previous = paintedSavedRef.current;
+      if (previous?.strokes !== visibleStrokes || previous?.width !== pageSize.width ||
+          previous?.height !== pageSize.height) {
+        redrawStrokeCanvas(strokeCanvasRef.current, visibleStrokes, pageSize.width, pageSize.height);
+        paintedSavedRef.current = { strokes: visibleStrokes, width: pageSize.width, height: pageSize.height };
+      }
+      redrawStrokeCanvas(liveCanvasRef.current, liveStrokes, pageSize.width, pageSize.height);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [visibleStrokes, liveStrokes, pageSize.width, pageSize.height]);
 
   useEffect(() => {
     redrawStrokeCanvas(
@@ -1341,6 +1345,10 @@ export default function useDrawingInteraction({
           cursor:
             QUESTION_CURSOR,
         }
+      : activeTool === "FIXER"
+        ? {
+            cursor: `url("${FixerCursorIcon}") 12 12, pointer`,
+          }
       : DRAW_TOOLS.has(
             activeTool,
           ) ||
@@ -1358,6 +1366,7 @@ export default function useDrawingInteraction({
     strokeCanvasRef,
 
     draftCanvasRef,
+    liveCanvasRef,
 
     drawingCursorRef,
 

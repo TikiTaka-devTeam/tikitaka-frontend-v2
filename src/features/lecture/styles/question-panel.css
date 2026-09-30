@@ -494,6 +494,42 @@
   overflow-y: auto;
 }
 
+.question-panel--student-list .question-panel__scroll {
+  display: flex;
+  flex-direction: column;
+}
+
+.question-panel--student-list:not(.is-question-selected) .question-panel__scroll {
+  overflow-y: hidden;
+}
+
+.question-panel--student-list .question-panel__list-viewport {
+  height: min(448px, 100%);
+  flex: 0 1 448px;
+}
+
+.question-panel--student-list .question-panel__list-scroll {
+  height: 100%;
+}
+
+.question-panel--student-list.is-question-selected .question-panel__list-viewport {
+  height: 192px;
+  flex: 0 0 192px;
+}
+
+.question-panel--student-list .question-panel__list-fade {
+  height: 80px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 20%,
+    rgba(255, 255, 255, 0.68) 50%,
+    #ffffff 100%
+  );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 @media (
   max-width: 980px
 ) and (

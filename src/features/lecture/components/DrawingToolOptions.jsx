@@ -109,6 +109,53 @@ function isSameColor(
   );
 }
 
+function normalizeHexColor(value) {
+  const hex = String(value || "").trim();
+  return /^#[0-9a-f]{6}$/i.test(hex)
+    ? hex.toUpperCase()
+    : "#212326";
+}
+
+function hexToHsv(hex) {
+  const [red, green, blue] = [1, 3, 5].map((index) =>
+    Number.parseInt(hex.slice(index, index + 2), 16) / 255,
+  );
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const delta = max - min;
+  let hue = 0;
+
+  if (delta) {
+    if (max === red) hue = ((green - blue) / delta) % 6;
+    else if (max === green) hue = (blue - red) / delta + 2;
+    else hue = (red - green) / delta + 4;
+  }
+
+  return {
+    h: (hue * 60 + 360) % 360,
+    s: max ? (delta / max) * 100 : 0,
+    v: max * 100,
+  };
+}
+
+function hsvToHex({ h, s, v }) {
+  const saturation = s / 100;
+  const value = v / 100;
+  const chroma = value * saturation;
+  const hueSection = h / 60;
+  const secondary = chroma * (1 - Math.abs((hueSection % 2) - 1));
+  const channels = hueSection < 1 ? [chroma, secondary, 0]
+    : hueSection < 2 ? [secondary, chroma, 0]
+      : hueSection < 3 ? [0, chroma, secondary]
+        : hueSection < 4 ? [0, secondary, chroma]
+          : hueSection < 5 ? [secondary, 0, chroma]
+            : [chroma, 0, secondary];
+  const offset = value - chroma;
+  return `#${channels.map((channel) =>
+    Math.round((channel + offset) * 255).toString(16).padStart(2, "0"),
+  ).join("")}`.toUpperCase();
+}
+
 function getAnchorSelector(
   tool,
   panel,
@@ -126,10 +173,7 @@ function getAnchorSelector(
     return ".lecture-toolbar__thickness-button";
   }
 
-  if (
-    panel ===
-    "COLOR"
-  ) {
+  if (panel === "COLOR" || panel === "CUSTOM_COLOR") {
     return '.lecture-toolbar__quick-swatch[aria-label="색상 더보기"]';
   }
 
@@ -392,8 +436,8 @@ function DrawingToolOptionsContent({
     setOpenPanel,
   ] = useState(null);
 
-  const colorInputRef =
-    useRef(null);
+  const [draftHex, setDraftHex] = useState(() => normalizeHexColor(color));
+  const [draftHsv, setDraftHsv] = useState(() => hexToHsv(normalizeHexColor(color)));
 
   const panelRef =
     useRef(null);
@@ -420,7 +464,8 @@ function DrawingToolOptionsContent({
 
       setOpenPanel(
         (previous) =>
-          previous === panel
+          previous === panel ||
+          (previous === "CUSTOM_COLOR" && panel === "COLOR")
             ? null
             : panel,
       );
@@ -437,7 +482,29 @@ function DrawingToolOptionsContent({
         handleOptionsEvent,
       );
     };
-  }, [tool]);
+  }, [tool, color]);
+
+  function updateDraftHsv(nextHsv) {
+    setDraftHsv(nextHsv);
+    setDraftHex(hsvToHex(nextHsv));
+  }
+
+  function handleColorBoardPointer(event) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    updateDraftHsv({
+      ...draftHsv,
+      s: Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100)),
+      v: Math.max(0, Math.min(100, (1 - (event.clientY - bounds.top) / bounds.height) * 100)),
+    });
+  }
+
+  function handleHexChange(value) {
+    const nextHex = value.startsWith("#") ? value : `#${value}`;
+    setDraftHex(nextHex);
+    if (/^#[0-9a-f]{6}$/i.test(nextHex)) {
+      setDraftHsv(hexToHsv(nextHex));
+    }
+  }
 
   const visiblePanel =
     tool === "ERASER"
@@ -731,98 +798,116 @@ function DrawingToolOptionsContent({
     );
   }
 
-  if (
-    openPanel ===
-    "COLOR"
-  ) {
+  if (openPanel === "COLOR") {
     return (
       <div
         ref={panelRef}
         className="drawing-options drawing-options--colors"
-        style={
-          anchoredPanelStyle
-        }
+        style={anchoredPanelStyle}
       >
-        {COLORS.map(
-          (swatch) => {
-            const isSelected =
-              isSameColor(
-                color,
-                swatch,
-              );
-
-            return (
-              <button
-                type="button"
-                key={
-                  swatch
-                }
-                className={
-                  isSelected
-                    ? "is-active"
-                    : ""
-                }
-                style={{
-                  background:
-                    swatch,
-                }}
-                aria-label={`색상 ${swatch}`}
-                aria-pressed={
-                  isSelected
-                }
-                onClick={() =>
-                  onColorChange(
-                    swatch,
-                  )
-                }
-              />
-            );
-          },
-        )}
-
+        {COLORS.map((swatch) => {
+          const isSelected = isSameColor(color, swatch);
+          return (
+            <button
+              type="button"
+              key={swatch}
+              className={isSelected ? "is-active" : ""}
+              style={{ background: swatch }}
+              aria-label={`색상 ${swatch}`}
+              aria-pressed={isSelected}
+              onClick={() => onColorChange(swatch)}
+            />
+          );
+        })}
         <button
           type="button"
           className="drawing-options__color-add"
-          aria-label="사용자 색상 선택"
-          onClick={() =>
-            colorInputRef.current?.click()
-          }
+          aria-label="사용자 색상 조절"
+          onClick={() => {
+            const initialColor = normalizeHexColor(color);
+            setDraftHex(initialColor);
+            setDraftHsv(hexToHsv(initialColor));
+            setOpenPanel("CUSTOM_COLOR");
+          }}
         >
-          <img
-            src={
-              ColorAddIcon
-            }
-            alt=""
-            draggable="false"
-            aria-hidden="true"
-          />
+          <img src={ColorAddIcon} alt="" draggable="false" aria-hidden="true" />
         </button>
+      </div>
+    );
+  }
+
+  if (openPanel === "CUSTOM_COLOR") {
+    const validDraft = /^#[0-9a-f]{6}$/i.test(draftHex);
+
+    return (
+      <div
+        ref={panelRef}
+        className="drawing-options drawing-options--color-picker"
+        style={anchoredPanelStyle}
+      >
+        <div className="drawing-options__color-heading">
+          <strong>색상 조절</strong>
+          <button type="button" aria-label="색상 조절 닫기" onClick={() => setOpenPanel("COLOR")}>×</button>
+        </div>
+
+        <div
+          className="drawing-options__color-board"
+          role="group"
+          aria-label="채도와 밝기 조절"
+          style={{ backgroundColor: `hsl(${draftHsv.h} 100% 50%)` }}
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            handleColorBoardPointer(event);
+          }}
+          onPointerMove={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+              handleColorBoardPointer(event);
+            }
+          }}
+        >
+          <span
+            className="drawing-options__color-board-thumb"
+            style={{ left: `${draftHsv.s}%`, top: `${100 - draftHsv.v}%` }}
+          />
+        </div>
 
         <input
-          ref={
-            colorInputRef
-          }
-          className="drawing-options__native-color-input"
-          type="color"
-          value={
-            /^#[0-9a-f]{6}$/i.test(
-              String(
-                color || "",
-              ),
-            )
-              ? color
-              : "#6366F1"
-          }
-          tabIndex={-1}
-          aria-hidden="true"
-          onChange={(
-            event,
-          ) =>
-            onColorChange(
-              event.target.value,
-            )
-          }
+          className="drawing-options__hue-slider"
+          type="range"
+          min="0"
+          max="359"
+          value={Math.round(draftHsv.h)}
+          aria-label="색조"
+          onChange={(event) => updateDraftHsv({ ...draftHsv, h: Number(event.target.value) })}
         />
+
+        <div className="drawing-options__color-preview-row">
+          <span className="drawing-options__color-preview" style={{ backgroundColor: validDraft ? draftHex : hsvToHex(draftHsv) }} aria-hidden="true" />
+          <label htmlFor="drawing-color-hex">HEX</label>
+          <input
+            id="drawing-color-hex"
+            type="text"
+            maxLength={7}
+            value={draftHex}
+            aria-invalid={!validDraft}
+            onChange={(event) => handleHexChange(event.target.value)}
+          />
+        </div>
+
+        <div className="drawing-options__color-actions">
+          <button type="button" onClick={() => setOpenPanel("COLOR")}>취소</button>
+          <button
+            type="button"
+            className="drawing-options__color-apply"
+            disabled={!validDraft}
+            onClick={() => {
+              onColorChange(draftHex.toUpperCase());
+              setOpenPanel(null);
+            }}
+          >
+            적용
+          </button>
+        </div>
       </div>
     );
   }

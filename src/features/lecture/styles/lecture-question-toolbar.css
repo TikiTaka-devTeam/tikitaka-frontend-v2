@@ -37,15 +37,3 @@
   background: #e5484d;
   pointer-events: none;
 }
-
-.lecture-toolbar__all-questions {
-  margin-left: 25px;
-  flex: 0 0 125px;
-  height: 35px;
-  border: 1px solid #d8dbe7;
-  border-radius: 12px;
-  background: #fafafa;
-  color: #131a29;
-  font: 600 14px "Tikitaka UI", sans-serif;
-  cursor: pointer;
-}

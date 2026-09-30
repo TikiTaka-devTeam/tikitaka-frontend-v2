@@ -304,7 +304,7 @@ export function normalizeQuestion(
 
     slide:
       question.slide ??
-      null,
+      (question.slide_id != null ? { slide_id: question.slide_id } : null),
 
     categories:
       question.categories ??
