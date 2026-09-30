@@ -1,0 +1,34 @@
+.professor-question-panel { position: relative; }
+.lecture-workspace:has(.professor-question-panel[data-answer-mode]) .lecture-toolbar__all-questions { display: none; }
+.professor-question-panel .question-panel__header { gap: 8px; }
+.professor-question-panel__filters { display: flex; gap: 5px; margin-top: -5px; }
+.professor-question-panel__questions { padding-top: 15px; min-height: 0; overflow-y: auto; padding-bottom: 85px; }
+.professor-question-panel__selected { padding-top: 15px; }
+.professor-question-panel__selected .question-panel__list-viewport,
+.professor-question-panel__selected .question-panel__list-scroll { height: 64px; flex-basis: 64px; }
+.professor-question-panel__actions,
+.professor-question-panel__recorder,
+.professor-question-panel__input { position: absolute; left: 24px; right: 24px; bottom: 19px; border: 1px solid #dee3ed; border-radius: 18px; background: white; box-shadow: 0 10px 26px #14244712; box-sizing: border-box; }
+.professor-question-panel__actions { height: 48px; display: flex; align-items: center; gap: 5px; padding: 9px 14px 9px 24px; }
+.professor-question-panel__actions strong { margin-right: auto; color: #131a29; font-size: 15px; white-space: nowrap; }
+.professor-question-panel__actions button { flex: 0 0 70px; height: 28px; border: 1px solid #d8dbe7; border-radius: 12px; background: #fafafa; color: #292e3d; font: 600 10px "Tikitaka UI", sans-serif; cursor: pointer; }
+.professor-question-panel__answer { margin: 14px 24px 115px; overflow-y: auto; }
+.professor-question-panel__answer-heading { position: relative; display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid #c2ccde73; }
+.professor-question-panel__answer-heading h3 { margin: 0; color: #131a29; font-size: 15px; line-height: 18px; }
+.professor-question-panel__answer-heading button { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.professor-question-panel__answer-heading img { display: block; }
+.professor-question-panel__answer-heading .professor-question-panel__edit-menu { position: absolute; z-index: 6; right: -6px; top: 25px; width: 90px; height: 40px; display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 15px; background: #fff; box-shadow: 0 18px 42px #0a1a3838; font: 500 13px "Tikitaka UI", sans-serif; color: #25283c; }
+.professor-question-panel__answer > p { margin: 14px 0 0; color: #292e3d; font-size: 15px; font-weight: 600; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.professor-question-panel__placeholder { position: absolute; left: 24px; right: 24px; top: 321px; margin: 0; text-align: center; color: #cbcbcb; font-size: 12px; font-weight: 500; }
+.professor-question-panel__input { bottom: 29px; height: 80px; padding: 10px 14px 30px; }
+.professor-question-panel__input textarea { width: 100%; height: 100%; padding: 0; resize: none; border: 0; outline: none; background: transparent; color: #292e3d; font: 500 12px/16px "Tikitaka UI", sans-serif; }
+.professor-question-panel__input textarea::placeholder { color: #cbcbcb; }
+.professor-question-panel__input button { position: absolute; right: 14px; bottom: 9px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.professor-question-panel__input button img { display: block; width: 20px; height: 20px; }
+.professor-question-panel__recorder { height: 48px; display: flex; align-items: center; gap: 8px; padding: 11px; }
+.professor-question-panel__recorder button { display: flex; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.professor-question-panel__recorder span { color: #bc2978; font-size: 10px; }
+.professor-question-panel__recorder canvas { min-width: 0; width: 100%; height: 28px; }
+.professor-question-panel__error { position: absolute; left: 25px; right: 25px; bottom: 115px; margin: 0; color: #d32f45; font-size: 12px; }
+.professor-question-panel button:disabled { cursor: default; }
+.professor-question-panel button:focus-visible { outline: 2px solid #2e6bff; outline-offset: 2px; }

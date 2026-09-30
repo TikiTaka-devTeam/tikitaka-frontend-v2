@@ -135,7 +135,8 @@
 }
 
 .space-lecture-sort__trigger img.is-active {
-  filter: brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1951%) hue-rotate(205deg) brightness(100%) contrast(101%);
+  filter: brightness(0) saturate(100%) invert(42%) sepia(93%)
+    saturate(1951%) hue-rotate(205deg) brightness(100%) contrast(101%);
 }
 
 .space-lecture-sort__modal {
@@ -223,7 +224,7 @@
   overflow: visible;
   border-color: #e3e8f1;
   background: rgba(247, 249, 252, 0.96);
-  cursor: default;
+  cursor: pointer;
 }
 
 .lecture-material-card__preview {

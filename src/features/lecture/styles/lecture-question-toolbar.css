@@ -1,0 +1,51 @@
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button[data-tool="Q_LIST"] {
+  position: relative;
+  border-radius: 8px;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button[data-tool="Q_LIST"].is-active {
+  background: #ebeef5;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button[data-tool="Q_LIST"].is-active:hover {
+  background: #ebeef5;
+  opacity: 1;
+}
+
+.lecture-toolbar.lecture-toolbar--figma
+  .lecture-toolbar__button[data-tool="Q_LIST"].is-active
+  .lecture-toolbar__icon img {
+  filter: none !important;
+}
+
+.lecture-toolbar__question-notification {
+  position: absolute;
+  z-index: 2;
+  top: 3px;
+  right: 2px;
+  width: 5px;
+  height: 5px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 50%;
+  background: #e5484d;
+  pointer-events: none;
+}
+
+.lecture-toolbar__all-questions {
+  margin-left: 25px;
+  flex: 0 0 125px;
+  height: 35px;
+  border: 1px solid #d8dbe7;
+  border-radius: 12px;
+  background: #fafafa;
+  color: #131a29;
+  font: 600 14px "Tikitaka UI", sans-serif;
+  cursor: pointer;
+}

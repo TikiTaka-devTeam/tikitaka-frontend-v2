@@ -22,16 +22,11 @@
   width: 15.17px;
   height: 10.83px;
 
-  background: #2e6bff;
+  color: #2e6bff;
+}
 
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-
-  -webkit-mask-position: center;
-  mask-position: center;
-
-  -webkit-mask-size: contain;
-  mask-size: contain;
+.activate-status-modal__check-icon path {
+  fill: currentColor;
 }
 
 .activate-status-modal__text {

@@ -1,71 +1,85 @@
-import DownloadIcon from "../../../assets/icons/download.svg?react";
+import DownloadDocumentIcon from "../../../assets/icons/download-document.svg";
+
+import CompactModal from "../../../components/common/CompactModal.jsx";
+import ModalActions from "../../../components/common/ModalActions.jsx";
 
 export default function DownloadModal({
   open,
   loading,
+  completed = false,
   onCancel,
   onConfirm,
+  onComplete,
 }) {
   if (!open) {
     return null;
   }
 
-  return (
-    <div
-      className="lecture-modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (
-          event.target ===
-          event.currentTarget
-        ) {
-          onCancel();
-        }
-      }}
-    >
-      <section
-        className="compact-modal lecture-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="lecture-download-title"
-      >
-        <div
-          className="lecture-modal__icon"
-          aria-hidden="true"
-        >
-          <DownloadIcon />
-        </div>
+  const handleClose = () => {
+    if (loading) {
+      return;
+    }
 
+    if (completed) {
+      onComplete?.();
+      return;
+    }
+
+    onCancel?.();
+  };
+
+  return (
+    <CompactModal
+      className="lecture-modal"
+      onClose={handleClose}
+      labelledBy="lecture-download-title"
+      describedBy="lecture-download-description"
+    >
+      <div
+        className="compact-modal__icon lecture-modal__icon"
+        aria-hidden="true"
+      >
+        <img
+          src={DownloadDocumentIcon}
+          alt=""
+          draggable="false"
+        />
+      </div>
+
+      <div className="compact-modal__text">
         <h2 id="lecture-download-title">
-          강의자료 다운로드
+          {completed
+            ? "강의자료를 다운로드했습니다."
+            : "강의자료를 다운로드하시겠습니까?"}
         </h2>
 
-        <p>
-          현재 강의자료를 다운로드하시겠습니까?
+        <p id="lecture-download-description">
+          {completed
+            ? "강의자료를 다운로드했습니다."
+            : "해당 강의자료를 다운로드합니다"}
         </p>
+      </div>
 
-        <div className="lecture-modal__actions">
-          <button
-            type="button"
-            className="is-secondary"
-            disabled={loading}
-            onClick={onCancel}
-          >
-            취소
-          </button>
-
-          <button
-            type="button"
-            className="is-primary"
-            disabled={loading}
-            onClick={onConfirm}
-          >
-            {loading
+      {completed ? (
+        <ModalActions
+          showCancel={false}
+          confirmText="확인"
+          onConfirm={onComplete}
+        />
+      ) : (
+        <ModalActions
+          cancelText="취소"
+          confirmText={
+            loading
               ? "다운로드 중"
-              : "다운로드"}
-          </button>
-        </div>
-      </section>
-    </div>
+              : "다운로드"
+          }
+          cancelDisabled={loading}
+          confirmDisabled={loading}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+        />
+      )}
+    </CompactModal>
   );
 }

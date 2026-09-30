@@ -1,7 +1,7 @@
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
 
-import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
+import ConfirmCheckIcon from "../../../assets/icons/confirm-check.svg?react";
 
 import "../styles/archiveStatusModal.css";
 
@@ -13,14 +13,11 @@ function ArchiveCompleteModal({ onConfirm }) {
       describedBy="archive-complete-modal-description"
       className="archive-status-modal"
     >
-      <div className="archive-status-modal__icon-box" aria-hidden="true">
-        <span
-          className="archive-status-modal__check-icon"
-          style={{
-            WebkitMaskImage: `url(${confirmCheckIcon})`,
-            maskImage: `url(${confirmCheckIcon})`,
-          }}
-        />
+      <div
+        className="archive-status-modal__icon-box"
+        aria-hidden="true"
+      >
+        <ConfirmCheckIcon className="archive-status-modal__check-icon" />
       </div>
 
       <div className="archive-status-modal__text">
