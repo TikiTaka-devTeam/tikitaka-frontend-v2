@@ -513,7 +513,8 @@ export default function SpaceQuestionsPage() {
             <div className="space-questions-sidebar__heading">탐색</div>
             <div className="space-questions-sidebar__nav">
               <button type="button" className={view === "all" && !isManagingCategories ? "is-active" : ""} onClick={() => changeView("all")}>
-                <img src={view === "all" && !isManagingCategories ? totalQuestionSelectedIcon : totalQuestionIcon} alt="" />전체 질문
+                <img src={view === "all" && !isManagingCategories ? totalQuestionSelectedIcon : totalQuestionIcon} alt="" />
+                <span>전체 질문</span>
               </button>
               <button type="button" className={isProfessor ? (isManagingCategories ? "is-active" : "") : (view === "mine" ? "is-active" : "")} onClick={() => {
                 if (!isProfessor) {
@@ -526,7 +527,7 @@ export default function SpaceQuestionsPage() {
                 setIsManagingCategories(true);
               }}>
                 <img src={isProfessor ? (isManagingCategories ? categorySelectedIcon : categoryIcon) : (view === "mine" ? myQuestionSelectedIcon : myQuestionIcon)} alt="" />
-                {isProfessor ? "질문 카테고리 수정" : "내 질문"}
+                <span>{isProfessor ? "질문 카테고리 수정" : "내 질문"}</span>
               </button>
             </div>
             <label className="space-questions-sidebar__label" htmlFor="space-questions-document">자료별 질문 탐색</label>
