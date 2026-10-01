@@ -112,6 +112,23 @@ export async function createQuestionComment(
   return response.data;
 }
 
+export async function updateQuestionComment(commentId, payload) {
+  const response = await apiClient.patch(
+    `/question-comments/${commentId}`,
+    payload,
+  );
+
+  return response.data;
+}
+
+export async function deleteQuestionComment(commentId) {
+  const response = await apiClient.delete(
+    `/question-comments/${commentId}`,
+  );
+
+  return response.data;
+}
+
 export async function likeQuestion(questionId) {
   const response = await apiClient.post(
     `/questions/${questionId}/likes`,

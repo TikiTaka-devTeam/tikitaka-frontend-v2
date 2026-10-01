@@ -17,6 +17,10 @@ import moreIcon from "../../../assets/icons/space/space-more.svg";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
+import {
+  getSpaceMemberPermissions,
+  getSpaceMembers,
+} from "../../members/api/membersApi.js";
 import { getDocuments } from "../../spaces/api/documentsApi.js";
 import DeleteCompleteModal from "../../spaces/components/DeleteCompleteModal.jsx";
 import DeleteConfirmModal from "../../spaces/components/DeleteConfirmModal.jsx";
@@ -68,6 +72,37 @@ function readUserRole() {
   }
 }
 
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("tikitaka_user") || "null") || {};
+  } catch {
+    return {};
+  }
+}
+
+function isCurrentSpaceMember(member, user) {
+  const memberId = String(member?.member_id ?? member?.id ?? "");
+  const userIds = [
+    user?.member_id,
+    user?.memberId,
+    user?.space_member_id,
+    user?.spaceMemberId,
+    user?.user_id,
+    user?.userId,
+    user?.id,
+  ].filter(Boolean).map(String);
+  const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+  const userNumber = String(
+    user?.member_id_number ?? user?.memberIdNumber ??
+    user?.student_number ?? user?.studentNumber ?? "",
+  );
+
+  return Boolean(
+    (memberId && userIds.includes(memberId)) ||
+    (memberNumber && userNumber && memberNumber === userNumber),
+  );
+}
+
 function getQuestionLikeStorageKey(spaceId) {
   try {
     const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
@@ -99,7 +134,11 @@ function formatQuestionTime(value) {
 
 function QuestionRow({ question, isProfessor, isMenuOpen, onDeleteRequest, onMenuToggle, onSelect }) {
   const category = question.categories?.map((item) => item.name ?? item.category_name).filter(Boolean).join(", ");
-  const detail = [question.document?.title, category, formatQuestionTime(question.created_at)].filter(Boolean).join(" · ");
+  const detail = [
+    question.document?.title,
+    category,
+    formatQuestionTime(question.created_at),
+  ].filter(Boolean).join(" · ");
 
   return (
     <li className="space-questions-row">
@@ -138,6 +177,8 @@ export default function SpaceQuestionsPage() {
   const spaceName = location.state?.spaceName || "Space";
   const userRole = readUserRole();
   const isProfessor = userRole === "PROFESSOR";
+  const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(false);
+  const [currentSpaceRole, setCurrentSpaceRole] = useState(isProfessor ? "PROFESSOR" : "STUDENT");
   const [view, setView] = useState("all");
   const [sort, setSort] = useState("LATEST");
   const [documents, setDocuments] = useState([]);
@@ -163,12 +204,54 @@ export default function SpaceQuestionsPage() {
   const [selectedQuestionId, setSelectedQuestionId] = useState(
     () => searchParams.get("questionId") ?? "",
   );
+  const [selectedQuestionIsMine, setSelectedQuestionIsMine] = useState(false);
   const [questionLikeOverrides, setQuestionLikeOverrides] = useState(() => readQuestionLikeOverrides(spaceId));
   const [questionMenuId, setQuestionMenuId] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteModal, setDeleteModal] = useState("");
   const [isDeletingQuestion, setIsDeletingQuestion] = useState(false);
   const [deleteQuestionError, setDeleteQuestionError] = useState("");
+
+  useEffect(() => {
+    if (isProfessor) return undefined;
+
+    const controller = new AbortController();
+
+    async function loadQuestionPermission() {
+      try {
+        const memberData = await getSpaceMembers(spaceId, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        const currentMember = (memberData?.members ?? []).find((member) =>
+          isCurrentSpaceMember(member, readStoredUser()));
+        const memberId = currentMember?.member_id ?? currentMember?.id;
+        const memberRole = String(currentMember?.role ?? "STUDENT").toUpperCase();
+        const isAssistant = memberRole === "ASSISTANT";
+        setCurrentSpaceRole(memberRole);
+
+        if (!isAssistant || !memberId) {
+          setHasQuestionManagePermission(false);
+          return;
+        }
+
+        const permissionData = await getSpaceMemberPermissions(
+          spaceId,
+          memberId,
+          { signal: controller.signal },
+        );
+        if (!controller.signal.aborted) {
+          setHasQuestionManagePermission(
+            Array.isArray(permissionData?.permissions) &&
+            permissionData.permissions.includes("QUESTION_MANAGE"),
+          );
+        }
+      } catch (cause) {
+        if (cause.code !== "ERR_CANCELED") setHasQuestionManagePermission(false);
+      }
+    }
+
+    loadQuestionPermission();
+    return () => controller.abort();
+  }, [isProfessor, spaceId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -230,11 +313,12 @@ export default function SpaceQuestionsPage() {
   }, [spaceId, refreshKey]);
 
   useEffect(() => {
-    if (view !== "mine" || isProfessor) return;
+    if (isProfessor) return undefined;
     const controller = new AbortController();
 
     async function loadMineCategories() {
       const categoriesByDocument = {};
+      const questionIds = new Set();
       const seenCursors = new Set();
       let cursor;
       try {
@@ -245,6 +329,8 @@ export default function SpaceQuestionsPage() {
             { signal: controller.signal },
           );
           for (const question of data?.questions ?? []) {
+            const questionId = question.question_id ?? question.id;
+            if (questionId) questionIds.add(String(questionId));
             const documentId = question.document?.document_id ?? question.document_id;
             if (!documentId) continue;
             const ids = categoriesByDocument[documentId] ?? new Set();
@@ -259,7 +345,7 @@ export default function SpaceQuestionsPage() {
         } while (cursor && !controller.signal.aborted);
 
         if (!controller.signal.aborted) {
-          setMineCategoryData({ spaceId, refreshKey, categoriesByDocument });
+          setMineCategoryData({ spaceId, refreshKey, categoriesByDocument, questionIds });
           setMineCategoryError("");
         }
       } catch (cause) {
@@ -271,7 +357,7 @@ export default function SpaceQuestionsPage() {
 
     loadMineCategories();
     return () => controller.abort();
-  }, [spaceId, view, isProfessor, refreshKey]);
+  }, [spaceId, isProfessor, refreshKey]);
 
   useEffect(() => {
     if (view !== "mine" || isProfessor) return;
@@ -354,6 +440,7 @@ export default function SpaceQuestionsPage() {
   const categoryDocuments = currentCategoryData?.documents ?? [];
   const currentMineCategoryData = mineCategoryData?.spaceId === spaceId && mineCategoryData.refreshKey === refreshKey ? mineCategoryData : null;
   const mineCategoryIds = currentMineCategoryData?.categoriesByDocument ?? null;
+  const mineQuestionIds = currentMineCategoryData?.questionIds;
   const categoryGroups = categoryDocuments
     .filter((document) => !selectedDocumentId || document.document_id === selectedDocumentId)
     .map((document) => ({
@@ -379,7 +466,6 @@ export default function SpaceQuestionsPage() {
     setMineCategoryError("");
     setSelectedCategories([]);
     setSelectedQuestionId("");
-    if (nextView === "mine") setMineCategoryData(null);
     setView(nextView);
   }
 
@@ -561,7 +647,13 @@ export default function SpaceQuestionsPage() {
             key={selectedQuestionId}
             questionId={selectedQuestionId}
             role={userRole}
-            onBack={() => setSelectedQuestionId("")}
+            currentSpaceRole={currentSpaceRole}
+            canManageQuestions={isProfessor || hasQuestionManagePermission}
+            isQuestionAuthor={selectedQuestionIsMine || Boolean(mineQuestionIds?.has(String(selectedQuestionId)))}
+            onBack={() => {
+              setSelectedQuestionId("");
+              setSelectedQuestionIsMine(false);
+            }}
             onUpdated={handleQuestionUpdated}
           /> : <section className="space-questions-content" aria-labelledby="space-questions-title">
             <div className="space-questions-content__heading">
@@ -630,8 +722,14 @@ export default function SpaceQuestionsPage() {
                 }}
                 onDeleteRequest={requestQuestionDelete}
                 onSelect={(selectedQuestion) => {
+                  const selectedId = selectedQuestion.question_id ?? selectedQuestion.id;
                   setQuestionMenuId("");
-                  setSelectedQuestionId(selectedQuestion.question_id ?? selectedQuestion.id);
+                  setSelectedQuestionIsMine(Boolean(
+                    view === "mine" ||
+                    (selectedQuestion.is_mine ?? selectedQuestion.isMine) ||
+                    mineQuestionIds?.has(String(selectedId)),
+                  ));
+                  setSelectedQuestionId(selectedId);
                 }}
               />;
             })}</ul>
