@@ -143,6 +143,10 @@
   padding-right: 13px;
 }
 
+.signup-inform-password-wrap {
+  position: relative;
+}
+
 .signup-inform-password input {
   height: 33px;
   flex: 1;
@@ -167,6 +171,68 @@
   display: block;
   width: 20px;
   height: 20px;
+}
+
+.signup-inform-password-requirements {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 10;
+  display: grid;
+  gap: 5px;
+  min-width: 220px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: #343a40;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(33, 35, 38, 0.18);
+  font-family: "Tikitaka UI", Pretendard, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.signup-inform-password-requirements::before {
+  position: absolute;
+  top: -6px;
+  left: 14px;
+  width: 12px;
+  height: 12px;
+  background: #343a40;
+  content: "";
+  transform: rotate(45deg);
+}
+
+.signup-inform-password-requirement {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #c5cbd1;
+}
+
+.signup-inform-password-requirement > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  border-radius: 50%;
+  background: #7a828a;
+  color: #343a40;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.signup-inform-password-requirement.is-valid {
+  color: #ffffff;
+}
+
+.signup-inform-password-requirement.is-valid > span {
+  background: #ffffff;
 }
 
 .signup-inform-phone,
@@ -220,29 +286,6 @@
   font-variation-settings: "wght" 400;
 }
 
-.signup-inform-code-meta button {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #212326;
-  font-size: 12px;
-  font-weight: 700;
-  font-variation-settings: "wght" 700;
-  line-height: 14px;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.signup-inform-code-help {
-  margin: 8px 0 0;
-  color: #212326;
-  font-family: "Tikitaka UI", Pretendard, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  font-variation-settings: "wght" 400;
-  line-height: 14px;
-}
-
 .signup-inform-action {
   height: 35px;
   border: 0;
@@ -258,9 +301,20 @@
   background: #d1d5db;
 }
 
+.signup-inform-action.is-exhausted {
+  background: #d9d9d9;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
 .signup-inform-action:disabled {
   cursor: wait;
   opacity: 0.75;
+}
+
+.signup-inform-action.is-exhausted:disabled {
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 .signup-inform-role-row {
