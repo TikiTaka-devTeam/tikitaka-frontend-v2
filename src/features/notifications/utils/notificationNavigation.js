@@ -1,4 +1,5 @@
 import { getSpaces } from "../../spaces/api/spacesApi.js";
+import { getDocuments } from "../../spaces/api/documentsApi.js";
 
 function findSpaceName(response, spaceId) {
   const spaces = Array.isArray(response)
@@ -23,6 +24,28 @@ export async function resolveNotificationSpaceName(notification) {
 
   const archivedSpaces = await getSpaces("ARCHIVED");
   return findSpaceName(archivedSpaces, notification.spaceId);
+}
+
+export async function resolveNotificationDocumentTitle(notification) {
+  if (
+    notification.type !== "DOCUMENT_UPLOADED" ||
+    !notification.spaceId ||
+    !notification.targetId
+  ) {
+    return "";
+  }
+
+  const response = await getDocuments(notification.spaceId);
+  const documents = Array.isArray(response)
+    ? response
+    : response?.documents ?? [];
+  const document = documents.find(
+    (item) =>
+      String(item.document_id ?? item.documentId ?? item.id) ===
+      String(notification.targetId),
+  );
+
+  return document?.title ?? "";
 }
 
 function readUserRole() {

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { markNotificationAsRead } from "../api/notifications.api.js";
 import {
   getNotificationDestination,
+  resolveNotificationDocumentTitle,
   resolveNotificationSpaceName,
 } from "../utils/notificationNavigation.js";
 import "../styles/notificationRedirect.css";
@@ -28,8 +29,12 @@ function resolveNotificationRedirectOnce(notification) {
   const request = Promise.all([
     readRequest,
     resolveNotificationSpaceName(notification).catch(() => ""),
+    resolveNotificationDocumentTitle(notification).catch(() => ""),
   ])
-    .then(([, spaceName]) => spaceName)
+    .then(([, spaceName, documentTitle]) => ({
+      spaceName,
+      documentTitle,
+    }))
     .finally(() => {
       pendingRedirectRequests.delete(requestKey);
     });
@@ -64,13 +69,17 @@ function NotificationRedirectPage() {
     };
 
     const redirect = async () => {
-      const spaceName = await resolveNotificationRedirectOnce(notification);
+      const { spaceName, documentTitle } =
+        await resolveNotificationRedirectOnce(notification);
 
       if (!isMounted) return;
 
       navigate(getNotificationDestination(notification), {
         replace: true,
-        state: spaceName ? { spaceName } : undefined,
+        state:
+          spaceName || documentTitle
+            ? { spaceName, documentTitle }
+            : undefined,
       });
     };
 
