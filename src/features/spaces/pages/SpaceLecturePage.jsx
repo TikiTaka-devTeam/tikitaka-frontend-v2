@@ -613,10 +613,6 @@ function SpaceLecturePage() {
               role="dialog"
               aria-label="정렬 기준"
             >
-              <strong>
-                정렬 기준
-              </strong>
-
               <button
                 type="button"
                 className={
