@@ -591,7 +591,7 @@ function NoticesContent({ onClose }) {
     getSystemNotice(selectedNoticeId, { signal: controller.signal })
       .then(({ data }) => {
         if (controller.signal.aborted) return;
-        setSelectedNotice(data);
+        setSelectedNotice((current) => ({ ...current, ...data }));
         setDetailStatus("success");
         setNotices((current) =>
           current.map((notice) =>
@@ -608,10 +608,10 @@ function NoticesContent({ onClose }) {
     return () => controller.abort();
   }, [selectedNoticeId]);
 
-  const openDetail = (systemNoticeId) => {
-    setSelectedNotice(null);
+  const openDetail = (notice) => {
+    setSelectedNotice(notice);
     setDetailStatus("loading");
-    setSelectedNoticeId(systemNoticeId);
+    setSelectedNoticeId(notice.system_notice_id);
   };
 
   const closeDetail = () => {
@@ -630,109 +630,92 @@ function NoticesContent({ onClose }) {
   };
 
   return (
-    <>
-      <ModalBackdrop
-        onClose={onClose}
-        closeOnEscape={!selectedNoticeId}
-        className="modal-backdrop--light"
+    <ModalBackdrop
+      onClose={selectedNoticeId ? closeDetail : onClose}
+      className="modal-backdrop--light"
+    >
+      <section
+        className="profile-notices-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-notices-title"
+        aria-describedby="profile-notices-description"
       >
-        <section
-          className="profile-notices-dialog"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="profile-notices-title"
-          aria-describedby="profile-notices-description"
+        <header>
+          <h2 id="profile-notices-title">
+            {selectedNoticeId ? selectedNotice?.title ?? "공지사항" : "공지사항"}
+          </h2>
+          <p id="profile-notices-description">
+            {selectedNoticeId
+              ? formatNoticeDate(selectedNotice?.created_at)
+              : "tikitaka의 업데이트와 서비스 안내를 확인합니다."}
+          </p>
+        </header>
+        <div className="profile-notices-dialog__divider" />
+        <div
+          className={`profile-notices-dialog__body${selectedNoticeId ? " is-detail" : ""}`}
         >
-          <header>
-            <h2 id="profile-notices-title">공지사항</h2>
-            <p id="profile-notices-description">
-              tikitaka의 업데이트와 서비스 안내를 확인합니다.
-            </p>
-          </header>
-          <div className="profile-notices-dialog__divider" />
-          <div className="profile-notices-dialog__body">
-            {status === "loading" ? (
-              <p className="profile-notices-dialog__status">
-                공지사항을 불러오는 중입니다.
-              </p>
-            ) : null}
-            {status === "error" ? (
-              <p className="profile-notices-dialog__status" role="alert">
-                공지사항을 불러오지 못했습니다.
-              </p>
-            ) : null}
-            {status === "success" && notices.length === 0 ? (
-              <p className="profile-notices-dialog__status">
-                등록된 공지사항이 없습니다.
-              </p>
-            ) : null}
-            {notices.map((notice) => (
-              <button
-                type="button"
-                className="profile-notice-card"
-                key={notice.system_notice_id}
-                onClick={() => openDetail(notice.system_notice_id)}
-              >
-                <h3>{notice.title}</h3>
-                {notice.created_at ? (
-                  <time dateTime={notice.created_at}>
-                    {formatNoticeDate(notice.created_at)}
-                  </time>
-                ) : null}
-              </button>
-            ))}
-          </div>
-          <ModalActions
-            className="profile-notices-dialog__actions"
-            onConfirm={onClose}
-            confirmText="닫기"
-            showCancel={false}
-          />
-        </section>
-      </ModalBackdrop>
-
-      {selectedNoticeId ? (
-        <ModalBackdrop onClose={closeDetail} className="modal-backdrop--light">
-          <section
-            className="profile-system-notice-detail-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="profile-system-notice-detail-title"
-          >
-            <header>
-              <h2 id="profile-system-notice-detail-title">
-                {selectedNotice?.title ?? "공지사항"}
-              </h2>
-            </header>
-            <div className="profile-system-notice-detail-dialog__divider" />
-            <div className="profile-system-notice-detail-dialog__body">
+          {selectedNoticeId ? (
+            <>
               {detailStatus === "loading" ? (
-                <p className="profile-system-notice-detail-dialog__status">
+                <p className="profile-notices-dialog__status">
                   공지사항을 불러오는 중입니다.
                 </p>
               ) : null}
               {detailStatus === "error" ? (
-                <p
-                  className="profile-system-notice-detail-dialog__status"
-                  role="alert"
-                >
+                <p className="profile-notices-dialog__status" role="alert">
                   공지사항을 불러오지 못했습니다.
                 </p>
               ) : null}
               {detailStatus === "success" ? (
-                <p>{selectedNotice?.content ?? ""}</p>
+                <p className="profile-notices-dialog__content">
+                  {selectedNotice?.content ?? ""}
+                </p>
               ) : null}
-            </div>
-            <ModalActions
-              className="profile-system-notice-detail-dialog__actions"
-              onConfirm={closeDetail}
-              confirmText="닫기"
-              showCancel={false}
-            />
-          </section>
-        </ModalBackdrop>
-      ) : null}
-    </>
+            </>
+          ) : (
+            <>
+              {status === "loading" ? (
+                <p className="profile-notices-dialog__status">
+                  공지사항을 불러오는 중입니다.
+                </p>
+              ) : null}
+              {status === "error" ? (
+                <p className="profile-notices-dialog__status" role="alert">
+                  공지사항을 불러오지 못했습니다.
+                </p>
+              ) : null}
+              {status === "success" && notices.length === 0 ? (
+                <p className="profile-notices-dialog__status">
+                  등록된 공지사항이 없습니다.
+                </p>
+              ) : null}
+              {notices.map((notice) => (
+                <button
+                  type="button"
+                  className="profile-notice-card"
+                  key={notice.system_notice_id}
+                  onClick={() => openDetail(notice)}
+                >
+                  <h3>{notice.title}</h3>
+                  {notice.created_at ? (
+                    <time dateTime={notice.created_at}>
+                      {formatNoticeDate(notice.created_at)}
+                    </time>
+                  ) : null}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+        <ModalActions
+          className="profile-notices-dialog__actions"
+          onConfirm={selectedNoticeId ? closeDetail : onClose}
+          confirmText="닫기"
+          showCancel={false}
+        />
+      </section>
+    </ModalBackdrop>
   );
 }
 
