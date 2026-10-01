@@ -841,9 +841,9 @@ file: 운영체제_1주차_추가자료.pdf
 | QST-010 | `POST /api/v1/questions/{question_id}/answers` | 교수·권한 조교 / 공식 답변 | `{"content":"CPU 사용률을 높이고 프로세스를 효율적으로 실행하기 위해 필요합니다."}` | `{"answer_id":"uuid","question_id":"uuid","content":"CPU 사용률을 높이고 프로세스를 효율적으로 실행하기 위해 필요합니다.","created_at":"2026-08-11T11:40:00+09:00"}` | 오류: 명세서에 구체 형식 없음; 작성 후 상세 갱신 |
 | QST-011 | `PATCH /api/v1/answers/{answer_id}` | 답변 작성자 / 수정 | `{"content":"수정된 공식 답변입니다."}` | `{"answer_id":"uuid","content":"수정된 공식 답변입니다.","updated_at":"2026-08-11T11:45:00+09:00"}` | 오류: 명세서에 구체 형식 없음 |
 | QST-012 | `DELETE /api/v1/answers/{answer_id}` | 작성자·교수 / 소프트 삭제 | body 없음 | `{"answer_id":"uuid","is_deleted":true}` | 오류: 명세서에 구체 형식 없음 |
-| QST-013 | `POST /api/v1/questions/{question_id}/comments` | 교수·권한 조교 / 댓글·대댓글 | `{"content":"추가 설명입니다.","parent_comment_id":null}` | `{"comment_id":"uuid","question_id":"uuid","parent_comment_id":null,"content":"추가 설명입니다.","created_at":"2026-08-11T12:00:00+09:00"}` | 대댓글은 parent UUID |
-| QST-014 | `PATCH /api/v1/question-comments/{comment_id}` | 댓글 작성자 / 수정 | `{"content":"수정된 댓글입니다."}` | `{"comment_id":"uuid","content":"수정된 댓글입니다.","updated_at":"2026-08-11T12:10:00+09:00"}` | 오류: 명세서에 구체 형식 없음 |
-| QST-015 | `DELETE /api/v1/question-comments/{comment_id}` | 댓글 작성자·교수 / 소프트 삭제 | body 없음 | `{"comment_id":"uuid","is_deleted":true}` | 오류: 명세서에 구체 형식 없음 |
+| QST-013 | `POST /api/v1/questions/{question_id}/comments` | 질문 작성자·교수·`QUESTION_MANAGE` 권한 조교 / 댓글·대댓글 | `{"content":"추가 설명입니다.","parent_comment_id":null}` | `{"comment_id":"uuid","question_id":"uuid","parent_comment_id":null,"content":"추가 설명입니다.","is_anonymous":true,"created_at":"2026-08-11T12:00:00+09:00"}` | 일반 댓글은 `parent_comment_id:null`, 대댓글은 부모 댓글 UUID |
+| QST-014 | `PATCH /api/v1/question-comments/{comment_id}` | 댓글 작성자 / 댓글·대댓글 수정 | `{"content":"수정된 댓글입니다."}` | `{"comment_id":"uuid","content":"수정된 댓글입니다.","is_anonymous":true,"updated_at":"2026-08-11T12:10:00+09:00"}` | 오류: 명세서에 구체 형식 없음 |
+| QST-015 | `DELETE /api/v1/question-comments/{comment_id}` | 댓글 작성자·교수 / 댓글·대댓글 소프트 삭제 | body 없음 | `{"comment_id":"uuid","is_deleted":true}` | 오류: 명세서에 구체 형식 없음 |
 | QST-016 | `POST /api/v1/questions/{question_id}/likes` | 강의 참여자 / 공감 | body 없음 | `{"question_id":"uuid","liked":true,"like_count":5}` | 낙관 업데이트 롤백 필요 |
 | QST-017 | `DELETE /api/v1/questions/{question_id}/likes` | 강의 참여자 / 공감 취소 | body 없음 | `{"question_id":"uuid","liked":false,"like_count":4}` | 낙관 업데이트 롤백 필요 |
 
