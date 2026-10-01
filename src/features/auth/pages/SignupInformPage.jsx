@@ -64,6 +64,29 @@ const initialForm = {
 
 const VERIFICATION_TIME_LIMIT = 300;
 const PASSWORD_SPECIAL_CHARACTER_PATTERN = /[!@#$%^&*(),.?":{}|<>_\-\\[\]/;'`~+=]/;
+const PASSWORD_LETTER_PATTERN = /[A-Za-z]/;
+const PASSWORD_NUMBER_PATTERN = /\d/;
+
+function getPasswordRequirements(password) {
+  return [
+    {
+      label: "8~64자",
+      isValid: password.length >= 8 && password.length <= 64,
+    },
+    {
+      label: "영문 최소 1자",
+      isValid: PASSWORD_LETTER_PATTERN.test(password),
+    },
+    {
+      label: "숫자 최소 1자",
+      isValid: PASSWORD_NUMBER_PATTERN.test(password),
+    },
+    {
+      label: "특수문자 최소 1자",
+      isValid: PASSWORD_SPECIAL_CHARACTER_PATTERN.test(password),
+    },
+  ];
+}
 
 function getFormErrors(form, options) {
   const {
@@ -85,18 +108,12 @@ function getFormErrors(form, options) {
   }
 
   if (!isOAuthSignup) {
-    const passwordErrors = [];
-
-    if (form.password.length < 8) {
-      passwordErrors.push("8자 이상");
-    }
-
-    if (!PASSWORD_SPECIAL_CHARACTER_PATTERN.test(form.password)) {
-      passwordErrors.push("특수문자 1개 이상");
-    }
+    const passwordErrors = getPasswordRequirements(form.password)
+      .filter(({ isValid }) => !isValid)
+      .map(({ label }) => label);
 
     if (passwordErrors.length > 0) {
-      errors.password = `비밀번호에 ${passwordErrors.join(", ")}이 필요합니다.`;
+      errors.password = `비밀번호 조건을 확인해주세요: ${passwordErrors.join(", ")}`;
     }
 
     if (!form.passwordConfirm) {
@@ -210,10 +227,13 @@ function SignupInformPage() {
   }));
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [phoneCodeSent, setPhoneCodeSent] = useState(false);
+  const [phoneVerificationSendCount, setPhoneVerificationSendCount] =
+    useState(0);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [phoneVerificationToken, setPhoneVerificationToken] = useState("");
   const [isSendingPhoneCode, setIsSendingPhoneCode] = useState(false);
@@ -249,6 +269,11 @@ function SignupInformPage() {
     [formErrors],
   );
 
+  const passwordRequirements = useMemo(
+    () => getPasswordRequirements(form.password),
+    [form.password],
+  );
+
   useEffect(() => {
     if (!phoneCodeSent || phoneVerified || verificationTimeLeft <= 0) {
       return undefined;
@@ -281,6 +306,7 @@ function SignupInformPage() {
       setPhoneVerified(false);
       setPhoneVerificationToken("");
       setPhoneCodeSent(false);
+      setPhoneVerificationSendCount(0);
       setVerificationTimeLeft(VERIFICATION_TIME_LIMIT);
       setPhoneErrorMessage("");
     }
@@ -323,6 +349,7 @@ function SignupInformPage() {
 
   const handleSendCode = async () => {
     const phoneNumber = form.phoneNumber.trim();
+    const isResend = phoneCodeSent;
 
     if (!phoneNumber) {
       setPhoneErrorMessage("휴대폰 번호를 입력해주세요.");
@@ -334,12 +361,18 @@ function SignupInformPage() {
       return;
     }
 
+    if (phoneVerificationSendCount >= 2) {
+      setPhoneErrorMessage("인증번호를 다시 요청할 수 없습니다.");
+      return;
+    }
+
     const formattedPhoneNumber = formatPhoneNumber(
       form.phonePrefix,
       phoneNumber,
     );
     setIsSendingPhoneCode(true);
     setPhoneErrorMessage("");
+    setPhoneVerificationSendCount((prev) => prev + 1);
 
     try {
       const { data } = await checkPhoneDuplicate(formattedPhoneNumber);
@@ -362,11 +395,15 @@ function SignupInformPage() {
       setForm((prev) => ({ ...prev, verificationCode: "" }));
       setErrorMessage("");
     } catch (error) {
+      if (isResend) {
+        setPhoneErrorMessage("");
+        return;
+      }
+
       const code = getApiErrorCode(error);
       const messages = {
         PHONE_NUMBER_ALREADY_REGISTERED: "이미 가입된 휴대폰 번호입니다.",
-        PHONE_VERIFICATION_RESEND_LIMITED:
-          "잠시 후 인증번호를 다시 요청해주세요.",
+        PHONE_VERIFICATION_RESEND_LIMITED: "인증번호 발송에 실패했습니다.",
         PHONE_VERIFICATION_RATE_LIMITED: "인증번호 발송 횟수를 초과했습니다.",
         SMS_DELIVERY_UNAVAILABLE: "인증번호를 발송하지 못했습니다.",
       };
@@ -378,10 +415,6 @@ function SignupInformPage() {
     } finally {
       setIsSendingPhoneCode(false);
     }
-  };
-
-  const handleExtendTime = () => {
-    void handleSendCode();
   };
 
   const handleVerifyCode = async () => {
@@ -416,7 +449,10 @@ function SignupInformPage() {
     } catch (error) {
       const code = getApiErrorCode(error);
       const messages = {
-        PHONE_VERIFICATION_CODE_MISMATCH: "인증번호가 일치하지 않습니다.",
+        PHONE_VERIFICATION_CODE_MISMATCH:
+          phoneVerificationSendCount >= 2
+            ? "회원가입을 다시 시도하고, 재인증해주세요."
+            : "인증번호가 일치하지 않습니다.",
         PHONE_VERIFICATION_CODE_EXPIRED: "인증번호가 만료되었습니다.",
         PHONE_VERIFICATION_ATTEMPTS_EXCEEDED: "인증 시도 횟수를 초과했습니다.",
       };
@@ -622,35 +658,61 @@ function SignupInformPage() {
               }`}
             >
               <span>비밀번호</span>
-              <div className="signup-inform-password">
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="비밀번호를 입력해주세요. (8자 이상, 특수문자 1개 이상)"
-                  aria-invalid={Boolean(
-                    (form.password || submitAttempted) && formErrors.password,
-                  )}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={
-                    showPassword ? "비밀번호 숨기기" : "비밀번호 보기"
-                  }
-                >
-                  <img
-                    src={showPassword ? watchPasswordIcon : hidePasswordIcon}
-                    alt=""
+              <div className="signup-inform-password-wrap">
+                <div className="signup-inform-password">
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={handleChange}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => setIsPasswordFocused(false)}
+                    placeholder="비밀번호를 입력해주세요."
+                    aria-invalid={Boolean(
+                      (form.password || submitAttempted) && formErrors.password,
+                    )}
+                    aria-describedby="signup-password-requirements"
                   />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={
+                      showPassword ? "비밀번호 숨기기" : "비밀번호 보기"
+                    }
+                  >
+                    <img
+                      src={showPassword ? watchPasswordIcon : hidePasswordIcon}
+                      alt=""
+                    />
+                  </button>
+                </div>
+                {isPasswordFocused && (
+                  <div
+                    id="signup-password-requirements"
+                    className="signup-inform-password-requirements"
+                    role="status"
+                  >
+                    {passwordRequirements.map(({ label, isValid }) => (
+                      <div
+                        className={`signup-inform-password-requirement ${
+                          isValid ? "is-valid" : ""
+                        }`}
+                        key={label}
+                      >
+                        <span aria-hidden="true">{isValid ? "✓" : "×"}</span>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              {(form.password || submitAttempted) && formErrors.password && (
+              {!isPasswordFocused &&
+                (form.password || submitAttempted) &&
+                formErrors.password && (
                 <p className="signup-inform-field-error">
                   {formErrors.password}
                 </p>
-              )}
+                )}
             </label>
           )}
 
@@ -734,10 +796,12 @@ function SignupInformPage() {
               />
               <button
                 className={`signup-inform-action ${
-                  phoneCodeSent ? "is-done" : ""
+                  phoneVerificationSendCount >= 2 ? "is-exhausted" : ""
                 }`}
                 type="button"
-                disabled={isSendingPhoneCode}
+                disabled={
+                  isSendingPhoneCode || phoneVerificationSendCount >= 2
+                }
                 onClick={handleSendCode}
               >
                 {isSendingPhoneCode
@@ -784,17 +848,7 @@ function SignupInformPage() {
                       {formatVerificationTime(verificationTimeLeft)}
                     </strong>
                   </span>
-                  <button
-                    type="button"
-                    disabled={isSendingPhoneCode}
-                    onClick={handleExtendTime}
-                  >
-                    시간연장
-                  </button>
                 </div>
-                <p className="signup-inform-code-help">
-                  인증번호는 받은 시점으로부터 5분간만 유효합니다.
-                </p>
               </div>
             )}
           </div>
