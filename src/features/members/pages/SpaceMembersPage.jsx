@@ -6,6 +6,7 @@ import moreIcon from "../../../assets/icons/more.svg";
 import memberBackgroundIcon from "../../../assets/icons/members/Notice-Member-Background.svg";
 import assistantSaveIcon from "../../../assets/icons/members/assistant-save.svg";
 import graduationCapIcon from "../../../assets/icons/members/graduation-cap.svg";
+import inviteCodeCopyIcon from "../../../assets/icons/members/invite-code-copy-blue.svg";
 import joinedDateIcon from "../../../assets/icons/members/member-joined-date.svg";
 import mailIcon from "../../../assets/icons/members/member-mail.svg";
 import profileAvatar from "../../../assets/images/profile-avatar.svg";
@@ -838,6 +839,7 @@ function SpaceMembersPage() {
                   <strong>초대 코드</strong>
                   {inviteCode ? (
                     <button type="button" onClick={handleCopyInviteCode}>
+                      <img src={inviteCodeCopyIcon} alt="" aria-hidden="true" />
                       <span>{isInviteCodeCopied ? "복사됨" : inviteCode}</span>
                     </button>
                   ) : (

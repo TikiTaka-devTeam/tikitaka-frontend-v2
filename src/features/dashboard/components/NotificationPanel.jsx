@@ -8,6 +8,7 @@ import {
 } from "../../notifications/api/notifications.api.js";
 import {
   getNotificationDestination,
+  resolveNotificationDocumentTitle,
   resolveNotificationSpaceName,
 } from "../../notifications/utils/notificationNavigation.js";
 import { getCourseColor } from "../utils/courseColor.js";
@@ -106,9 +107,10 @@ function NotificationPanel({ onClose }) {
   };
 
   const handleNotificationClick = async (notification) => {
-    const [, spaceName] = await Promise.all([
+    const [, spaceName, documentTitle] = await Promise.all([
       markAsRead(notification.id),
       resolveNotificationSpaceName(notification).catch(() => ""),
+      resolveNotificationDocumentTitle(notification).catch(() => ""),
     ]);
 
     const destination = getNotificationDestination(notification);
@@ -116,7 +118,10 @@ function NotificationPanel({ onClose }) {
 
     onClose();
     navigate(destination, {
-      state: spaceName ? { spaceName } : undefined,
+      state:
+        spaceName || documentTitle
+          ? { spaceName, documentTitle }
+          : undefined,
     });
   };
 

@@ -141,25 +141,16 @@
 
 .space-lecture-sort__modal {
   position: fixed;
-  top: 131px;
+  top: 125px;
   right: max(40px, calc((100vw - var(--app-content-max)) / 2));
   width: 140px;
-  height: 113px;
-  padding: 20px 25px 8px 25px;
+  height: 90px;
+  padding: 20px 25px 20px 25px;
   display: flex;
   flex-direction: column;
   border-radius: 15px;
   background: #ffffff;
   box-shadow: 0 14px 30px rgba(31, 35, 64, 0.18);
-}
-
-.space-lecture-sort__modal strong {
-  margin-bottom: 7px;
-  color: #25283c;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: normal;
-  text-align: center;
 }
 
 .space-lecture-sort__modal button {
@@ -173,7 +164,7 @@
   background: transparent;
   color: #25283c;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   line-height: normal;
   text-align: left;
