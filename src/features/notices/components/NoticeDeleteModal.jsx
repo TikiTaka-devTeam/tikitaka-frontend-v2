@@ -1,4 +1,4 @@
-import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
+import ConfirmCheckIcon from "../../../assets/icons/confirm-check.svg?react";
 import deleteIcon from "../../../assets/icons/delete.svg";
 
 function NoticeDeleteModal({
@@ -34,13 +34,7 @@ function NoticeDeleteModal({
             aria-hidden="true"
           >
             {isSuccess ? (
-              <span
-                className="notice-delete-modal__success-icon"
-                style={{
-                  WebkitMaskImage: `url(${confirmCheckIcon})`,
-                  maskImage: `url(${confirmCheckIcon})`,
-                }}
-              />
+              <ConfirmCheckIcon className="notice-delete-modal__success-icon" />
             ) : (
               <img
                 src={deleteIcon}

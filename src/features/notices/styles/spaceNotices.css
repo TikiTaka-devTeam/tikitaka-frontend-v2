@@ -883,18 +883,12 @@
 .notice-delete-modal__success-icon {
   display: block;
 
-  width: 15.17px;
-  height: 10.83px;
+  width: 18px;
+  height: 13px;
+}
 
-  background: #e24b63;
-
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  -webkit-mask-size: contain;
-
-  mask-repeat: no-repeat;
-  mask-position: center;
-  mask-size: contain;
+.notice-delete-modal__success-icon path {
+  stroke: #e24b63;
 }
 
 .notice-delete-modal__text {
@@ -997,7 +991,7 @@
 
   border: 0;
 
-  background: #386eeb;
+  background: #e24b63;
 
   color: #ffffff;
 }
