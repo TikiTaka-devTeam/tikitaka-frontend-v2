@@ -16,37 +16,6 @@ import hidePasswordIcon from "../../../assets/icons/HidePassword.svg";
 import watchPasswordIcon from "../../../assets/icons/WatchPassword.svg";
 import "../styles/signupInform.css";
 
-const campusOptions = [
-  "단국대학교 죽전캠퍼스",
-  "단국대학교 천안캠퍼스",
-  "서울대학교",
-  "연세대학교",
-  "고려대학교",
-  "성균관대학교",
-  "한양대학교",
-  "중앙대학교",
-  "경희대학교",
-  "한국외국어대학교",
-  "서울시립대학교",
-  "숭실대학교",
-  "인하대학교",
-  "건국대학교",
-  "동국대학교",
-  "홍익대학교",
-  "서강대학교",
-  "이화여자대학교",
-  "숙명여자대학교",
-  "세종대학교",
-  "광운대학교",
-  "국민대학교",
-  "상명대학교",
-  "가천대학교",
-  "명지대학교",
-  "인제대학교",
-  "안양대학교",
-  "수원대학교",
-];
-
 const initialForm = {
   name: "",
   email: "",
@@ -56,9 +25,8 @@ const initialForm = {
   phoneNumber: "",
   verificationCode: "",
   role: "",
-  univ: "",
-  major: "",
-  memberIdNumber: "",
+  organizationName: "",
+  affiliation: "",
   profileUrl: "",
 };
 
@@ -133,16 +101,12 @@ function getFormErrors(form, options) {
     errors.role = "역할을 선택해주세요.";
   }
 
-  if (!form.univ) {
-    errors.univ = "학교를 선택해주세요.";
+  if (!form.organizationName.trim()) {
+    errors.organizationName = "기관·모임명을 입력해주세요.";
   }
 
-  if (!form.major.trim()) {
-    errors.major = "1전공을 입력해주세요.";
-  }
-
-  if (!form.memberIdNumber.trim()) {
-    errors.memberIdNumber = "학번을 입력해주세요.";
+  if (!form.affiliation.trim()) {
+    errors.affiliation = "소속을 입력해주세요.";
   }
 
   return errors;
@@ -521,12 +485,12 @@ function SignupInformPage() {
       const commonPayload = {
         email: form.email.trim(),
         name: form.name.trim(),
-        univ: form.univ,
-        major: form.major.trim(),
+        // Keep the existing API contract while exposing generic UI terminology.
+        univ: form.organizationName.trim(),
+        major: form.affiliation.trim(),
         phone_number: formatPhoneNumber(form.phonePrefix, form.phoneNumber),
         phone_verification_token: phoneVerificationToken,
         account_type: form.role,
-        member_id_number: form.memberIdNumber.trim(),
       };
 
       const { data } = isOAuthSignup
@@ -547,7 +511,6 @@ function SignupInformPage() {
               account_type: commonPayload.account_type,
               univ: commonPayload.univ,
               major: commonPayload.major,
-              member_id_number: commonPayload.member_id_number,
             },
             selectedProfileFile,
           );
@@ -853,6 +816,50 @@ function SignupInformPage() {
             )}
           </div>
 
+          <label
+            className={`signup-inform-field ${
+              submitAttempted && formErrors.organizationName ? "has-error" : ""
+            }`}
+          >
+            <span>기관·모임명</span>
+            <input
+              name="organizationName"
+              value={form.organizationName}
+              onChange={handleChange}
+              placeholder="기관·모임명을 입력해주세요. ex) 단국대학교, OO 코딩학원"
+              aria-invalid={Boolean(
+                submitAttempted && formErrors.organizationName,
+              )}
+            />
+            {submitAttempted && formErrors.organizationName && (
+              <p className="signup-inform-field-error">
+                {formErrors.organizationName}
+              </p>
+            )}
+          </label>
+
+          <label
+            className={`signup-inform-field ${
+              submitAttempted && formErrors.affiliation ? "has-error" : ""
+            }`}
+          >
+            <span>소속</span>
+            <input
+              name="affiliation"
+              value={form.affiliation}
+              onChange={handleChange}
+              placeholder="소속을 입력해주세요. ex) 컴퓨터공학과, 백엔드반"
+              aria-invalid={Boolean(
+                submitAttempted && formErrors.affiliation,
+              )}
+            />
+            {submitAttempted && formErrors.affiliation && (
+              <p className="signup-inform-field-error">
+                {formErrors.affiliation}
+              </p>
+            )}
+          </label>
+
           <div
             className={`signup-inform-role-row ${
               submitAttempted && formErrors.role ? "has-error" : ""
@@ -861,94 +868,28 @@ function SignupInformPage() {
             <span>역할</span>
             <div className="signup-inform-role-options">
               <button
-                className={form.role === "STUDENT" ? "is-selected" : ""}
-                type="button"
-                onClick={() =>
-                  setForm((prev) => ({ ...prev, role: "STUDENT" }))
-                }
-              >
-                학생
-              </button>
-              <button
                 className={form.role === "PROFESSOR" ? "is-selected" : ""}
                 type="button"
                 onClick={() =>
                   setForm((prev) => ({ ...prev, role: "PROFESSOR" }))
                 }
               >
-                교수
+                운영자
+              </button>
+              <button
+                className={form.role === "STUDENT" ? "is-selected" : ""}
+                type="button"
+                onClick={() =>
+                  setForm((prev) => ({ ...prev, role: "STUDENT" }))
+                }
+              >
+                참여자
               </button>
             </div>
             {submitAttempted && formErrors.role && (
               <p className="signup-inform-field-error">{formErrors.role}</p>
             )}
           </div>
-
-          <div className="signup-inform-grid">
-            <label
-              className={`signup-inform-field ${
-                submitAttempted && formErrors.univ ? "has-error" : ""
-              }`}
-            >
-              <span>학교</span>
-              <select
-                name="univ"
-                value={form.univ}
-                onChange={handleChange}
-                aria-invalid={Boolean(submitAttempted && formErrors.univ)}
-              >
-                <option value="">학교를 선택해주세요.</option>
-                {campusOptions.map((campus) => (
-                  <option key={campus} value={campus}>
-                    {campus}
-                  </option>
-                ))}
-              </select>
-              {submitAttempted && formErrors.univ && (
-                <p className="signup-inform-field-error">{formErrors.univ}</p>
-              )}
-            </label>
-
-            <label
-              className={`signup-inform-field ${
-                submitAttempted && formErrors.major ? "has-error" : ""
-              }`}
-            >
-              <span>1전공</span>
-              <input
-                name="major"
-                value={form.major}
-                onChange={handleChange}
-                placeholder="1전공을 입력해주세요. ex) 컴퓨터공학과"
-                aria-invalid={Boolean(submitAttempted && formErrors.major)}
-              />
-              {submitAttempted && formErrors.major && (
-                <p className="signup-inform-field-error">{formErrors.major}</p>
-              )}
-            </label>
-          </div>
-
-          <label
-            className={`signup-inform-field ${
-              submitAttempted && formErrors.memberIdNumber ? "has-error" : ""
-            }`}
-          >
-            <span>학번</span>
-            <input
-              name="memberIdNumber"
-              value={form.memberIdNumber}
-              onChange={handleChange}
-              placeholder="학번을 입력해주세요. 강의자에게 표시되는 학번입니다."
-              aria-invalid={Boolean(
-                submitAttempted && formErrors.memberIdNumber,
-              )}
-            />
-            {submitAttempted && formErrors.memberIdNumber && (
-              <p className="signup-inform-field-error">
-                {formErrors.memberIdNumber}
-              </p>
-            )}
-          </label>
 
           <div className="signup-inform-profile">
             <div className="signup-inform-profile-copy">

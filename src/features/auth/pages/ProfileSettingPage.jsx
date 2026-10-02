@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import leftArrowIcon from "../../../assets/icons/left_arrow.png";
-import userIcon from "../../../assets/icons/userIcon.png";
 import addImgIcon from "../../../assets/icons/addImg.svg";
+import { getProfileInitial } from "../../../utils/profileInitial.js";
 import { getCurrentUser, logout, updateProfileImage } from "../api/auth.api.js";
 import {
   clearStoredPushSubscriptionId,
@@ -225,7 +225,9 @@ function ProfileSettingPage() {
               onError={() => setFailedProfileImage(profileImage)}
             />
           ) : (
-            <img src={userIcon} alt={`${displayName} 프로필`} />
+            <span className="profile-setting-avatar__fallback" aria-hidden="true">
+              {getProfileInitial(displayName)}
+            </span>
           )}
           <label
             className="profile-setting-avatar__plus"

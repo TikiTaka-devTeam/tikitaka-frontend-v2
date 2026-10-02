@@ -8,11 +8,11 @@ import questionSubmitIcon from "../../../assets/icons/question-submit.svg";
 import profileEditPencilIcon from "../../../assets/icons/profile-edit-pencil.svg";
 import logoutIcon from "../../../assets/icons/profile-menu/logout.svg";
 import watchPasswordIcon from "../../../assets/icons/WatchPassword.svg";
-import profileAvatar from "../../../assets/images/profile-avatar.svg";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
 import ModalBackdrop from "../../../components/common/ModalBackdrop.jsx";
 import SystemErrorModal from "../../../components/common/SystemErrorModal.jsx";
+import { getProfileInitial } from "../../../utils/profileInitial.js";
 import {
   changePassword,
   createInquiry,
@@ -80,11 +80,20 @@ function ProfileEditDialog({ file, message, onCancel, onFileChange, onSave }) {
             className="profile-edit-dialog__avatar"
             aria-label="프로필 이미지 파일 선택"
           >
-            <img
-              src={previewUrl || storedImage || profileAvatar}
-              alt={`${name} 프로필`}
-            />
-            <span>
+            {previewUrl || storedImage ? (
+              <img
+                src={previewUrl || storedImage}
+                alt={`${name} 프로필`}
+              />
+            ) : (
+              <span
+                className="profile-edit-dialog__avatar-placeholder"
+                aria-hidden="true"
+              >
+                {getProfileInitial(name)}
+              </span>
+            )}
+            <span className="profile-edit-dialog__avatar-edit">
               <img src={profileEditPencilIcon} alt="" />
             </span>
             <input type="file" accept="image/*" onChange={onFileChange} />

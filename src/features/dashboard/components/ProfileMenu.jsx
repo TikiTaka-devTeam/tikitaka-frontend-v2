@@ -6,8 +6,8 @@ import megaphoneIcon from "../../../assets/icons/profile-menu/mail.svg";
 import userListIcon from "../../../assets/icons/profile-menu/chevron.svg";
 import notificationIcon from "../../../assets/icons/dashboard-notification.svg";
 import { useEffect, useState } from "react";
-import profileAvatar from "../../../assets/images/profile-avatar.svg";
 import { getCurrentUser } from "../../auth/api/auth.api.js";
+import { getProfileInitial } from "../../../utils/profileInitial.js";
 
 const PROFILE_MENU_ITEMS = [
   {
@@ -103,7 +103,13 @@ function ProfileMenu({ onSelect }) {
   return (
     <section className="dashboard-profile-menu" aria-label="프로필 메뉴">
       <header>
-        <img src={profileImage || profileAvatar} alt={`${name} 프로필`} />
+        {profileImage ? (
+          <img src={profileImage} alt={`${name} 프로필`} />
+        ) : (
+          <span className="dashboard-profile-menu__avatar" aria-hidden="true">
+            {getProfileInitial(name)}
+          </span>
+        )}
         <div>
           <strong>
             {name} <small>{role}</small>

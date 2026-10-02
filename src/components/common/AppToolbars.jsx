@@ -10,10 +10,10 @@ import homeBlackIcon from "../../assets/icons/dashboard-home-black.svg";
 import spacesIcon from "../../assets/icons/dashboard-spaces.svg";
 import spacesBlackIcon from "../../assets/icons/dashboard-spaces-black.svg";
 
-import profileAvatar from "../../assets/images/profile-avatar.svg";
 import NotificationPanel from "../../features/dashboard/components/NotificationPanel.jsx";
 import ProfileActionModal from "../../features/dashboard/components/ProfileActionModal.jsx";
 import ProfileMenu from "../../features/dashboard/components/ProfileMenu.jsx";
+import { getProfileInitial } from "../../utils/profileInitial.js";
 import "./appToolbars.css";
 
 const DEFAULT_NAV_ITEMS = [
@@ -47,16 +47,27 @@ function readProfileImage() {
   }
 }
 
+function readProfileName() {
+  try {
+    const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
+    return user?.name || user?.user_name || user?.username || "";
+  } catch {
+    return "";
+  }
+}
+
 export function UtilityToolbar({
   onSearch,
   onNotifications,
   onProfile,
   profilePath = "/profile-setting",
   profileImage,
+  profileName,
 }) {
   const navigate = useNavigate();
 
   const resolvedProfileImage = profileImage ?? readProfileImage();
+  const resolvedProfileName = profileName ?? readProfileName();
 
   return (
     <nav className="dashboard-utility" aria-label="빠른 메뉴">
@@ -73,11 +84,17 @@ export function UtilityToolbar({
         aria-label="내 정보"
         onClick={onProfile || (() => navigate(profilePath))}
       >
-        <img
-          className="dashboard-utility__profile"
-          src={resolvedProfileImage || profileAvatar}
-          alt=""
-        />
+        {resolvedProfileImage ? (
+          <img
+            className="dashboard-utility__profile"
+            src={resolvedProfileImage}
+            alt=""
+          />
+        ) : (
+          <span className="dashboard-utility__profile" aria-hidden="true">
+            {getProfileInitial(resolvedProfileName)}
+          </span>
+        )}
       </button>
     </nav>
   );

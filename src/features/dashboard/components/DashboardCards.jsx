@@ -1,6 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import CompactModal from "../../../components/common/CompactModal.jsx";
+import ModalActions from "../../../components/common/ModalActions.jsx";
+import { getAssignmentDetail } from "../../assignments/api/assignmentsApi.js";
+
+function readUserRole() {
+  try {
+    const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
+    return String(
+      user?.account_type
+      ?? user?.accountType
+      ?? user?.role
+      ?? user?.user?.account_type
+      ?? user?.user?.accountType
+      ?? user?.user?.role
+      ?? localStorage.getItem("tikitaka_account_type")
+      ?? localStorage.getItem("account_type")
+      ?? localStorage.getItem("role")
+      ?? "",
+    ).toUpperCase();
+  } catch {
+    return "";
+  }
+}
+
+function isSubmittedTask(task) {
+  return ["SUBMITTED", "LATE", "COMPLETED"].includes(
+    String(task?.submissionStatus ?? "").toUpperCase(),
+  );
+}
+
+function isClosedTask(task) {
+  return task?.isClosed === true || ["CLOSED", "ENDED", "EXPIRED"].includes(
+    String(task?.assignmentStatus ?? "").toUpperCase(),
+  );
+}
+
 export function NextClassCard({
   selectedCourse,
   nextCourse,
@@ -63,13 +99,23 @@ export function TaskSummaryCard({
   errorMessage,
 }) {
   const [readTaskIds, setReadTaskIds] = useState(() => new Set());
-  const visibleTasks = selectedCourse
+  const [deletedTask, setDeletedTask] = useState(null);
+  const [openingTaskId, setOpeningTaskId] = useState(null);
+  const navigate = useNavigate();
+  const isProfessor = readUserRole() === "PROFESSOR";
+  const scopedTasks = selectedCourse
     ? tasks.filter((task) => task.spaceId === selectedCourse.spaceId)
-    : [...tasks].sort(
+    : tasks;
+  const visibleTasks = scopedTasks
+    .filter((task) => isProfessor || !isClosedTask(task))
+    .sort(
         (firstTask, secondTask) =>
           new Date(firstTask.dueAt).getTime() -
           new Date(secondTask.dueAt).getTime(),
       );
+  const pendingTaskCount = visibleTasks.filter(
+    (task) => !(isProfessor ? isClosedTask(task) : isSubmittedTask(task)),
+  ).length;
 
   const markAsRead = (taskId) => {
     setReadTaskIds((currentIds) => {
@@ -81,6 +127,38 @@ export function TaskSummaryCard({
     });
   };
 
+  async function handleOpenTask(task) {
+    if (!task?.id || !task.spaceId || openingTaskId) return;
+
+    setOpeningTaskId(task.id);
+
+    try {
+      const assignmentDetail = await getAssignmentDetail(task.id);
+      if (assignmentDetail?.is_deleted === true || assignmentDetail?.deleted === true) {
+        setDeletedTask(task);
+        return;
+      }
+
+      const assignmentPath = readUserRole() === "PROFESSOR"
+        ? "assignments/professor"
+        : "assignments";
+
+      navigate(`/spaces/${encodeURIComponent(task.spaceId)}/${assignmentPath}`, {
+        state: {
+          spaceName: task.spaceName,
+          assignmentDetail,
+        },
+      });
+    } catch (error) {
+      const status = error?.response?.status;
+      if (status === 404 || status === 410) {
+        setDeletedTask(task);
+      }
+    } finally {
+      setOpeningTaskId(null);
+    }
+  }
+
   return (
     <section
       className="dashboard-glass-card dashboard-tasks"
@@ -91,8 +169,8 @@ export function TaskSummaryCard({
           <h2 id="dashboard-tasks-title">할 일 모아보기</h2>
           <span>TASK</span>
         </div>
-        <strong aria-label={`할 일 ${visibleTasks.length}개`}>
-          {visibleTasks.length}
+        <strong aria-label={`할 일 ${pendingTaskCount}개`}>
+          {pendingTaskCount}
         </strong>
       </header>
       <ul aria-live="polite">
@@ -106,12 +184,20 @@ export function TaskSummaryCard({
         ) : null}
         {visibleTasks.map((task) => (
           <li
-            className={readTaskIds.has(task.id) ? "is-read" : ""}
+            className={
+              readTaskIds.has(task.id)
+              || (isProfessor ? isClosedTask(task) : isSubmittedTask(task))
+                ? "is-read"
+                : ""
+            }
             key={task.id}
           >
             <button
               type="button"
-              onClick={() => markAsRead(task.id)}
+              onClick={() => {
+                markAsRead(task.id);
+                void handleOpenTask(task);
+              }}
               aria-label={`${task.title}, ${task.due}`}
             >
               <span
@@ -127,6 +213,25 @@ export function TaskSummaryCard({
           <li className="dashboard-tasks__empty">등록된 할 일이 없습니다.</li>
         ) : null}
       </ul>
+      {deletedTask ? (
+        <CompactModal
+          onClose={() => setDeletedTask(null)}
+          labelledBy="dashboard-deleted-task-title"
+          describedBy="dashboard-deleted-task-description"
+        >
+            <div className="compact-modal__text">
+              <h2 id="dashboard-deleted-task-title">과제가 삭제되었습니다</h2>
+              <p id="dashboard-deleted-task-description">
+                삭제된 과제는 확인할 수 없습니다.
+              </p>
+            </div>
+            <ModalActions
+              showCancel={false}
+              confirmText="확인"
+              onConfirm={() => setDeletedTask(null)}
+            />
+        </CompactModal>
+      ) : null}
     </section>
   );
 }
