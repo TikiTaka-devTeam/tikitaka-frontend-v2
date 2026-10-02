@@ -210,7 +210,7 @@ export default function useLectureSlideData({
 
       try {
         const requests = [
-          normalizedRole === "PROFESSOR"
+          normalizedRole === "PROFESSOR" || normalizedRole === "ASSISTANT"
             ? Promise.resolve({ version: 0, strokes: [] })
             : getPrivateStrokes(currentSlideId),
 

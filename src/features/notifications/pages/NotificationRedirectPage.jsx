@@ -5,6 +5,7 @@ import { markNotificationAsRead } from "../api/notifications.api.js";
 import {
   getNotificationDestination,
   resolveNotificationDocumentTitle,
+  resolveNotificationLectureRole,
   resolveNotificationSpaceName,
 } from "../utils/notificationNavigation.js";
 import "../styles/notificationRedirect.css";
@@ -30,10 +31,12 @@ function resolveNotificationRedirectOnce(notification) {
     readRequest,
     resolveNotificationSpaceName(notification).catch(() => ""),
     resolveNotificationDocumentTitle(notification).catch(() => ""),
+    resolveNotificationLectureRole(notification),
   ])
-    .then(([, spaceName, documentTitle]) => ({
+    .then(([, spaceName, documentTitle, lectureRole]) => ({
       spaceName,
       documentTitle,
+      lectureRole,
     }))
     .finally(() => {
       pendingRedirectRequests.delete(requestKey);
@@ -69,12 +72,12 @@ function NotificationRedirectPage() {
     };
 
     const redirect = async () => {
-      const { spaceName, documentTitle } =
+      const { spaceName, documentTitle, lectureRole } =
         await resolveNotificationRedirectOnce(notification);
 
       if (!isMounted) return;
 
-      navigate(getNotificationDestination(notification), {
+      navigate(getNotificationDestination(notification, lectureRole), {
         replace: true,
         state:
           spaceName || documentTitle

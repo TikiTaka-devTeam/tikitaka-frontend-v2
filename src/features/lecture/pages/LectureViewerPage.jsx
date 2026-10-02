@@ -176,13 +176,10 @@ export default function LectureViewerPage({
       setToast,
     });
 
-  const editableLayer =
-    String(
-      role || "",
-    ).toUpperCase() ===
-    "PROFESSOR"
-      ? "SHARED"
-      : "PRIVATE";
+  const viewerRole = String(role || "").toUpperCase();
+  const editableLayer = ["PROFESSOR", "ASSISTANT"].includes(viewerRole)
+    ? "SHARED"
+    : "PRIVATE";
 
   const currentSlide =
     slides[currentIndex] ??

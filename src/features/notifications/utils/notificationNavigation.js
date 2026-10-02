@@ -1,5 +1,9 @@
 import { getSpaces } from "../../spaces/api/spacesApi.js";
 import { getDocuments } from "../../spaces/api/documentsApi.js";
+import {
+  getSpaceMemberPermissions,
+  getSpaceMembers,
+} from "../../members/api/membersApi.js";
 
 function findSpaceName(response, spaceId) {
   const spaces = Array.isArray(response)
@@ -68,7 +72,49 @@ function readUserRole() {
   }
 }
 
-export function getNotificationDestination(notification) {
+export async function resolveNotificationLectureRole(notification) {
+  if (notification.type !== "DOCUMENT_UPLOADED" || !notification.spaceId) {
+    return "STUDENT";
+  }
+  const fallbackRole = readUserRole() === "PROFESSOR" ? "PROFESSOR" : "STUDENT";
+  const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
+  const account = { ...user, ...user?.user };
+  const userIds = [
+    account?.member_id,
+    account?.memberId,
+    account?.space_member_id,
+    account?.spaceMemberId,
+    account?.user_id,
+    account?.userId,
+    account?.id,
+  ].filter(Boolean).map(String);
+  const studentNumber = String(
+    account?.member_id_number ?? account?.memberIdNumber ??
+    account?.student_number ?? account?.studentNumber ?? "",
+  );
+  if (!userIds.length && !studentNumber) return fallbackRole;
+
+  const memberData = await getSpaceMembers(notification.spaceId);
+  const currentMember = (memberData?.members ?? []).find((member) => {
+    const memberId = String(member?.member_id ?? member?.id ?? "");
+    const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+    return (memberId && userIds.includes(memberId)) ||
+      (memberNumber && studentNumber && memberNumber === studentNumber);
+  });
+  if (!currentMember) return fallbackRole;
+  const spaceRole = String(currentMember.role ?? "").toUpperCase();
+  if (spaceRole === "PROFESSOR") return "PROFESSOR";
+  if (spaceRole !== "ASSISTANT") return "STUDENT";
+
+  const memberId = currentMember.member_id ?? currentMember.id;
+  const permissionData = await getSpaceMemberPermissions(notification.spaceId, memberId);
+  return permissionData?.role === "ASSISTANT" &&
+    permissionData?.permissions?.includes("LECTURE_MATERIAL_MANAGE")
+    ? "ASSISTANT"
+    : "STUDENT";
+}
+
+export function getNotificationDestination(notification, lectureRole) {
   if (!notification.spaceId) return "/dashboard";
 
   const spacePath = `/spaces/${encodeURIComponent(notification.spaceId)}`;
@@ -84,8 +130,12 @@ export function getNotificationDestination(notification) {
       return `${spacePath}/notices${targetId ? `?noticeId=${targetId}` : ""}`;
     case "DOCUMENT_UPLOADED": {
       if (!targetId) return spacePath;
-      const viewerRole = readUserRole() === "PROFESSOR" ? "professor" : "student";
-      return `${spacePath}/documents/${targetId}/lecture/${viewerRole}`;
+      const viewerRole = lectureRole ??
+        (readUserRole() === "PROFESSOR" ? "PROFESSOR" : "STUDENT");
+      const rolePath = ["PROFESSOR", "ASSISTANT"].includes(viewerRole)
+        ? viewerRole.toLowerCase()
+        : "student";
+      return `${spacePath}/documents/${targetId}/lecture/${rolePath}`;
     }
     case "ASSIGNMENT_CLOSED": {
       const assignmentPath =

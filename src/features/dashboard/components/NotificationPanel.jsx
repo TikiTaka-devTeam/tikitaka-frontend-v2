@@ -9,6 +9,7 @@ import {
 import {
   getNotificationDestination,
   resolveNotificationDocumentTitle,
+  resolveNotificationLectureRole,
   resolveNotificationSpaceName,
 } from "../../notifications/utils/notificationNavigation.js";
 import { getCourseColor } from "../utils/courseColor.js";
@@ -107,22 +108,27 @@ function NotificationPanel({ onClose }) {
   };
 
   const handleNotificationClick = async (notification) => {
-    const [, spaceName, documentTitle] = await Promise.all([
-      markAsRead(notification.id),
-      resolveNotificationSpaceName(notification).catch(() => ""),
-      resolveNotificationDocumentTitle(notification).catch(() => ""),
-    ]);
+    try {
+      const [, spaceName, documentTitle, lectureRole] = await Promise.all([
+        markAsRead(notification.id),
+        resolveNotificationSpaceName(notification).catch(() => ""),
+        resolveNotificationDocumentTitle(notification).catch(() => ""),
+        resolveNotificationLectureRole(notification),
+      ]);
 
-    const destination = getNotificationDestination(notification);
-    if (!destination) return;
+      const destination = getNotificationDestination(notification, lectureRole);
+      if (!destination) return;
 
-    onClose();
-    navigate(destination, {
-      state:
-        spaceName || documentTitle
-          ? { spaceName, documentTitle }
-          : undefined,
-    });
+      onClose();
+      navigate(destination, {
+        state:
+          spaceName || documentTitle
+            ? { spaceName, documentTitle }
+            : undefined,
+      });
+    } catch {
+      setErrorMessage("강의 권한을 확인하지 못했습니다.");
+    }
   };
 
   const markAllAsRead = async () => {
