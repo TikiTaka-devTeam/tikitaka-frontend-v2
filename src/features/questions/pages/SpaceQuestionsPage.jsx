@@ -177,7 +177,7 @@ export default function SpaceQuestionsPage() {
   const spaceName = location.state?.spaceName || "Space";
   const userRole = readUserRole();
   const isProfessor = userRole === "PROFESSOR";
-  const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(false);
+  const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(null);
   const [currentSpaceRole, setCurrentSpaceRole] = useState(isProfessor ? "PROFESSOR" : "STUDENT");
   const [view, setView] = useState("all");
   const [sort, setSort] = useState("LATEST");
@@ -214,6 +214,7 @@ export default function SpaceQuestionsPage() {
   const isQuestionManager = isProfessor || (
     currentSpaceRole === "ASSISTANT" && hasQuestionManagePermission
   );
+  const isQuestionPermissionLoading = !isProfessor && hasQuestionManagePermission === null;
 
   useEffect(() => {
     if (isProfessor) return undefined;
@@ -585,6 +586,7 @@ export default function SpaceQuestionsPage() {
         <AppToolbars showBottomNavigation={false} onSearch={() => navigate("/search")} />
 
         <div className="space-questions-layout app-container">
+          {isQuestionPermissionLoading ? <p className="space-questions-status space-questions-status--permission" role="status">권한을 확인하는 중입니다.</p> : <>
           {isComposing && !isQuestionManager ? (
             <QuestionComposer
               spaceId={spaceId}
@@ -739,6 +741,7 @@ export default function SpaceQuestionsPage() {
             })}</ul>
             {nextCursor && <button type="button" className="space-questions-more" onClick={loadMore} disabled={isLoading}>{isLoading ? "불러오는 중..." : "더 보기"}</button>}
           </section>}
+          </>}
           </>}
         </div>
         <SpaceToolbar activeItem="question" spaceId={spaceId} spaceName={spaceName} />
