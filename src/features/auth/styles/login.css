@@ -7,14 +7,23 @@
 
 .auth-brand-panel {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   min-height: 100vh;
   padding: 73px 43px 88px 54px;
   color: #ffffff;
   background:
-    linear-gradient(121deg, rgba(133, 92, 246, 0.6) 0%, rgba(147, 130, 245, 0.6) 60%, rgba(39, 102, 236, 0.6) 100%),
-    linear-gradient(102deg, rgba(147, 130, 245, 0.8) 0%, rgba(39, 102, 236, 0.8) 100%),
-    linear-gradient(135deg, #2766ec 0%, #5284ef 100%);
+    linear-gradient(121deg, rgba(133, 92, 246, 0.58) 0%, rgba(147, 130, 245, 0.5) 60%, rgba(39, 102, 236, 0.56) 100%),
+    linear-gradient(135deg, rgba(39, 102, 236, 0.82) 0%, rgba(82, 132, 239, 0.72) 100%);
+  background-size: 180% 180%, 140% 140%;
+  background-position: 15% 50%, 50% 50%;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  -webkit-backdrop-filter: blur(24px) saturate(145%);
+  backdrop-filter: blur(24px) saturate(145%);
+  animation: auth-brand-gradient-drift 14s ease-in-out infinite alternate;
 }
 
 .auth-brand-panel::before,
@@ -24,19 +33,53 @@
   width: 400px;
   height: 400px;
   border-radius: 50%;
-  background: radial-gradient(circle, #2766ec 0%, #ffffff 100%);
-  opacity: 0.1;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(39, 102, 236, 0.16) 72%);
+  filter: blur(18px);
+  opacity: 0.28;
   pointer-events: none;
+  will-change: transform, opacity;
+  animation: auth-brand-glow-float 16s ease-in-out infinite alternate;
 }
 
 .auth-brand-panel::before {
   top: -135px;
   left: -136px;
+  animation-delay: -3s;
 }
 
 .auth-brand-panel::after {
   right: -168px;
   bottom: -160px;
+  animation-duration: 19s;
+  animation-delay: -6s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes auth-brand-gradient-drift {
+  0% {
+    background-position: 15% 50%, 50% 50%;
+  }
+
+  100% {
+    background-position: 85% 45%, 60% 85%;
+  }
+}
+
+@keyframes auth-brand-glow-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.22;
+  }
+
+  50% {
+    transform: translate3d(36px, 24px, 0) scale(1.08);
+    opacity: 0.34;
+  }
+
+  100% {
+    transform: translate3d(-18px, 52px, 0) scale(0.94);
+    opacity: 0.26;
+  }
 }
 
 .auth-brand-panel__nav {
@@ -457,5 +500,13 @@
 
   .auth-brand-panel__links button {
     font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-brand-panel,
+  .auth-brand-panel::before,
+  .auth-brand-panel::after {
+    animation: none;
   }
 }
