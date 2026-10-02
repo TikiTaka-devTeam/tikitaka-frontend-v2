@@ -25,6 +25,12 @@ import {
 
 import { createSharedStrokeSync, createLiveStrokeSender, sortStrokes } from "../utils/sharedStrokeSync.js";
 
+function isSameHistoryAction(first, second) {
+  return first === second || Boolean(
+    first?.historyId && second?.historyId && first.historyId === second.historyId,
+  );
+}
+
 export default function useLectureStrokes({
   spaceId,
   currentSlideId,
@@ -273,12 +279,21 @@ export default function useLectureStrokes({
       slideId,
     };
 
+    const historyAction = recordHistory
+      ? { historyId: clientStrokeId, type: "CREATE", strokes: [optimisticStroke] }
+      : null;
+
     setStrokes(
       (previous) => [
         ...previous,
         optimisticStroke,
       ],
     );
+
+    if (historyAction) {
+      setUndoStack((previous) => [...previous, historyAction]);
+      setRedoStack([]);
+    }
 
     return enqueueLayerTask(
       layer,
@@ -329,27 +344,14 @@ export default function useLectureStrokes({
             versions.current.set(slideId, Math.max(versions.current.get(slideId) ?? 0, responseVersion));
           }
 
-          if (
-            recordHistory &&
-            sessionRef.current === session
-          ) {
-            setUndoStack(
-              (previous) => [
-                ...previous,
-                {
-                  type:
-                    "CREATE",
-
-                  strokes: [
-                    savedStroke,
-                  ],
-                },
-              ],
+          if (historyAction && sessionRef.current === session) {
+            const replaceAction = (previous) => previous.map((action) =>
+              isSameHistoryAction(action, historyAction)
+                ? { ...action, strokes: [savedStroke] }
+                : action,
             );
-
-            setRedoStack(
-              [],
-            );
+            setUndoStack(replaceAction);
+            setRedoStack(replaceAction);
           }
 
           return savedStroke;
@@ -365,6 +367,11 @@ export default function useLectureStrokes({
                     localStrokeId,
                 ),
             );
+
+            if (historyAction) {
+              setUndoStack((previous) => previous.filter((action) => !isSameHistoryAction(action, historyAction)));
+              setRedoStack((previous) => previous.filter((action) => !isSameHistoryAction(action, historyAction)));
+            }
           }
 
           if (layer === "SHARED") session?.sender.cancel(clientStrokeId);
@@ -542,7 +549,9 @@ export default function useLectureStrokes({
       action.type ===
       "CREATE"
     ) {
-      await deleteStrokesOnServer(
+      setRedoStack((previous) => [...previous, action]);
+
+      const removed = await deleteStrokesOnServer(
         action.strokes.map(
           (stroke) =>
             stroke.id,
@@ -550,12 +559,13 @@ export default function useLectureStrokes({
         false,
       );
 
-      setRedoStack(
-        (previous) => [
-          ...previous,
-          action,
-        ],
-      );
+      if (!removed.length) {
+        setRedoStack((previous) => previous.filter((item) => !isSameHistoryAction(item, action)));
+        const strokeId = action.strokes[0]?.id;
+        if (!String(strokeId).startsWith("local-") || strokeMappingsRef.current.has(strokeId)) {
+          setUndoStack((previous) => [...previous, action]);
+        }
+      }
 
       return;
     }
@@ -600,22 +610,32 @@ export default function useLectureStrokes({
       action.type ===
       "CREATE"
     ) {
-      const recreated =
-        await recreateStrokes(
-          action.strokes,
-        );
+      const sourceStroke = action.strokes[0];
+      const clientStrokeId = createUuid();
+      const pendingAction = {
+        ...action,
+        historyId: clientStrokeId,
+        strokes: [{
+          ...sourceStroke,
+          id: `local-${clientStrokeId}`,
+          clientStrokeId,
+        }],
+      };
+      setUndoStack((previous) => [...previous, pendingAction]);
 
-      setUndoStack(
-        (previous) => [
-          ...previous,
-          {
-            ...action,
+      const savedStroke = await createStrokeOnServer({
+        ...sourceStroke,
+        id: undefined,
+        clientStrokeId,
+      }, false);
 
-            strokes:
-              recreated,
-          },
-        ],
-      );
+      const updateAction = (previous) => previous
+        .filter((item) => savedStroke || !isSameHistoryAction(item, pendingAction))
+        .map((item) => isSameHistoryAction(item, pendingAction)
+          ? { ...item, strokes: [savedStroke] }
+          : item);
+      setUndoStack(updateAction);
+      setRedoStack(updateAction);
 
       return;
     }

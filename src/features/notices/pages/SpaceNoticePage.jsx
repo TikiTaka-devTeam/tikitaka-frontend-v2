@@ -32,6 +32,7 @@ import {
 } from "../api/spaceNoticesApi.js";
 
 import NoticeDeleteModal from "../components/NoticeDeleteModal.jsx";
+import NoticeEditor from "../components/NoticeEditor.jsx";
 import SpaceNoticeCreateView from "../components/SpaceNoticeCreateView.jsx";
 
 import "../styles/spaceNotices.css";
@@ -236,9 +237,12 @@ function normalizeNotice(
       "",
 
     preview:
-      notice.content_preview ??
-      notice.contentPreview ??
-      "",
+      makePreview(
+        notice.content_preview ??
+          notice.contentPreview ??
+          "",
+      ) ||
+      makePreview(notice.content),
 
     createdAt:
       notice.created_at ??
@@ -378,6 +382,10 @@ function makePreview(
   )
     .replace(
       /<[^>]*>/g,
+      "",
+    )
+    .replace(
+      /<[^>]*$/g,
       "",
     )
     .replace(
@@ -803,10 +811,13 @@ function SpaceNoticePage() {
             return;
           }
 
-          setSelectedNotice(
+          const detail =
             normalizeNoticeDetail(
               response,
-            ),
+            );
+
+          setSelectedNotice(
+            detail,
           );
 
           setNotices(
@@ -830,6 +841,10 @@ function SpaceNoticePage() {
                     return {
                       ...notice,
                       isRead: true,
+                      preview:
+                        makePreview(
+                          detail?.content,
+                        ) || notice.preview,
                     };
                   },
                 );
@@ -934,24 +949,26 @@ function SpaceNoticePage() {
         detail,
       );
 
+      setNotices(
+        (current) =>
+          current.map(
+            (item) =>
+              item.id === notice.id
+                ? {
+                    ...item,
+                    isRead: true,
+                    preview:
+                      makePreview(
+                        detail?.content,
+                      ) || item.preview,
+                  }
+                : item,
+          ),
+      );
+
       if (
         !notice.isRead
       ) {
-        setNotices(
-          (current) =>
-            current.map(
-              (item) =>
-                item.id ===
-                notice.id
-                  ? {
-                      ...item,
-                      isRead:
-                        true,
-                    }
-                  : item,
-            ),
-        );
-
         setUnreadCount(
           (current) =>
             Math.max(
@@ -1390,11 +1407,11 @@ function SpaceNoticePage() {
                             }
                           </strong>
 
-                          <small>
-                            {
-                              notice.preview
-                            }
-                          </small>
+                          {notice.preview && (
+                            <small>
+                              {notice.preview}
+                            </small>
+                          )}
                         </span>
 
                         <span className="notice-list-item__date">
@@ -1541,10 +1558,14 @@ function SpaceNoticePage() {
                 <div className="notice-detail__divider notice-detail__divider--top" />
 
                 <div className="notice-detail__content">
-                  {
-                    selectedNotice
-                      .content
-                  }
+                  {selectedNotice.content.trimStart().startsWith("<") ? (
+                    <NoticeEditor
+                      value={selectedNotice.content}
+                      readOnly
+                    />
+                  ) : (
+                    selectedNotice.content
+                  )}
                 </div>
 
                 <div className="notice-detail__divider notice-detail__divider--files" />

@@ -13,6 +13,7 @@ import {
   getDashboardTimetable,
 } from "../api/dashboardApi.js";
 import { getCourseColor } from "../utils/courseColor.js";
+import { getSpaces } from "../../spaces/api/spacesApi.js";
 
 import "../styles/dashboard.css";
 
@@ -36,7 +37,7 @@ function toMinutes(time) {
   return hours * 60 + minutes;
 }
 
-function normalizeTimetable(data) {
+function normalizeTimetable(data, colorKeysBySpaceId) {
   if (!Array.isArray(data)) return [];
 
   return data.flatMap((space) =>
@@ -57,6 +58,7 @@ function normalizeTimetable(data) {
           end,
           room: schedule.classroom ?? "",
           color: getCourseColor(space.space_id),
+          colorKey: colorKeysBySpaceId.get(space.space_id) ?? space.color_key,
         };
       },
     ),
@@ -167,9 +169,26 @@ function DashboardPage() {
   useEffect(() => {
     const controller = new AbortController();
 
-    getDashboardTimetable(year, semester, { signal: controller.signal })
-      .then((data) => {
-        setCourses(normalizeTimetable(data));
+    Promise.allSettled([
+      getDashboardTimetable(year, semester, { signal: controller.signal }),
+      getSpaces("ACTIVE", { signal: controller.signal }),
+    ])
+      .then(([timetableResult, spacesResult]) => {
+        if (timetableResult.status === "rejected") {
+          throw timetableResult.reason;
+        }
+
+        const activeSpaces =
+          spacesResult.status === "fulfilled"
+            ? (spacesResult.value?.spaces ?? [])
+            : [];
+        const colorKeysBySpaceId = new Map(
+          activeSpaces.map((space) => [space.space_id, space.color_key]),
+        );
+
+        setCourses(
+          normalizeTimetable(timetableResult.value, colorKeysBySpaceId),
+        );
         setTimetableError("");
       })
       .catch((error) => {

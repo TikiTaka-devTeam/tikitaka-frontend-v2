@@ -44,12 +44,7 @@ export default function SlideMarkers({
       className="pdf-stage__markers"
       aria-label="질문 및 수정 메모 위치"
     >
-      {(
-        activeTool ===
-          "Q_POINT" ||
-        activeTool ===
-          "Q_LIST"
-      ) &&
+      {activeTool === "Q_LIST" &&
         questions
           .filter(
             (
@@ -59,7 +54,8 @@ export default function SlideMarkers({
                 null &&
               question.yRatio !=
                 null &&
-              (activeTool === "Q_POINT" || String(question.id) === String(selectedQuestionId)),
+              selectedQuestionId != null &&
+              String(question.id) === String(selectedQuestionId),
           )
           .map(
             (

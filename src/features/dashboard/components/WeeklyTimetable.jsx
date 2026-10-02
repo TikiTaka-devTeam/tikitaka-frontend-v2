@@ -1,4 +1,5 @@
 import { getCoursePosition } from "../utils/timetable.js";
+import { getSpaceColor } from "../../spaces/utils/spaceColors.js";
 
 const WEEK_DAYS = ["월", "화", "수", "목", "금"];
 
@@ -16,6 +17,7 @@ const TIMES = [
 
 function CourseBlock({ course, isSelected, onSelect }) {
   const { top, height } = getCoursePosition(course);
+  const spaceColor = course.colorKey ? getSpaceColor(course.colorKey) : null;
 
   return (
     <button
@@ -25,6 +27,10 @@ function CourseBlock({ course, isSelected, onSelect }) {
         "--course-day": course.day,
         "--course-top": `${top}px`,
         "--course-height": `${height}px`,
+        ...(spaceColor && {
+          "--course-bg": spaceColor.background,
+          "--course-color": spaceColor.accent,
+        }),
       }}
       aria-pressed={isSelected}
       aria-label={`${course.title}, ${course.start} – ${course.end}, ${course.room}`}

@@ -624,7 +624,28 @@ function AssignmentGradePanel({
     });
   }
 
-  async function handleEditSave() {
+  function handleRequestEditSave() {
+    if (
+      isSaving ||
+      !assignmentId
+    ) {
+      return;
+    }
+
+    if (
+      validateScores() ===
+      null
+    ) {
+      return;
+    }
+
+    setError("");
+    setGradeModalStep(
+      "confirm",
+    );
+  }
+
+  async function handleConfirmEditSave() {
     if (
       isSaving ||
       !assignmentId
@@ -639,6 +660,10 @@ function AssignmentGradePanel({
       numericMaxScore ===
       null
     ) {
+      setGradeModalStep(
+        null,
+      );
+
       return;
     }
 
@@ -722,19 +747,16 @@ function AssignmentGradePanel({
         ),
       );
 
-      onEditSaved?.({
-        grading_status:
-          "FINALIZED",
-
-        max_score:
-          numericMaxScore,
-
-        submissions:
-          updatedSubmissions,
-      });
+      setGradeModalStep(
+        "success",
+      );
     } catch (
       requestError
     ) {
+      setGradeModalStep(
+        null,
+      );
+
       setError(
         getApiErrorMessage(
           requestError,
@@ -746,6 +768,23 @@ function AssignmentGradePanel({
         false,
       );
     }
+  }
+
+  function handleEditSuccess() {
+    setGradeModalStep(
+      null,
+    );
+
+    onEditSaved?.({
+      grading_status:
+        "FINALIZED",
+
+      max_score:
+        Number(maxScore),
+
+      submissions:
+        buildUpdatedSubmissions(),
+    });
   }
 
   function handleRequestDownload() {
@@ -1104,7 +1143,7 @@ function AssignmentGradePanel({
               }
               onClick={
                 isGradeEdit
-                  ? handleEditSave
+                  ? handleRequestEditSave
                   : handleRequestFinalize
               }
             >
@@ -1121,7 +1160,7 @@ function AssignmentGradePanel({
       </section>
 
       <AssignmentManageModal
-        action="grade"
+        action={isGradeEdit ? "gradeEdit" : "grade"}
         step={
           gradeModalStep ??
           "confirm"
@@ -1139,8 +1178,12 @@ function AssignmentGradePanel({
         onConfirm={
           gradeModalStep ===
           "success"
-            ? handleFinalizeSuccess
-            : handleConfirmFinalize
+            ? isGradeEdit
+              ? handleEditSuccess
+              : handleFinalizeSuccess
+            : isGradeEdit
+              ? handleConfirmEditSave
+              : handleConfirmFinalize
         }
       />
 

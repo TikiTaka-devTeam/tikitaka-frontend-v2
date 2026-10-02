@@ -201,6 +201,7 @@ export default function useLectureSlideData({
 
         setFixers([]);
 
+        setSlideLoading(false);
 
         return;
       }
@@ -243,8 +244,8 @@ export default function useLectureSlideData({
           );
         }
 
-        const responses =
-          await Promise.all(
+        const results =
+          await Promise.allSettled(
             requests,
           );
 
@@ -252,73 +253,52 @@ export default function useLectureSlideData({
           return;
         }
 
-        const [
-          privateResponse,
-          questionResponse,
-          fixerResponse,
-        ] = responses;
+        const [privateResult, questionResult, fixerResult] = results;
 
-        const nextPrivateStrokes =
-          getStrokeArray(
-            privateResponse,
-          )
-            .map(
-              normalizeStroke,
-            )
-            .filter(
-              (stroke) =>
-                stroke &&
-                !stroke.isDeleted,
-            );
+        if (privateResult.status === "fulfilled") {
+          const privateResponse = privateResult.value;
+          const nextPrivateStrokes = getStrokeArray(privateResponse)
+            .map(normalizeStroke)
+            .filter((stroke) => stroke && !stroke.isDeleted);
 
-        const nextQuestions =
-          getQuestionArray(
-            questionResponse,
-          )
-            .map(
-              normalizeQuestion,
-            )
-            .filter(Boolean);
-
-        const nextFixers =
-          normalizedRole ===
-          "PROFESSOR"
-            ? getFixerArray(
-                fixerResponse,
-              )
-                .map(
-                  normalizeFixer,
-                )
-                .filter(
-                  Boolean,
-                )
-            : [];
-
-        if ((privateVersionsRef.current.get(currentSlideId) ?? -1) <= getVersion(privateResponse)) {
-          setPrivateStrokes(nextPrivateStrokes);
-          privateVersionsRef.current.set(currentSlideId, getVersion(privateResponse));
+          if ((privateVersionsRef.current.get(currentSlideId) ?? -1) <= getVersion(privateResponse)) {
+            setPrivateStrokes(nextPrivateStrokes);
+            privateVersionsRef.current.set(currentSlideId, getVersion(privateResponse));
+          }
         }
 
         setQuestions(
-          nextQuestions,
+          questionResult.status === "fulfilled"
+            ? getQuestionArray(questionResult.value)
+                .map(normalizeQuestion)
+                .filter(Boolean)
+            : [],
         );
 
         setFixers(
-          nextFixers,
+          normalizedRole === "PROFESSOR" && fixerResult.status === "fulfilled"
+            ? getFixerArray(fixerResult.value)
+                .map(normalizeFixer)
+                .filter(Boolean)
+            : [],
         );
+
+        const failedResult = results.find((result) => result.status === "rejected");
+        if (failedResult) {
+          setToast?.(
+            failedResult.reason?.response?.data?.message ??
+              "일부 슬라이드 데이터를 불러오지 못했습니다.",
+          );
+        }
 
       } catch (error) {
         if (cancelled) {
           return;
         }
 
-        setPrivateStrokes([]);
-
         setQuestions([]);
 
         setFixers([]);
-
-
 
         setToast?.(
           error?.response?.data?.message ??

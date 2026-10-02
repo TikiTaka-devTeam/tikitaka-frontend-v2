@@ -674,6 +674,18 @@
   display: none;
 }
 
+.notice-detail__rich-text p {
+  margin: 0 0 8px;
+}
+
+.notice-detail__rich-text {
+  font-synthesis: style;
+}
+
+.notice-detail__rich-text p:last-child {
+  margin-bottom: 0;
+}
+
 .notice-detail__attachments {
   position: absolute;
 

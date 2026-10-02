@@ -70,6 +70,22 @@ const MODAL_CONTENT = {
     },
   },
 
+  gradeEdit: {
+    confirm: {
+      title: "성적을 수정하시겠습니까?",
+      description:
+        "저장 시, 수정한 성적이 학생에게 공개됩니다.",
+      confirmLabel: "저장",
+    },
+
+    success: {
+      title: "수정되었습니다",
+      description:
+        "수정한 성적이 저장되었습니다.",
+      confirmLabel: "확인",
+    },
+  },
+
   download: {
     confirm: {
       title:

@@ -220,6 +220,7 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 1.7;
+  font-synthesis: style;
 
   scrollbar-width: none;
 }
@@ -245,6 +246,7 @@
 
   display: flex;
   align-items: center;
+  justify-content: safe center;
 
   gap: 9px;
 
@@ -296,6 +298,34 @@
   opacity: 0.35;
 
   cursor: default;
+}
+
+.notice-editor-toolbar__history-button {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  flex: 0 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notice-editor-toolbar__history-button svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  pointer-events: none;
+}
+
+.notice-editor-toolbar__history-button svg path {
+  stroke: currentColor;
+}
+
+.notice-editor-toolbar__history-button:disabled:hover {
+  background: transparent;
+  color: #344054;
 }
 
 .notice-editor-toolbar__divider {
@@ -352,8 +382,13 @@
   display: grid;
   place-items: center;
 
+  padding: 0;
+  border: 0;
+  background: transparent;
+
   color: #344054;
 
+  font-family: inherit;
   font-size: 15px;
   font-weight: 600;
 
@@ -369,31 +404,138 @@
 
   height: 2px;
 
-  background: #344054;
+  background: var(--notice-text-color, #344054);
 
   content: "";
 }
 
-.notice-editor-toolbar__color input {
-  position: absolute;
-
-  width: 1px;
-  height: 1px;
-
-  opacity: 0;
+.notice-editor-toolbar__font-size {
+  height: 30px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  border: 1px solid #d8dfea;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #798397;
+  font-size: 11px;
 }
 
-.notice-editor-toolbar__size-button {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.notice-editor-toolbar__align-center {
+.notice-editor-toolbar__font-size input {
+  width: 30px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #263244;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
   text-align: center;
+  appearance: textfield;
 }
 
-.notice-editor-toolbar__align-right {
-  transform: scaleX(-1);
+.notice-editor-toolbar__font-size input::-webkit-inner-spin-button,
+.notice-editor-toolbar__font-size input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.notice-editor__color-popover {
+  position: absolute;
+  z-index: 5;
+  bottom: 60px;
+  left: 50%;
+  width: min(244px, calc(100% - 16px));
+  padding: 13px;
+  transform: translateX(-50%);
+  border: 1px solid #d8dfea;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.12);
+  color: #212326;
+  font-family: "Tikitaka UI", sans-serif;
+  font-size: 12px;
+}
+
+.notice-editor__color-swatches {
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.notice-editor__color-swatch {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  padding: 0;
+  border: 1px solid rgba(33, 35, 38, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.notice-editor__color-swatch[aria-pressed="true"] {
+  outline: 2px solid #2e6bff;
+  outline-offset: 2px;
+}
+
+.notice-editor__custom-color {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.notice-editor__color-preview {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border: 1px solid #d8dfea;
+  border-radius: 6px;
+}
+
+.notice-editor__custom-color label {
+  color: #798397;
+  font-size: 11px;
+}
+
+.notice-editor__custom-color input {
+  width: 0;
+  min-width: 0;
+  height: 28px;
+  flex: 1;
+  padding: 0 8px;
+  border: 1px solid #d8dfea;
+  border-radius: 6px;
+  color: #212326;
+  font: inherit;
+  text-transform: uppercase;
+}
+
+.notice-editor__custom-color input[aria-invalid="true"] {
+  border-color: #ef4444;
+}
+
+.notice-editor__color-apply {
+  min-width: 52px;
+  height: 27px;
+  margin-top: 11px;
+  padding: 0 9px;
+  display: block;
+  margin-left: auto;
+  border: 1px solid #2f6bff;
+  border-radius: 6px;
+  background: #2f6bff;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.notice-editor__color-apply:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .notice-create-files {
@@ -877,6 +1019,10 @@
   font-weight: 700;
 
   cursor: pointer;
+}
+
+.compact-modal.notice-modal > button.notice-modal__single-button {
+  flex: 0 0 44px;
 }
 
 .notice-modal__cancel:disabled,
