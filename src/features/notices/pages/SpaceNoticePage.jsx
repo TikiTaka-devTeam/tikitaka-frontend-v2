@@ -750,6 +750,7 @@ function SpaceNoticePage() {
           ) {
             setSearchParams(
               {},
+              { state: location.state },
             );
           }
         }
@@ -766,6 +767,7 @@ function SpaceNoticePage() {
       editNoticeId,
       editingNotice,
       isEditMode,
+      location.state,
       setSearchParams,
     ],
   );
@@ -1034,7 +1036,7 @@ function SpaceNoticePage() {
       mode: "edit",
       noticeId:
         selectedNotice.id,
-    });
+    }, { state: location.state });
   }
 
   function handleDeleteNotice() {
@@ -1167,6 +1169,7 @@ function SpaceNoticePage() {
 
     setSearchParams(
       {},
+      { state: location.state },
     );
   }
 
@@ -1433,7 +1436,7 @@ function SpaceNoticePage() {
                 onClick={() =>
                   setSearchParams({
                     mode: "create",
-                  })
+                  }, { state: location.state })
                 }
               >
                 <img

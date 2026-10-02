@@ -24,6 +24,7 @@ import StudentAssignmentPage from "../features/assignments/pages/StudentAssignme
 import ProfessorAssignmentPage from "../features/assignments/pages/ProfessorAssignmentPage.jsx";
 import StudentLecturePage from "../features/lecture/pages/StudentLecturePage.jsx";
 import ProfessorLecturePage from "../features/lecture/pages/ProfessorLecturePage.jsx";
+import LectureViewerPage from "../features/lecture/pages/LectureViewerPage.jsx";
 import NotificationRedirectPage from "../features/notifications/pages/NotificationRedirectPage.jsx";
 
 function App() {
@@ -106,6 +107,11 @@ function App() {
         element={
           <ProfessorLecturePage />
         }
+      />
+
+      <Route
+        path="/spaces/:spaceId/documents/:documentId/lecture/assistant"
+        element={<LectureViewerPage role="ASSISTANT" />}
       />
 
       <Route

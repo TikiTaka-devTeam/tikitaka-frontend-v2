@@ -323,7 +323,15 @@ export default function LectureToolbar({
             icon: QuestionListIcon,
           },
         ]
-      : [
+      : normalizedRole === "ASSISTANT"
+        ? [
+            {
+              id: "Q_LIST",
+              label: "질문 목록",
+              icon: QuestionListIcon,
+            },
+          ]
+        : [
           {
             id: "Q_POINT",
             label: "질문 등록",

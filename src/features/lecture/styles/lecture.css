@@ -280,6 +280,7 @@
   height: 100%;
 
   overflow: auto;
+  scrollbar-width: none;
 
   display: grid;
 
@@ -288,6 +289,10 @@
   overscroll-behavior: contain;
 
   background: #3c4147;
+}
+
+.pdf-stage__viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .pdf-stage__page {
