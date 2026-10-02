@@ -1,3 +1,5 @@
+import { HIGHLIGHTER_OPACITY } from "./lectureData.js";
+
 export const DRAW_TOOLS = new Set([
   "PEN",
   "HIGHLIGHTER",
@@ -250,16 +252,14 @@ export function drawStroke(
     stroke.color ||
     "#212326";
 
+  const opacity = Number(
+    stroke.opacity ??
+      (stroke.tool === "HIGHLIGHTER" ? HIGHLIGHTER_OPACITY : 1),
+  );
   context.globalAlpha =
-    Number(
-      stroke.opacity ??
-        (
-          stroke.tool ===
-          "HIGHLIGHTER"
-            ? 0.4
-            : 1
-        ),
-    );
+    stroke.tool === "HIGHLIGHTER"
+      ? Math.min(opacity, HIGHLIGHTER_OPACITY)
+      : opacity;
 
   if (
     points.length ===
@@ -731,7 +731,7 @@ export function getDrawingCursorAppearance({
       background:
         hexToRgba(
           highlighterColor,
-          0.45,
+          HIGHLIGHTER_OPACITY,
         ),
     };
   }

@@ -695,9 +695,12 @@ function ProfessorAssignmentPage() {
           assignmentId,
         );
 
-      setAssignmentDetail(
-        detail,
-      );
+      setAssignmentDetail({
+        ...detail,
+        close_type:
+          detail?.close_type ??
+          assignment.close_type,
+      });
 
       setAssignments(
         (current) =>
@@ -889,6 +892,10 @@ function ProfessorAssignmentPage() {
               : assignment,
         ),
     );
+
+    setViewMode(
+      "detail",
+    );
   }
 
   function handleRequestDelete() {
@@ -1017,9 +1024,13 @@ function ProfessorAssignmentPage() {
               created;
           }
 
-          setAssignmentDetail(
-            nextDetail,
-          );
+          setAssignmentDetail({
+            ...nextDetail,
+            close_type:
+              nextDetail?.close_type ??
+              created?.close_type ??
+              pendingSaveData.closeType,
+          });
         }
 
         try {
@@ -1074,9 +1085,13 @@ function ProfessorAssignmentPage() {
           };
         }
 
-        setAssignmentDetail(
-          nextDetail,
-        );
+        setAssignmentDetail({
+          ...nextDetail,
+          close_type:
+            nextDetail?.close_type ??
+            updated?.close_type ??
+            pendingSaveData.closeType,
+        });
 
         try {
           await refreshListData();
@@ -1282,9 +1297,12 @@ function ProfessorAssignmentPage() {
         };
       }
 
-      setAssignmentDetail(
-        nextDetail,
-      );
+      setAssignmentDetail({
+        ...nextDetail,
+        close_type:
+          nextDetail?.close_type ??
+          assignmentDetail.close_type,
+      });
 
       setAssignments(
         (current) =>
@@ -1838,7 +1856,10 @@ function ProfessorAssignmentPage() {
               onCancel={
                 handleCloseGradePanel
               }
-              onSaved={
+              onFinalized={
+                handleGradeSaved
+              }
+              onEditSaved={
                 handleGradeSaved
               }
             />

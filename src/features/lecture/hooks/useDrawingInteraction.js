@@ -8,6 +8,7 @@ import FixerCursorIcon from "../../../assets/icons/fixer-active.svg";
 
 import {
   createUuid,
+  HIGHLIGHTER_OPACITY,
 } from "../utils/lectureData.js";
 
 import {
@@ -1052,7 +1053,7 @@ export default function useDrawingInteraction({
     const opacity =
       activeTool ===
       "HIGHLIGHTER"
-        ? 0.4
+        ? HIGHLIGHTER_OPACITY
         : 1;
 
     activePointerRef.current =

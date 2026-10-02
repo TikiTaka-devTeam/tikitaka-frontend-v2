@@ -1,6 +1,6 @@
 import BackIcon from "../../../assets/icons/go-back.svg";
-import UndoIcon from "../../../assets/icons/undo.svg";
-import RedoIcon from "../../../assets/icons/redo.svg";
+import UndoIcon from "../../../assets/icons/undo.svg?react";
+import RedoIcon from "../../../assets/icons/redo.svg?react";
 import DownloadIcon from "../../../assets/icons/download.svg";
 import MoreIcon from "../../../assets/icons/more2.svg";
 
@@ -10,6 +10,8 @@ export default function LectureHeader({
   title,
   spaceName,
   onBack,
+  canUndo = false,
+  canRedo = false,
   onUndo,
   onRedo,
   onDownload,
@@ -36,18 +38,20 @@ export default function LectureHeader({
           type="button"
           className="lecture-header__action lecture-header__action--undo"
           aria-label="실행 취소"
+          disabled={!canUndo}
           onClick={onUndo}
         >
-          <img src={UndoIcon} alt="" draggable="false" />
+          <UndoIcon aria-hidden="true" />
         </button>
 
         <button
           type="button"
           className="lecture-header__action lecture-header__action--redo"
           aria-label="다시 실행"
+          disabled={!canRedo}
           onClick={onRedo}
         >
-          <img src={RedoIcon} alt="" draggable="false" />
+          <RedoIcon aria-hidden="true" />
         </button>
 
         <button

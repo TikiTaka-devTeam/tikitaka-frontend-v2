@@ -12,21 +12,23 @@
 }
 
 .archive-status-modal__archive-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+}
+
+.archive-status-modal__archive-icon path {
+  stroke: #e24b63;
 }
 
 .archive-status-modal__check-icon {
   display: block;
 
-  width: 15.17px;
-  height: 10.83px;
-
-  color: #e24b63;
+  width: 18px;
+  height: 13px;
 }
 
 .archive-status-modal__check-icon path {
-  fill: currentColor;
+  stroke: #e24b63;
 }
 
 .archive-status-modal__text {

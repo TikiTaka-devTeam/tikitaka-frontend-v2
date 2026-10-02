@@ -553,11 +553,29 @@ export default function LectureViewerPage({
         throw new Error();
       }
 
-      window.open(
-        downloadUrl,
-        "_blank",
-        "noopener,noreferrer",
-      );
+      const fileResponse = await fetch(downloadUrl);
+      if (!fileResponse.ok) {
+        throw new Error();
+      }
+
+      const pdfBlob = await fileResponse.blob();
+      if (!pdfBlob.size || pdfBlob.type.includes("text/html")) {
+        throw new Error();
+      }
+
+      const objectUrl = URL.createObjectURL(pdfBlob);
+      const downloadLink = document.createElement("a");
+      const title = documentTitle?.trim() || "강의자료";
+      downloadLink.href = objectUrl;
+      downloadLink.download = /\.pdf$/i.test(title) ? title : `${title}.pdf`;
+      downloadLink.hidden = true;
+      document.body.appendChild(downloadLink);
+      try {
+        downloadLink.click();
+      } finally {
+        downloadLink.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+      }
 
       setDownloadCompleted(
         true,

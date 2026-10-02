@@ -7,18 +7,18 @@ export const TOOL_THICKNESS_DEFAULTS = {
 export const TOOL_THICKNESS_MM = {
   PEN: {
     min: 0.1,
-    max: 1,
+    max: 2,
     step: 0.1,
     default: 0.5,
-    presets: [0.3, 0.5, 0.7],
+    presets: [0.7, 1.3, 2],
   },
 
   HIGHLIGHTER: {
     min: 1,
-    max: 6,
+    max: 10,
     step: 0.1,
     default: 3,
-    presets: [2, 3, 4],
+    presets: [3, 7, 10],
   },
 
   ERASER: {
@@ -34,6 +34,8 @@ export const TOOL_COLORS = {
   PEN: "#212326",
   HIGHLIGHTER: "#FACC15",
 };
+
+export const HIGHLIGHTER_OPACITY = 0.25;
 
 const POINTS_PER_INCH = 72;
 const MM_PER_INCH = 25.4;

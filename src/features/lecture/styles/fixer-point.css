@@ -7,4 +7,3 @@
 .fixer-point__bubble button { display: grid; place-items: center; flex: 0 0 20px; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .fixer-point__bubble button img { display: block; }
 .fixer-point__bubble button:disabled { cursor: default; }
-.fixer-point:focus-within .fixer-point__bubble { border-color: #758094; }

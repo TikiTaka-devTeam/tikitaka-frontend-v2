@@ -5,83 +5,7 @@ import ArchiveIcon from "../../../assets/icons/archive.svg?react";
 import PencilEditIcon from "../../../assets/icons/pencil-edit.svg?react";
 import ActivityIcon from "../../../assets/icons/activity.svg?react";
 import DeleteIcon from "../../../assets/icons/delete.svg?react";
-
-const COURSE_COLORS = {
-  BLUE: {
-    background: "#EAF0FF",
-    accent: "#2E63E9",
-  },
-
-  SKY: {
-    background: "#E8F4FF",
-    accent: "#2776C8",
-  },
-
-  CYAN: {
-    background: "#E4F7F8",
-    accent: "#168A93",
-  },
-
-  TEAL: {
-    background: "#E5F6F1",
-    accent: "#23856E",
-  },
-
-  GREEN: {
-    background: "#EAF7ED",
-    accent: "#3F9653",
-  },
-
-  LIME: {
-    background: "#F1F7E4",
-    accent: "#6F8F2E",
-  },
-
-  YELLOW: {
-    background: "#FFF6D9",
-    accent: "#A57916",
-  },
-
-  ORANGE: {
-    background: "#FFF0E2",
-    accent: "#C66A22",
-  },
-
-  RED: {
-    background: "#FDE8E8",
-    accent: "#D54A4A",
-  },
-
-  PINK: {
-    background: "#FBE8F4",
-    accent: "#C64D91",
-  },
-
-  PURPLE: {
-    background: "#F1EAFE",
-    accent: "#7B57C7",
-  },
-
-  INDIGO: {
-    background: "#ECECFF",
-    accent: "#5B5CC5",
-  },
-};
-
-const COLOR_KEY_MAP = {
-  COLOR_1: "BLUE",
-  COLOR_2: "SKY",
-  COLOR_3: "CYAN",
-  COLOR_4: "TEAL",
-  COLOR_5: "GREEN",
-  COLOR_6: "LIME",
-  COLOR_7: "YELLOW",
-  COLOR_8: "ORANGE",
-  COLOR_9: "RED",
-  COLOR_10: "PINK",
-  COLOR_11: "PURPLE",
-  COLOR_12: "INDIGO",
-};
+import { getSpaceColor } from "../utils/spaceColors.js";
 
 const MENU_LABEL_STYLE = {
   display: "inline-block",
@@ -97,6 +21,11 @@ const PENDING_BADGE_STYLE = {
   color: "#757F94",
 };
 
+const ARCHIVED_BADGE_STYLE = {
+  backgroundColor: "#EBEEF5",
+  color: "#758094",
+};
+
 function SpaceCard({
   space,
   canManage = false,
@@ -110,12 +39,7 @@ function SpaceCard({
 
   const menuRef = useRef(null);
 
-  const rawColorKey =
-    typeof space.color === "string" ? space.color.toUpperCase() : "BLUE";
-
-  const normalizedColorKey = COLOR_KEY_MAP[rawColorKey] ?? rawColorKey;
-
-  const courseColor = COURSE_COLORS[normalizedColorKey] ?? COURSE_COLORS.BLUE;
+  const courseColor = getSpaceColor(space.color);
 
   const isPending =
     space.participationStatus === "PENDING" || space.isPending === true;
@@ -184,7 +108,9 @@ function SpaceCard({
       <div
         className="space-card__semester"
         style={
-          isPending
+          space.archived
+            ? ARCHIVED_BADGE_STYLE
+            : isPending
             ? PENDING_BADGE_STYLE
             : {
                 backgroundColor: courseColor.background,

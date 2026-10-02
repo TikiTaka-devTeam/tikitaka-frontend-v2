@@ -8,25 +8,23 @@
   justify-content: center;
 
   border-radius: 16px;
-  background: #f1f3ff;
+  background: #f0f1ff;
 }
 
 .activate-status-modal__activity-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+}
+
+.activate-status-modal__activity-icon path {
+  stroke: #5b5ce2;
 }
 
 .activate-status-modal__check-icon {
   display: block;
 
-  width: 15.17px;
-  height: 10.83px;
-
-  color: #2e6bff;
-}
-
-.activate-status-modal__check-icon path {
-  fill: currentColor;
+  width: 18px;
+  height: 13px;
 }
 
 .activate-status-modal__text {

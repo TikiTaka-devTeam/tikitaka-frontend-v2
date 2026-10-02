@@ -52,7 +52,16 @@ function readUserRole() {
   try {
     const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
     return String(
-      user?.account_type ?? user?.accountType ?? user?.role ?? "",
+      user?.account_type ??
+      user?.accountType ??
+      user?.role ??
+      user?.user?.account_type ??
+      user?.user?.accountType ??
+      user?.user?.role ??
+      localStorage.getItem("tikitaka_account_type") ??
+      localStorage.getItem("account_type") ??
+      localStorage.getItem("role") ??
+      "",
     ).toUpperCase();
   } catch {
     return "";

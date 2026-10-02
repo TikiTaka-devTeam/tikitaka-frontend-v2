@@ -97,10 +97,32 @@
   user-select: none;
 }
 
-.lecture-page .lecture-header__action--undo img,
-.lecture-page .lecture-header__action--redo img {
+.lecture-page .lecture-header__action--undo svg,
+.lecture-page .lecture-header__action--redo svg {
   width: 40px;
   height: 40px;
+  pointer-events: none;
+}
+
+.lecture-page .lecture-header__action--undo svg path,
+.lecture-page .lecture-header__action--redo svg path {
+  transition: stroke 90ms ease-out;
+}
+
+.lecture-page .lecture-header__action:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.lecture-page .lecture-header__action:disabled svg path {
+  stroke: #d8dbe7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lecture-page .lecture-header__action--undo svg path,
+  .lecture-page .lecture-header__action--redo svg path {
+    transition: none;
+  }
 }
 
 .lecture-page .lecture-header__action--download img,
@@ -163,8 +185,8 @@
     flex-basis: 36px;
   }
 
-  .lecture-page .lecture-header__action--undo img,
-  .lecture-page .lecture-header__action--redo img {
+  .lecture-page .lecture-header__action--undo svg,
+  .lecture-page .lecture-header__action--redo svg {
     width: 36px;
     height: 36px;
   }
