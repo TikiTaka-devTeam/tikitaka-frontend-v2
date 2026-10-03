@@ -83,12 +83,13 @@
   grid-template-columns: minmax(0, 2.2fr) minmax(300px, 1fr);
   gap: 20px;
   align-items: stretch;
+  height: max(280px, calc(100dvh - var(--app-logo-top) - 105px - 102px));
 }
 
 .dashboard-sidebar {
   display: flex;
   min-width: 0;
-  height: 568px;
+  height: 100%;
   flex-direction: column;
   gap: 18px;
 }
@@ -96,7 +97,7 @@
 .dashboard-timetable-scroll {
   width: 100%;
   min-width: 0;
-  height: 568px;
+  height: 100%;
   overflow-x: auto;
   overflow-y: auto;
   border-radius: 24px;
@@ -427,7 +428,9 @@
 }
 
 .dashboard-tasks {
-  height: 399px;
+  height: auto;
+  min-height: 0;
+  flex: 1;
 }
 
 .dashboard-tasks header {
@@ -1509,6 +1512,7 @@
 
   .dashboard-content {
     gap: 16px;
+    height: max(280px, calc(100dvh - var(--app-logo-top) - 140px - 102px));
   }
 
   .dashboard-next-class {
@@ -1631,18 +1635,14 @@
   }
 
   .dashboard-timetable-scroll {
-    height: min(568px, calc(100dvh - 180px));
+    height: 100%;
     overscroll-behavior-x: contain;
-  }
-
-  .dashboard-timetable {
-    min-width: 845px;
   }
 
   .dashboard-sidebar {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) minmax(300px, 1fr);
-    height: auto;
+    height: 100%;
     align-items: start;
   }
 
@@ -1653,6 +1653,12 @@
 
   .dashboard-shell {
     padding-bottom: 105px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .dashboard-timetable {
+    min-width: 845px;
   }
 }
 
