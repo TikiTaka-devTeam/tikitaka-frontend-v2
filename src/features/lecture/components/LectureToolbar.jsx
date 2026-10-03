@@ -16,8 +16,8 @@ import ShapeIcon from "../../../assets/icons/shape.svg";
 import LassoIcon from "../../../assets/icons/lasso.svg";
 import ImageAddIcon from "../../../assets/icons/image-add.svg";
 import KeyboardIcon from "../../../assets/icons/keyboard.svg";
-import QuestionIcon from "../../../assets/icons/question.svg?react";
-import QuestionActiveIcon from "../../../assets/icons/question-active.svg?react";
+import QuestionIcon from "../../../assets/icons/question.svg";
+import QuestionActiveIcon from "../../../assets/icons/question-active.svg";
 import QuestionListIcon from "../../../assets/icons/question-list.svg";
 import FixerIcon from "../../../assets/icons/fixer.svg";
 import FixerActiveIcon from "../../../assets/icons/fixer-active.svg";
@@ -463,11 +463,6 @@ export default function LectureToolbar({
                 hasQuestionNotification &&
                 !isActive;
 
-              const QuestionPointIcon =
-                isActive && activeIcon
-                  ? activeIcon
-                  : icon;
-
               return (
                 <div
                   className="lecture-toolbar__slot"
@@ -512,13 +507,6 @@ export default function LectureToolbar({
                                 dynamicFill,
                               ),
                           }}
-                        />
-                      ) : id === "Q_POINT" ? (
-                        <QuestionPointIcon
-                          className="lecture-toolbar__question-point-svg"
-                          viewBox="26 16 25 25"
-                          aria-hidden="true"
-                          focusable="false"
                         />
                       ) : (
                         <img

@@ -9,8 +9,6 @@ import usePdfPageRender from "../hooks/usePdfPageRender";
 export default function PdfSlideStage({
   role,
 
-  pageTransitionDirection,
-
   pdfUrl,
 
   pageNumber,
@@ -166,7 +164,6 @@ export default function PdfSlideStage({
         containerRef
       }
       className="pdf-stage"
-      onDragStart={(event) => event.preventDefault()}
     >
       <div
         ref={
@@ -189,13 +186,7 @@ export default function PdfSlideStage({
 
         {normalizedPdfUrl && (
           <div
-            className={
-              `pdf-stage__page${
-                pageTransitionDirection
-                  ? ` pdf-stage__page--enter-${pageTransitionDirection}`
-                  : ""
-              }`
-            }
+            className="pdf-stage__page"
             style={{
               width:
                 pageSize.width ||

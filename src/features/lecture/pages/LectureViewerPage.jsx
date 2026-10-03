@@ -76,11 +76,6 @@ export default function LectureViewerPage({
   ] = useState(1);
 
   const [
-    pageTransitionDirection,
-    setPageTransitionDirection,
-  ] = useState(null);
-
-  const [
     activeTool,
     setActiveTool,
   ] = useState(null);
@@ -674,12 +669,6 @@ export default function LectureViewerPage({
 
     clearQuestionDraft();
 
-    setPageTransitionDirection(
-      nextIndex > currentIndex
-        ? "next"
-        : "previous",
-    );
-
     setCurrentIndex(
       nextIndex,
     );
@@ -728,7 +717,6 @@ export default function LectureViewerPage({
       className={
         pageShellClass
       }
-      onDragStart={(event) => event.preventDefault()}
     >
       <div
         className="lecture-background"
@@ -855,7 +843,6 @@ export default function LectureViewerPage({
             </div>
 
             <PdfSlideStage
-              pageTransitionDirection={pageTransitionDirection}
               pageChangeNotice={pageChangeNotice}
               onAcknowledgePageChange={acknowledgePageChange}
               key={`${documentId}:${currentSlideId}`}
