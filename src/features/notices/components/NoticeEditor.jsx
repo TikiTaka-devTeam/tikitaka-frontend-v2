@@ -18,6 +18,45 @@ const TEXT_COLORS = [
   "#6366F1",
 ];
 
+const FONT_FAMILIES = [
+  {
+    label: "기본",
+    value: "sans-serif",
+  },
+  {
+    label: "프리텐다드",
+    value: "Pretendard",
+  },
+  {
+    label: "맑은 고딕",
+    value: '"Malgun Gothic", "맑은 고딕", sans-serif',
+  },
+  {
+    label: "굴림",
+    value: 'Gulim, "굴림", sans-serif',
+  },
+  {
+    label: "돋움",
+    value: 'Dotum, "돋움", sans-serif',
+  },
+  {
+    label: "바탕",
+    value: 'Batang, "바탕", serif',
+  },
+  {
+    label: "궁서",
+    value: 'Gungsuh, "궁서", serif',
+  },
+  {
+    label: "Arial",
+    value: "Arial",
+  },
+  {
+    label: "Georgia",
+    value: "Georgia",
+  },
+];
+
 function NoticeEditor({
   value = "",
   onChange,
@@ -262,21 +301,14 @@ function NoticeEditor({
               .run()
           }
         >
-          <option value="sans-serif">
-            Sans Serif
-          </option>
-
-          <option value="Pretendard">
-            Pretendard
-          </option>
-
-          <option value="Arial">
-            Arial
-          </option>
-
-          <option value="Georgia">
-            Georgia
-          </option>
+          {FONT_FAMILIES.map((font) => (
+            <option
+              key={font.value}
+              value={font.value}
+            >
+              {font.label}
+            </option>
+          ))}
         </select>
 
         <div className="notice-editor-toolbar__divider" />

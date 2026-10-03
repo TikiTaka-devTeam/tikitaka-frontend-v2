@@ -39,6 +39,15 @@ const STRAIGHT_MIN_DISTANCE_PX =
 const PAGE_SWIPE_MIN_DISTANCE_PX =
   60;
 
+const PAGE_FLICK_MIN_DISTANCE_PX =
+  32;
+
+const PAGE_FLICK_MAX_DURATION_MS =
+  350;
+
+const PAGE_FLICK_MIN_VELOCITY_PX_PER_MS =
+  0.45;
+
 const PAGE_SWIPE_AXIS_RATIO =
   1.2;
 
@@ -724,6 +733,9 @@ export default function useDrawingInteraction({
         startY:
           event.clientY,
 
+        startTime:
+          event.timeStamp,
+
         didPinch:
           false,
       };
@@ -879,9 +891,18 @@ export default function useDrawingInteraction({
           deltaY,
         );
 
+      const elapsed = Math.max(
+        1,
+        event.timeStamp - gesture.startTime,
+      );
+
+      const isQuickFlick =
+        horizontalDistance >= PAGE_FLICK_MIN_DISTANCE_PX &&
+        elapsed <= PAGE_FLICK_MAX_DURATION_MS &&
+        horizontalDistance / elapsed >= PAGE_FLICK_MIN_VELOCITY_PX_PER_MS;
+
       if (
-        horizontalDistance >=
-          PAGE_SWIPE_MIN_DISTANCE_PX &&
+        (horizontalDistance >= PAGE_SWIPE_MIN_DISTANCE_PX || isQuickFlick) &&
         horizontalDistance >
           verticalDistance *
             PAGE_SWIPE_AXIS_RATIO
@@ -1014,6 +1035,15 @@ export default function useDrawingInteraction({
       activeTool ===
       "ERASER"
     ) {
+      window.dispatchEvent(
+        new CustomEvent("tikitaka:drawing-options", {
+          detail: {
+            panel: null,
+            tool: activeTool,
+          },
+        }),
+      );
+
       event.preventDefault();
 
       const strokeIds =
@@ -1047,6 +1077,15 @@ export default function useDrawingInteraction({
     ) {
       return;
     }
+
+    window.dispatchEvent(
+      new CustomEvent("tikitaka:drawing-options", {
+        detail: {
+          panel: null,
+          tool: activeTool,
+        },
+      }),
+    );
 
     event.preventDefault();
 

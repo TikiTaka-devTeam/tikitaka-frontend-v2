@@ -1,5 +1,5 @@
 import { useState } from "react";
-import FixerIcon from "../../../assets/icons/fixer-active.svg";
+import FixerIcon from "../../../assets/icons/fixer-active.svg?react";
 import SubmitIcon from "../../../assets/icons/submit.svg";
 import SubmitActiveIcon from "../../../assets/icons/submit-professor-active.svg";
 import CheckIcon from "../../../assets/icons/check-circle.svg";
@@ -11,7 +11,7 @@ function pointStyle(point, pageWidth) {
     left: `${point.x * 100}%`, top: `${point.y * 100}%`,
     "--fixer-bubble-width": `${Math.min(250, Math.max(120, pageWidth - 55))}px`,
     "--fixer-side": isLeft ? "row-reverse" : "row",
-    transform: isLeft ? "translate(calc(-100% + 12.5px), -50%)" : "translate(-12.5px, -50%)",
+    transform: isLeft ? "translate(calc(-100% + 13.5px), -50%)" : "translate(-13.5px, -50%)",
   };
 }
 
@@ -25,7 +25,7 @@ export function FixerBubble({ fixer, pageWidth, onCheck }) {
   }
   if (fixer.isChecked) return null;
   return <div className="fixer-point" style={pointStyle({ x: fixer.xRatio, y: fixer.yRatio }, pageWidth)}>
-    <img className="fixer-point__marker" src={FixerIcon} alt="수정 메모" />
+    <FixerIcon className="fixer-point__marker" role="img" aria-label="수정 메모" shapeRendering="geometricPrecision" />
     <div className="fixer-point__bubble">
       <span title={fixer.content}>{fixer.content}</span>
       <button type="button" aria-label={fixer.isChecked ? "확인 완료된 수정 메모" : "수정 메모 확인"} disabled={checking || fixer.isChecked} onClick={check}><img src={CheckIcon} alt="" /></button>
@@ -47,7 +47,7 @@ export default function FixerComposer({ point, pageWidth, onCancel, onSubmit }) 
   return <form className="fixer-point" style={pointStyle(point, pageWidth)} onSubmit={submit} onKeyDown={(event) => {
     if (event.key === "Escape" && !submitting) { event.stopPropagation(); onCancel(); }
   }}>
-    <img className="fixer-point__marker" src={FixerIcon} alt="수정 메모" />
+    <FixerIcon className="fixer-point__marker" role="img" aria-label="수정 메모" shapeRendering="geometricPrecision" />
     <div className="fixer-point__bubble">
       <input autoFocus value={content} disabled={submitting} placeholder="수정사항 입력" aria-label="수정사항 입력" onChange={(event) => setContent(event.target.value)} />
       <button type="submit" aria-label="수정 메모 등록" disabled={!content.trim() || submitting}><img src={content.trim() && !submitting ? SubmitActiveIcon : SubmitIcon} alt="" /></button>

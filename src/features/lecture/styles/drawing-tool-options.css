@@ -644,293 +644,67 @@
 
 .lecture-toolbar-wrap
   .drawing-options.drawing-options--figma-eraser {
-  position: absolute;
-
-  width: calc(
-    var(--lecture-u, 1px) * 50
-  );
-
-  height: calc(
-    var(--lecture-u, 1px) * 206
-  );
-
-  min-width: calc(
-    var(--lecture-u, 1px) * 50
-  );
-
-  min-height: calc(
-    var(--lecture-u, 1px) * 206
-  );
-
+  width: calc(var(--lecture-u, 1px) * 160);
+  height: calc(var(--lecture-u, 1px) * 58);
+  min-width: calc(var(--lecture-u, 1px) * 160);
+  min-height: calc(var(--lecture-u, 1px) * 58);
   padding: 0;
-
-  box-sizing: border-box;
-
   overflow: hidden;
-
-  border:
-    1px solid
-    #e6e7e9;
-
-  border-radius: calc(
-    var(--lecture-u, 1px) * 8
-  );
-
+  border: 1px solid #e6e7e9;
+  border-radius: calc(var(--lecture-u, 1px) * 10);
   background: #ffffff;
-
   box-shadow:
-    0
-      calc(
-        var(--lecture-u, 1px) * 4
-      )
-      calc(
-        var(--lecture-u, 1px) * 6
-      )
-      rgba(
-        31,
-        41,
-        55,
-        0.1
-      ),
-    0
-      calc(
-        var(--lecture-u, 1px) * 2
-      )
-      calc(
-        var(--lecture-u, 1px) * 4
-      )
-      rgba(
-        31,
-        41,
-        55,
-        0.06
-      );
+    0 calc(var(--lecture-u, 1px) * 4) calc(var(--lecture-u, 1px) * 6) rgba(31, 41, 55, 0.1),
+    0 calc(var(--lecture-u, 1px) * 2) calc(var(--lecture-u, 1px) * 4) rgba(31, 41, 55, 0.06);
 }
 
 .lecture-toolbar-wrap
   .drawing-options--figma-eraser
-  .drawing-options__eraser-slider {
-  position: absolute;
-
-  left: 50%;
-
-  top: 50%;
-
-  width: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  height: calc(
-    var(--lecture-u, 1px) * 180
-  );
-
-  transform:
-    translate(
-      -50%,
-      -50%
-    );
+  .drawing-options__thickness-label {
+  top: calc(var(--lecture-u, 1px) * 21);
 }
 
 .lecture-toolbar-wrap
   .drawing-options--figma-eraser
-  .drawing-options__eraser-track {
-  position: absolute;
-
-  left: 50%;
-
-  top: 0;
-
-  width: calc(
-    var(--lecture-u, 1px) * 14
-  );
-
-  height: 100%;
-
-  transform:
-    translateX(-50%);
-
-  border-radius: calc(
-    var(--lecture-u, 1px) * 8
-  );
-
-  background: #666b74;
-
-  pointer-events: none;
+  .drawing-options__thickness-slider {
+  top: calc(var(--lecture-u, 1px) * 23);
 }
 
 .lecture-toolbar-wrap
   .drawing-options--figma-eraser
-  .drawing-options__eraser-thumb {
-  position: absolute;
-
-  z-index: 2;
-
-  left: 50%;
-
-  width: calc(
-    var(--lecture-u, 1px) * 17
-  );
-
-  height: calc(
-    var(--lecture-u, 1px) * 17
-  );
-
-  transform:
-    translate(
-      -50%,
-      -50%
-    );
-
+  .drawing-options__eraser-size {
+  display: block;
+  flex: 0 0 auto;
   border-radius: 50%;
-
-  background: #f1f2f4;
-
-  box-shadow:
-    0
-      calc(
-        var(--lecture-u, 1px) * 1
-      )
-      calc(
-        var(--lecture-u, 1px) * 3
-      )
-      rgba(
-        31,
-        41,
-        55,
-        0.18
-      );
-
+  background: #666b74;
   pointer-events: none;
 }
 
 .lecture-toolbar-wrap
   .drawing-options--figma-eraser
-  .drawing-options__eraser-slider
-  input[type="range"] {
-  position: absolute;
-
-  z-index: 3;
-
-  left: 50%;
-
-  top: 50%;
-
-  width: calc(
-    var(--lecture-u, 1px) * 180
-  );
-
-  height: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  margin: 0;
-
-  padding: 0;
-
-  appearance: none;
-
-  -webkit-appearance: none;
-
-  border: 0;
-
-  outline: 0;
-
-  background: transparent;
-
-  transform:
-    translate(
-      -50%,
-      -50%
-    )
-    rotate(90deg);
-
-  cursor: pointer;
-
-  opacity: 0;
+  .drawing-options__eraser-size--small {
+  width: calc(var(--lecture-u, 1px) * 6);
+  height: calc(var(--lecture-u, 1px) * 6);
 }
 
 .lecture-toolbar-wrap
   .drawing-options--figma-eraser
-  .drawing-options__eraser-slider
-  input[type="range"]::-webkit-slider-runnable-track {
-  width: 100%;
-
-  height: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  border: 0;
-
-  background: transparent;
+  .drawing-options__eraser-size--medium {
+  width: calc(var(--lecture-u, 1px) * 11);
+  height: calc(var(--lecture-u, 1px) * 11);
 }
 
 .lecture-toolbar-wrap
   .drawing-options--figma-eraser
-  .drawing-options__eraser-slider
-  input[type="range"]::-webkit-slider-thumb {
-  width: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  height: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  appearance: none;
-
-  -webkit-appearance: none;
-
-  border: 0;
-
-  background: transparent;
-
-  cursor: grab;
+  .drawing-options__eraser-size--large {
+  width: calc(var(--lecture-u, 1px) * 16);
+  height: calc(var(--lecture-u, 1px) * 16);
 }
 
 .lecture-toolbar-wrap
   .drawing-options--figma-eraser
-  .drawing-options__eraser-slider
-  input[type="range"]:active::-webkit-slider-thumb {
-  cursor: grabbing;
-}
-
-.lecture-toolbar-wrap
-  .drawing-options--figma-eraser
-  .drawing-options__eraser-slider
-  input[type="range"]::-moz-range-track {
-  width: 100%;
-
-  height: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  border: 0;
-
-  background: transparent;
-}
-
-.lecture-toolbar-wrap
-  .drawing-options--figma-eraser
-  .drawing-options__eraser-slider
-  input[type="range"]::-moz-range-progress {
-  background: transparent;
-}
-
-.lecture-toolbar-wrap
-  .drawing-options--figma-eraser
-  .drawing-options__eraser-slider
-  input[type="range"]::-moz-range-thumb {
-  width: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  height: calc(
-    var(--lecture-u, 1px) * 18
-  );
-
-  border: 0;
-
-  background: transparent;
-
-  cursor: grab;
+  .drawing-options__eraser-presets
+  button.is-active
+  .drawing-options__eraser-size {
+  box-shadow: 0 0 0 calc(var(--lecture-u, 1px) * 2) rgba(46, 107, 255, 0.3);
 }

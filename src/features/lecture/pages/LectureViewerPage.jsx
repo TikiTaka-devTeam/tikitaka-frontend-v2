@@ -28,11 +28,16 @@ import useLectureSlideData from "../hooks/useLectureSlideData";
 import useLectureStrokes from "../hooks/useLectureStrokes";
 
 import {
-  TOOL_COLORS,
   TOOL_THICKNESS_DEFAULTS,
   TOOL_THICKNESS_MM,
   thicknessMmToRatio,
 } from "../utils/lectureData";
+import {
+  addSavedDrawingColor,
+  getDrawingColorStorageKey,
+  readDrawingColorPreferences,
+  saveDrawingColorPreferences,
+} from "../utils/drawingColorPreferences.js";
 
 import {
   extractPdfUrl,
@@ -122,12 +127,49 @@ export default function LectureViewerPage({
         .default,
   });
 
-  const [
-    colorByTool,
-    setColorByTool,
-  ] = useState({
-    ...TOOL_COLORS,
-  });
+  const [colorPreferenceKey] = useState(getDrawingColorStorageKey);
+  const [drawingColorPreferences, setDrawingColorPreferences] = useState(() =>
+    readDrawingColorPreferences(colorPreferenceKey),
+  );
+  const colorByTool = drawingColorPreferences.colorsByTool;
+  const savedDrawingColors = drawingColorPreferences.savedColors;
+
+  function setColorByTool(update) {
+    setDrawingColorPreferences((previous) => ({
+      ...previous,
+      colorsByTool: typeof update === "function"
+        ? update(previous.colorsByTool)
+        : update,
+    }));
+  }
+
+  function saveCustomDrawingColor(color) {
+    setDrawingColorPreferences((previous) => ({
+      ...previous,
+      savedColors: addSavedDrawingColor(previous.savedColors, color),
+    }));
+  }
+
+  useEffect(() => {
+    saveDrawingColorPreferences(colorPreferenceKey, drawingColorPreferences);
+  }, [colorPreferenceKey, drawingColorPreferences]);
+
+  useEffect(() => {
+    function closeEraserOptions(event) {
+      if (event.detail?.tool !== "ERASER") {
+        return;
+      }
+
+      if (event.detail?.panel === null) {
+        setToolOptionsOpen(false);
+      } else if (event.detail?.panel === "ERASER") {
+        setToolOptionsOpen(true);
+      }
+    }
+
+    window.addEventListener("tikitaka:drawing-options", closeEraserOptions);
+    return () => window.removeEventListener("tikitaka:drawing-options", closeEraserOptions);
+  }, []);
 
   const [
     pdfPageMetrics,
@@ -406,6 +448,11 @@ export default function LectureViewerPage({
     if (
       activeTool === tool
     ) {
+      if (tool === "ERASER" && !toolOptionsOpen) {
+        setToolOptionsOpen(true);
+        return;
+      }
+
       clearQuestionDraft();
 
       resetQuestionState();
@@ -719,6 +766,14 @@ export default function LectureViewerPage({
                 activeColor={
                   activeColor
                 }
+                activeThickness={activeThicknessMm}
+                toolOptionsOpen={toolOptionsOpen}
+                onThicknessChange={(value) =>
+                  setThicknessByTool((previous) => ({
+                    ...previous,
+                    [activeTool]: value,
+                  }))
+                }
                 panelOpen={
                   panelOpen
                 }
@@ -747,6 +802,8 @@ export default function LectureViewerPage({
                   tool={
                     activeTool
                   }
+                  customColors={savedDrawingColors}
+                  onSaveCustomColor={saveCustomDrawingColor}
                   thickness={
                     activeThicknessMm
                   }

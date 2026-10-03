@@ -202,6 +202,7 @@ export default function PdfSlideStage({
                 pdfCanvasRef
               }
               className="pdf-stage__pdf-canvas"
+              draggable={false}
               aria-label="강의자료 PDF"
             />
 
@@ -218,6 +219,7 @@ export default function PdfSlideStage({
               style={
                 strokeCanvasStyle
               }
+              draggable={false}
               aria-label="필기 영역"
               onPointerDown={
                 handlePointerDown
