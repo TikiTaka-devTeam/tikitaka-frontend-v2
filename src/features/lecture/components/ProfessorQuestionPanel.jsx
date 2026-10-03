@@ -7,7 +7,7 @@ import RecordStartIcon from "../../../assets/icons/professor-record-start.svg";
 import RecordStopIcon from "../../../assets/icons/professor-record-stop.svg";
 import "../styles/professor-question-panel.css";
 
-function AnswerView({ question, initialMode, renderList, onSubmitAnswer, onSubmitVoice }) {
+function AnswerView({ question, initialMode, renderList, questions, questionScope, onQuestionScopeChange, onArchive, onBack, onSubmitAnswer, onSubmitVoice }) {
   const answer = question.answers?.[0];
   const [editing, setEditing] = useState(!answer);
   const [content, setContent] = useState("");
@@ -163,19 +163,39 @@ function AnswerView({ question, initialMode, renderList, onSubmitAnswer, onSubmi
     }
   }
 
+  if (answer) {
+    return <>
+      <div className="question-panel__header">
+        <div className="question-panel__header-copy"><h2>질문 리스트</h2><p>{questionScope === "SLIDE" ? "해당 페이지" : "전체"}</p></div>
+        <div className="question-panel__header-actions"><button type="button" className="question-panel__archive" onClick={onArchive}>질문 아카이브</button></div>
+      </div>
+      <div className="question-panel__scope-row">{[["SLIDE", "해당페이지"], ["DOCUMENT", "전체"]].map(([value, label]) => <button key={value} type="button" className={`question-panel__scope-button${questionScope === value ? " is-active" : ""}`} aria-pressed={questionScope === value} onClick={() => onQuestionScopeChange(value)}>{label}</button>)}</div>
+      <div className="question-panel__scroll">
+        {renderList(questions)}
+        <div className="question-panel__divider" />
+        <section className="question-panel__answer-section">
+          <div className="professor-question-panel__answer-heading">
+            <h3 className="question-panel__answer-heading">답변</h3>
+            <button type="button" className="professor-question-panel__more" aria-label="답변 메뉴" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><img src={MoreIcon} alt="" /></button>
+            {menuOpen && <button type="button" className="professor-question-panel__edit-menu" onClick={() => { setEditing(true); setContent(answer.content ?? ""); setMenuOpen(false); }}><img src={EditIcon} alt="" />수정</button>}
+          </div>
+          {!editing ? <div className="question-panel__answer-readonly"><p>{answer.content}</p></div> : <form className="professor-question-panel__input professor-question-panel__input--inline" onSubmit={submitText}>
+            <textarea aria-label="답변 수정" placeholder="수정사항 입력" value={content} disabled={busy} onChange={(event) => setContent(event.target.value)} />
+            <button type="submit" aria-label="수정 저장" disabled={busy || !content.trim()}><img src={!busy && content.trim() ? SubmitActiveIcon : SubmitIcon} alt="" /></button>
+          </form>}
+          {error && <p className="professor-question-panel__error" role="alert">{error}</p>}
+        </section>
+      </div>
+    </>;
+  }
+
   return <>
     <div className="question-panel__header">
       <div className="question-panel__header-copy"><h2>질문 답변</h2><p>{mode === "VOICE" ? "음성답변" : "텍스트 답변"}</p></div>
+      <div className="question-panel__header-actions"><button type="button" className="professor-question-panel__back" onClick={onBack} disabled={busy}>뒤로가기</button></div>
     </div>
     <div className="professor-question-panel__selected">{renderList([question])}</div>
-    {answer ? <div className="professor-question-panel__answer">
-      <div className="professor-question-panel__answer-heading">
-        <h3>답변</h3>
-        <button type="button" className="professor-question-panel__more" aria-label="답변 메뉴" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><img src={MoreIcon} alt="" /></button>
-        {menuOpen && <button type="button" className="professor-question-panel__edit-menu" onClick={() => { setEditing(true); setContent(answer.content ?? ""); setMenuOpen(false); }}><img src={EditIcon} alt="" />수정</button>}
-      </div>
-      <p>{answer.content}</p>
-    </div> : <p className="professor-question-panel__placeholder" role="status">{recording ? "답변 중" : busy ? "답변을 정리하고 있습니다" : "답변을 입력해주세요"}</p>}
+    <p className="professor-question-panel__placeholder" role="status">{recording ? "답변 중" : busy ? "답변을 정리하고 있습니다" : "답변을 입력해주세요"}</p>
     {error && <p className="professor-question-panel__error" role="alert">{error}</p>}
     {editing && (mode === "TEXT" || answer ?
       <form className="professor-question-panel__input" onSubmit={submitText}>
@@ -196,7 +216,7 @@ export default function ProfessorQuestionPanel({ selectedQuestion, questions, qu
   if (selectionId !== selectedQuestion?.id) { setSelectionId(selectedQuestion?.id); setMode(null); }
   const answerMode = mode ?? (selectedQuestion?.answers?.[0] ? selectedQuestion.answers[0].answer_type ?? "TEXT" : null);
   return <aside className="question-panel question-panel--list professor-question-panel" data-answer-mode={answerMode || undefined}>
-    {answerMode && selectedQuestion ? <AnswerView key={`${selectedQuestion.id}:${answerMode}`} question={selectedQuestion} initialMode={answerMode} renderList={renderList} onSubmitAnswer={onSubmitAnswer} onSubmitVoice={onSubmitVoice} /> : <>
+    {answerMode && selectedQuestion ? <AnswerView key={`${selectedQuestion.id}:${answerMode}`} question={selectedQuestion} initialMode={answerMode} questions={questions} questionScope={questionScope} onQuestionScopeChange={onQuestionScopeChange} onArchive={onArchive} onBack={() => setMode(null)} renderList={renderList} onSubmitAnswer={onSubmitAnswer} onSubmitVoice={onSubmitVoice} /> : <>
       <div className="question-panel__header">
         <div className="question-panel__header-copy"><h2>질문 리스트</h2><p>{questionScope === "SLIDE" ? "해당 페이지" : "전체"}</p></div>
         <div className="question-panel__header-actions">

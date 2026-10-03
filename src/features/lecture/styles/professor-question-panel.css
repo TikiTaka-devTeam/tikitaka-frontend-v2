@@ -3,6 +3,8 @@
    rule switches the student panel to position: static !important. */
 .lecture-page.is-panel-open .question-panel.professor-question-panel { position: relative !important; }
 .professor-question-panel .question-panel__header { gap: 8px; }
+.professor-question-panel__back { min-width: 64px; height: 28px; padding: 0 10px; border: 1px solid #d8dbe7; border-radius: 12px; background: #fafafa; color: #292e3d; font: 600 11px "Tikitaka UI", sans-serif; cursor: pointer; }
+.professor-question-panel__back:disabled { opacity: 0.55; cursor: default; }
 .professor-question-panel__questions { padding: 0 0 19px; min-height: 0; flex: 1 1 0; display: flex; flex-direction: column; overflow: hidden; }
 /* Override both the student list's height AND its 192px flex basis. The
    viewport consumes the panel remainder; its scroll area fills that viewport. */
@@ -30,9 +32,11 @@
 .professor-question-panel__answer-heading .professor-question-panel__more[aria-expanded="true"] { background: #ebeef5; }
 .professor-question-panel__answer-heading img { display: block; }
 .professor-question-panel__answer-heading .professor-question-panel__edit-menu { position: absolute; z-index: 6; right: 0; top: 25px; width: 90px; height: 40px; box-sizing: border-box; display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 15px; background: #fff; box-shadow: 0 18px 42px #0a1a3838; font: 500 13px "Tikitaka UI", sans-serif; color: #25283c; }
+.professor-question-panel .question-panel__answer-readonly { padding-top: 20px; }
 .professor-question-panel__answer > p { margin: 14px 0 0; min-height: 0; overflow-x: hidden; overflow-y: auto; color: #292e3d; font-size: 15px; font-weight: 600; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .professor-question-panel__placeholder { position: absolute; left: 24px; right: 24px; top: 321px; margin: 0; text-align: center; color: #cbcbcb; font-size: 12px; font-weight: 500; }
 .professor-question-panel__input { bottom: 29px; height: 80px; padding: 10px 14px 30px; }
+.professor-question-panel__input--inline { position: static; width: 100%; margin-top: 20px; }
 .professor-question-panel__input textarea { width: 100%; height: 100%; padding: 0; resize: none; border: 0; outline: none; background: transparent; color: #292e3d; font: 500 12px/16px "Tikitaka UI", sans-serif; }
 .professor-question-panel__input textarea::placeholder { color: #cbcbcb; }
 .professor-question-panel__input button { position: absolute; right: 14px; bottom: 9px; padding: 0; border: 0; background: transparent; cursor: pointer; }
