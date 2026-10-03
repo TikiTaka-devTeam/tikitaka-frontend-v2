@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import searchIcon from "../../assets/icons/dashboard-search.svg";
+import refreshIcon from "../../assets/icons/members/refresh.svg";
 import notificationIcon from "../../assets/icons/dashboard-notification.svg";
 
 import homeIcon from "../../assets/icons/dashboard-home.svg";
@@ -113,36 +114,46 @@ export function UtilityToolbar({
   );
 }
 
-export function SearchToolbar({ value, onChange, onSubmit }) {
+export function SearchToolbar({ value, onChange, onSubmit, isSearching = false }) {
   function handleSubmit(event) {
     event.preventDefault();
     onSubmit?.();
   }
 
   return (
-    <form
-      className="dashboard-search-toolbar"
-      role="search"
-      onSubmit={handleSubmit}
-    >
-      <label className="sr-only" htmlFor="global-search">
-        통합 검색
-      </label>
+    <div className="dashboard-search-toolbar-wrap">
+      {isSearching ? (
+        <img
+          className="dashboard-search-toolbar__loading"
+          src={refreshIcon}
+          alt="검색 중"
+        />
+      ) : null}
 
-      <input
-        id="global-search"
-        name="query"
-        type="search"
-        placeholder="Space, 강의자료, 공지사항, 질문 검색"
-        value={value}
-        onChange={onChange}
-        autoFocus
-      />
+      <form
+        className="dashboard-search-toolbar"
+        role="search"
+        onSubmit={handleSubmit}
+      >
+        <label className="sr-only" htmlFor="global-search">
+          통합 검색
+        </label>
 
-      <button type="submit" aria-label="검색">
-        <img src={searchIcon} alt="" />
-      </button>
-    </form>
+        <input
+          id="global-search"
+          name="query"
+          type="search"
+          placeholder="Space, 강의자료, 공지사항, 질문 검색"
+          value={value}
+          onChange={onChange}
+          autoFocus
+        />
+
+        <button type="submit" aria-label="검색">
+          <img src={searchIcon} alt="" />
+        </button>
+      </form>
+    </div>
   );
 }
 

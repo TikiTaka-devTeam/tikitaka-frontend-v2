@@ -8,6 +8,10 @@ export async function searchAll(keyword, config = {}) {
   return response.data;
 }
 
+export async function saveRecentSearch(keyword) {
+  await apiClient.post("/search/recent", { keyword });
+}
+
 export async function getRecentSearches(config = {}) {
   const response = await apiClient.get("/search/recent", config);
   return response.data;
