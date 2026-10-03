@@ -90,25 +90,6 @@
 }
 
 .lecture-toolbar.lecture-toolbar--figma
-  .lecture-toolbar__button[data-tool="Q_POINT"]
-  .lecture-toolbar__icon {
-  overflow: hidden;
-}
-
-.lecture-toolbar.lecture-toolbar--figma
-  .lecture-toolbar__button[data-tool="Q_POINT"]
-  .lecture-toolbar__icon
-  img {
-  position: absolute;
-  left: -26px;
-  top: -16px;
-  width: 77px;
-  height: 77px;
-  max-width: none;
-  max-height: none;
-}
-
-.lecture-toolbar.lecture-toolbar--figma
   .lecture-toolbar__end-divider {
   width: 1px;
   height: 35px;
@@ -723,21 +704,23 @@
   display: block;
 }
 
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__question-point-svg {
+  width: calc(var(--lecture-u, 1px) * 25);
+  height: calc(var(--lecture-u, 1px) * 25);
+  display: block;
+  overflow: visible;
+}
+
+.lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__question-point-svg path {
+  shape-rendering: geometricPrecision;
+}
+
 .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__icon img {
   filter: none !important;
 }
 
 .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__color-svg {
   pointer-events: none;
-}
-
-.lecture-toolbar.lecture-toolbar--figma
-  .lecture-toolbar__button[data-tool="Q_POINT"]
-  .lecture-toolbar__icon img {
-  left: calc(var(--lecture-u, 1px) * -26);
-  top: calc(var(--lecture-u, 1px) * -16);
-  width: calc(var(--lecture-u, 1px) * 77);
-  height: calc(var(--lecture-u, 1px) * 77);
 }
 
 .lecture-toolbar.lecture-toolbar--figma .lecture-toolbar__end-divider {
