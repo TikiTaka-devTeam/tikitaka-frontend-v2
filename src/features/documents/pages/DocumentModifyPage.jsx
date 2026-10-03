@@ -352,6 +352,7 @@ function DocumentModifyPage() {
   const material = location.state?.material ?? {};
   const spaceName = location.state?.spaceName ?? "강의 Space";
   const initialDocumentName = material.title ?? material.fileName ?? "강의자료.pdf";
+  const [baseDocumentName, setBaseDocumentName] = useState(initialDocumentName);
   const [documentName, setDocumentName] = useState(initialDocumentName);
   const [documentNameDraft, setDocumentNameDraft] = useState(initialDocumentName);
   const [isEditingDocumentName, setIsEditingDocumentName] = useState(false);
@@ -377,6 +378,7 @@ function DocumentModifyPage() {
   const canUndo = Boolean(revisionSession?.can_undo ?? revisionSession?.canUndo);
   const canRedo = Boolean(revisionSession?.can_redo ?? revisionSession?.canRedo);
   const isRevisionEditable = revisionSession?.status === "EDITING";
+  const hasRevisionChanges = canUndo || documentName !== baseDocumentName;
   const isRevisionInteractionLocked = !isRevisionEditable
     || isApplyingRevisionOperation;
   const visiblePreviewPages = previewPages.filter(isVisiblePreviewPage);
@@ -481,6 +483,9 @@ function DocumentModifyPage() {
 
         setOriginalPdfDocument(pdf);
         baseOriginalPagesRef.current = nextPreviewPages;
+        if (!revisionPreviewRef.current) {
+          setBaseDocumentName(initialDocumentName);
+        }
 
         const restoredPages = revisionPreviewRef.current
           ? hydrateRevisionPreview(revisionPreviewRef.current, nextPreviewPages)
@@ -506,7 +511,7 @@ function DocumentModifyPage() {
       cancelled = true;
       loadingTask?.destroy();
     };
-  }, [documentId]);
+  }, [documentId, initialDocumentName]);
 
   useEffect(() => {
     if (!documentId) return;
@@ -579,6 +584,7 @@ function DocumentModifyPage() {
           if (normalizedRevision.title) {
             setDocumentName(normalizedRevision.title);
             setDocumentNameDraft(normalizedRevision.title);
+            setBaseDocumentName(normalizedRevision.title);
           }
 
           const restoredPages = hydrateRevisionPreview(
@@ -1637,7 +1643,7 @@ function DocumentModifyPage() {
         <button
           type="button"
           aria-label="저장"
-          disabled={!isRevisionEditable || isApplyingRevisionOperation}
+          disabled={!isRevisionEditable || !hasRevisionChanges || isApplyingRevisionOperation}
           onClick={() => {
             setSaveModalError("");
             setSaveModalStep("confirm");

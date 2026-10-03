@@ -1,5 +1,5 @@
-.slide-change-notice { position: absolute; left: 30px; bottom: 15px; z-index: 12; width: min(378px, calc(100% - 60px)); min-height: 35px; padding: 6px 14px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; border: 1px solid #dee3ed; border-radius: 18px; background: #fff; box-shadow: 0 10px 26px #14244712; pointer-events: auto; }
-.slide-change-notice > span { color: #e24b63; font-size: 16px; font-weight: 600; }
+.slide-change-notice { position: absolute; left: 30px; bottom: 15px; z-index: 12; width: max-content; max-width: calc(100vw - 60px); min-height: 35px; padding: 6px 14px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; border: 1px solid #dee3ed; border-radius: 18px; background: #fff; box-shadow: 0 10px 26px #14244712; pointer-events: auto; }
+.slide-change-notice > span { color: #e24b63; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .slide-change-notice > strong { color: #2a313f; font-size: 14px; font-weight: 600; white-space: nowrap; }
 .slide-change-notice > button { display: grid; place-items: center; margin-left: auto; padding: 0; border: 0; background: transparent; flex: 0 0 20px; cursor: pointer; }
 .slide-change-notice img { display: block; }

@@ -530,6 +530,19 @@
   -webkit-backdrop-filter: none;
 }
 
+/* Keep the student question panel above the fixed slide pagination. */
+.lecture-page.is-panel-open
+  .question-panel--student-list {
+  height: calc(100dvh - 174px) !important;
+  min-height: 0 !important;
+}
+
+.lecture-page.is-panel-open
+  .question-panel--list.professor-question-panel {
+  height: calc(100dvh - 174px) !important;
+  min-height: 0 !important;
+}
+
 @media (
   max-width: 980px
 ) and (
