@@ -140,7 +140,52 @@ function WeeklyTimetable({
       }}
       aria-label={`${semesterLabel} 주간 시간표`}
     >
-      <div className="dashboard-timetable__header-wash" aria-hidden="true" />
+      <div className="dashboard-timetable__sticky-header">
+        <div className="dashboard-timetable__header-wash" aria-hidden="true" />
+
+        <button
+          className="dashboard-timetable__day-control dashboard-timetable__day-control--previous"
+          type="button"
+          aria-label="이전 날짜 보기"
+          onClick={() =>
+            setMobileDayAnchor((dayIndex) =>
+              Math.max(0, (dayIndex ?? todayIndex) - 1),
+            )
+          }
+          disabled={!isMobile || currentMobileDay === 0}
+        >
+          ‹
+        </button>
+        <button
+          className="dashboard-timetable__day-control dashboard-timetable__day-control--next"
+          type="button"
+          aria-label="다음 날짜 보기"
+          onClick={() =>
+            setMobileDayAnchor((dayIndex) =>
+              Math.min(6, (dayIndex ?? todayIndex) + 1),
+            )
+          }
+          disabled={!isMobile || currentMobileDay === 6}
+        >
+          ›
+        </button>
+
+        <div className="dashboard-timetable__corner">시간</div>
+        {visibleDayIndexes.map((dayIndex, index) => (
+          <div
+            className={`dashboard-timetable__day${dayIndex === todayIndex ? " is-today" : ""}`}
+            style={{
+              "--day-index": index,
+              "--day-left": `${TIME_LABEL_WIDTH + index * dayWidth}px`,
+            }}
+            key={DAY_LABELS[dayIndex]}
+          >
+            {WEEK_DAYS[dayIndex]}
+            {dayIndex === todayIndex ? <span aria-hidden="true" /> : null}
+          </div>
+        ))}
+      </div>
+
       {todayVisibleIndex >= 0 ? (
         <div
           className="dashboard-timetable__today"
@@ -151,44 +196,6 @@ function WeeklyTimetable({
           aria-hidden="true"
         />
       ) : null}
-
-      <button
-        className="dashboard-timetable__day-control dashboard-timetable__day-control--previous"
-        type="button"
-        aria-label="이전 날짜 보기"
-        onClick={() =>
-          setMobileDayAnchor((dayIndex) => Math.max(0, (dayIndex ?? todayIndex) - 1))
-        }
-        disabled={!isMobile || currentMobileDay === 0}
-      >
-        ‹
-      </button>
-      <button
-        className="dashboard-timetable__day-control dashboard-timetable__day-control--next"
-        type="button"
-        aria-label="다음 날짜 보기"
-        onClick={() =>
-          setMobileDayAnchor((dayIndex) => Math.min(6, (dayIndex ?? todayIndex) + 1))
-        }
-        disabled={!isMobile || currentMobileDay === 6}
-      >
-        ›
-      </button>
-
-      <div className="dashboard-timetable__corner">시간</div>
-      {visibleDayIndexes.map((dayIndex, index) => (
-        <div
-          className={`dashboard-timetable__day${dayIndex === todayIndex ? " is-today" : ""}`}
-          style={{
-            "--day-index": index,
-            "--day-left": `${TIME_LABEL_WIDTH + index * dayWidth}px`,
-          }}
-          key={DAY_LABELS[dayIndex]}
-        >
-          {WEEK_DAYS[dayIndex]}
-          {dayIndex === todayIndex ? <span aria-hidden="true" /> : null}
-        </div>
-      ))}
 
       <div className="dashboard-timetable__grid" aria-hidden="true">
         {Array.from({ length: visibleDayIndexes.length + 1 }, (_, index) => (
