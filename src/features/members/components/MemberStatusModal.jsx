@@ -17,33 +17,42 @@ function MemberStatusModal({
   onConfirm,
 }) {
   const isApproval = action === "approval";
+  const isDenial = action === "denial";
   const isPermission = action === "permission";
   const isComplete = step === "complete";
   const modalId = `member-${action}-${step}-modal`;
-  const title = isPermission
+  const title = isDenial
     ? isComplete
-      ? "저장되었습니다"
-      : "저장하시겠습니까?"
-    : isApproval
+      ? "거절되었습니다"
+      : "거절하시겠습니까?"
+    : isPermission
       ? isComplete
-        ? "승인되었습니다"
-        : "승인하시겠습니까?"
-      : isComplete
-        ? "삭제되었습니다"
-        : "내보내시겠습니까?";
+        ? "저장되었습니다"
+        : "저장하시겠습니까?"
+      : isApproval
+        ? isComplete
+          ? "승인되었습니다"
+          : "승인하시겠습니까?"
+        : isComplete
+          ? "삭제되었습니다"
+          : "내보내시겠습니까?";
   const confirmText = isComplete
     ? "확인"
     : isSubmitting
       ? isApproval
         ? "승인 중"
-        : isPermission
-          ? "저장 중"
-          : "처리 중"
-      : isApproval
-        ? "승인"
-        : isPermission
-          ? "저장"
-          : "내보내기";
+        : isDenial
+          ? "거절 중"
+          : isPermission
+            ? "저장 중"
+            : "처리 중"
+      : isDenial
+        ? "거절"
+        : isApproval
+          ? "승인"
+          : isPermission
+            ? "저장"
+            : "내보내기";
 
   return (
     <CompactModal
@@ -59,7 +68,7 @@ function MemberStatusModal({
             src={assistantSaveIcon}
             alt=""
           />
-        ) : !isApproval && !isPermission && !isComplete ? (
+        ) : !isApproval && !isDenial && !isPermission && !isComplete ? (
           <LogoutIcon className="member-status-modal__logout-icon" />
         ) : (
           <span

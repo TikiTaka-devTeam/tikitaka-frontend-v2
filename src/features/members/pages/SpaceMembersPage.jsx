@@ -19,6 +19,7 @@ import MemberStatusModal from "../components/MemberStatusModal.jsx";
 import {
   approveSpaceJoinRequests,
   deleteSpaceMember,
+  denySpaceJoinRequests,
   getSpaceInviteCode,
   getSpaceJoinRequests,
   getSpaceMemberDetail,
@@ -149,7 +150,6 @@ function SpaceMembersPage() {
   const { spaceId } = useParams();
   const userRole = readUserRole();
   const isProfessor = userRole === "PROFESSOR";
-  const isStudent = userRole === "STUDENT";
   const spaceName = location.state?.spaceName || "Space";
   const [currentUser, setCurrentUser] = useState(() => readStoredUser());
   const [members, setMembers] = useState([]);
@@ -173,6 +173,10 @@ function SpaceMembersPage() {
   const [approvalModalStep, setApprovalModalStep] = useState(null);
   const [approvalTargets, setApprovalTargets] = useState([]);
   const [approvalError, setApprovalError] = useState("");
+  const [isDenyingJoinRequests, setIsDenyingJoinRequests] = useState(false);
+  const [denialModalStep, setDenialModalStep] = useState(null);
+  const [denialTargets, setDenialTargets] = useState([]);
+  const [denialError, setDenialError] = useState("");
   const [kickModalStep, setKickModalStep] = useState(null);
   const [kickTarget, setKickTarget] = useState(null);
   const [kickError, setKickError] = useState("");
@@ -195,13 +199,13 @@ function SpaceMembersPage() {
   );
   const currentSpaceMemberId = currentSpaceMember?.id;
   const isCurrentUserAssistant =
-    isStudent && currentSpaceMember?.role === "ASSISTANT";
+    !isProfessor && currentSpaceMember?.role === "ASSISTANT";
   const canManageMembers =
     isProfessor ||
     (isCurrentUserAssistant && assistantPermissions.includes("MEMBER_MANAGE"));
 
   useEffect(() => {
-    if (!isStudent) return undefined;
+    if (isProfessor) return undefined;
 
     let isActive = true;
 
@@ -221,7 +225,7 @@ function SpaceMembersPage() {
     return () => {
       isActive = false;
     };
-  }, [isStudent]);
+  }, [isProfessor]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -380,6 +384,16 @@ function SpaceMembersPage() {
     setApprovalModalStep("confirm");
   }
 
+  function handleOpenDenialModal() {
+    if (selectedJoinRequestIds.length === 0) return;
+
+    setDenialTargets(
+      joinRequests.filter((request) => selectedJoinRequestIds.includes(request.id)),
+    );
+    setDenialError("");
+    setDenialModalStep("confirm");
+  }
+
   async function handleConfirmApproval() {
     if (approvalTargets.length === 0 || isApprovingJoinRequests) return;
 
@@ -423,6 +437,38 @@ function SpaceMembersPage() {
     setApprovalError("");
   }
 
+  async function handleConfirmDenial() {
+    if (denialTargets.length === 0 || isDenyingJoinRequests) return;
+
+    const deniedIds = denialTargets.map((request) => request.id);
+    setIsDenyingJoinRequests(true);
+    setDenialError("");
+
+    try {
+      await denySpaceJoinRequests(spaceId, deniedIds);
+      setJoinRequests((previous) =>
+        previous.filter((request) => !deniedIds.includes(request.id)),
+      );
+      setSelectedJoinRequestIds([]);
+      setDenialModalStep("complete");
+    } catch (error) {
+      setDenialError(
+        error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "선택한 참여 요청을 거절하지 못했습니다.",
+      );
+    } finally {
+      setIsDenyingJoinRequests(false);
+    }
+  }
+
+  function handleCloseDenialModal() {
+    if (isDenyingJoinRequests) return;
+    setDenialModalStep(null);
+    setDenialTargets([]);
+    setDenialError("");
+  }
+
   async function handleAutoApproveChange() {
     if (isUpdatingAutoApprove) return;
 
@@ -464,7 +510,7 @@ function SpaceMembersPage() {
 
   async function handleSelectMember(member) {
     if (!member.id || isDetailLoading) return;
-    const hasStudentDetailRestriction = isStudent && !canManageMembers;
+    const hasStudentDetailRestriction = !isProfessor && !canManageMembers;
     if (
       hasStudentDetailRestriction &&
       member.role !== "PROFESSOR" &&
@@ -629,7 +675,7 @@ function SpaceMembersPage() {
   }
 
   function handleOpenKickModal() {
-    if (!selectedMember?.id || !isProfessor) return;
+    if (!canKickSelectedMember) return;
     setKickTarget(selectedMember);
     setKickError("");
     setKickModalStep("confirm");
@@ -673,7 +719,16 @@ function SpaceMembersPage() {
     isProfessor &&
     selectedMember &&
     ["STUDENT", "ASSISTANT"].includes(selectedMember.role);
-  const hasStudentDetailRestriction = isStudent && !canManageMembers;
+  const canKickSelectedMember = Boolean(
+    canManageMembers &&
+      selectedMember?.role === "STUDENT" &&
+      !isOwnMember(selectedMember, currentUser),
+  ) || Boolean(
+    isProfessor &&
+      selectedMember?.role === "ASSISTANT" &&
+      !isOwnMember(selectedMember, currentUser),
+  );
+  const hasStudentDetailRestriction = !isProfessor && !canManageMembers;
   const isViewingOwnAssistantProfile =
     isCurrentUserAssistant && selectedMember?.id === currentSpaceMemberId;
 
@@ -803,14 +858,24 @@ function SpaceMembersPage() {
                   수강 신청을 확인하고 강의 참여 권한을 관리하세요
                 </p>
                 {joinRequests.length > 0 ? (
-                  <button
-                    type="button"
-                    className="member-management__selected-approve"
-                    disabled={selectedJoinRequestIds.length === 0}
-                    onClick={handleOpenApprovalModal}
-                  >
-                    선택 승인
-                  </button>
+                  <div className="member-management__selected-actions">
+                    <button
+                      type="button"
+                      className="member-management__selected-deny"
+                      disabled={selectedJoinRequestIds.length === 0}
+                      onClick={handleOpenDenialModal}
+                    >
+                      선택 거절
+                    </button>
+                    <button
+                      type="button"
+                      className="member-management__selected-approve"
+                      disabled={selectedJoinRequestIds.length === 0}
+                      onClick={handleOpenApprovalModal}
+                    >
+                      선택 승인
+                    </button>
+                  </div>
                 ) : null}
                 <div className="member-management__divider member-management__divider--top" aria-hidden="true" />
 
@@ -939,18 +1004,22 @@ function SpaceMembersPage() {
                     <dd>{formatJoinedDate(selectedMember.joinedAt)}</dd>
                   </div>
                 </dl>
-                {canManageSelectedMember ? (
+                {canManageSelectedMember || canKickSelectedMember ? (
                   <div className="member-detail__actions">
-                    <button type="button" onClick={handleOpenPermissionModal}>
-                      권한
-                    </button>
-                    <button
-                      type="button"
-                      className="member-detail__kick"
-                      onClick={handleOpenKickModal}
-                    >
-                      추방
-                    </button>
+                    {canManageSelectedMember ? (
+                      <button type="button" onClick={handleOpenPermissionModal}>
+                        권한
+                      </button>
+                    ) : null}
+                    {canKickSelectedMember ? (
+                      <button
+                        type="button"
+                        className="member-detail__kick"
+                        onClick={handleOpenKickModal}
+                      >
+                        추방
+                      </button>
+                    ) : null}
                   </div>
                 ) : isViewingOwnAssistantProfile ? (
                   <div className="member-detail__actions">
@@ -983,6 +1052,26 @@ function SpaceMembersPage() {
             approvalModalStep === "complete"
               ? handleCloseApprovalModal
               : handleConfirmApproval
+          }
+        />
+      ) : null}
+
+      {denialModalStep ? (
+        <MemberStatusModal
+          action="denial"
+          step={denialModalStep}
+          description={
+            denialModalStep === "complete"
+              ? `${formatRequestSummary(denialTargets)}의 참여 신청을 거절했습니다.`
+              : formatRequestSummary(denialTargets)
+          }
+          errorMessage={denialError}
+          isSubmitting={isDenyingJoinRequests}
+          onCancel={handleCloseDenialModal}
+          onConfirm={
+            denialModalStep === "complete"
+              ? handleCloseDenialModal
+              : handleConfirmDenial
           }
         />
       ) : null}

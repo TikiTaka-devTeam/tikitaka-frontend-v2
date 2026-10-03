@@ -26,6 +26,10 @@
   background: #fff2f2;
 }
 
+.member-status-modal--denial .member-status-modal__icon-box {
+  background: #fff2f2;
+}
+
 .member-status-modal__check-icon {
   width: 18px;
   height: 13px;
@@ -40,6 +44,10 @@
 }
 
 .member-status-modal--kick .member-status-modal__check-icon {
+  background: #e24b63;
+}
+
+.member-status-modal--denial .member-status-modal__check-icon {
   background: #e24b63;
 }
 
