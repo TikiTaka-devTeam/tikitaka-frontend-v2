@@ -129,6 +129,9 @@ function SearchSection({ children, count, title, variant }) {
       <header className="search-section__heading">
         <h2>{title}</h2>
         {count !== undefined ? <span>{count}</span> : null}
+        {variant === "questions" ? (
+          <span> 좌우로 스크롤하시면 4개 이상의 질문을 확인할 수 있습니다. </span>
+        ) : null}
       </header>
       {children}
     </section>
