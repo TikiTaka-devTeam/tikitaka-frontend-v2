@@ -647,7 +647,25 @@ export default function useLectureQuestions({
 
       const targetIndex = findQuestionSlideIndex(slides, detail);
       if (targetIndex < 0) {
-        setToast?.("질문이 작성된 페이지를 현재 강의자료에서 찾을 수 없습니다.");
+        const hasSlide = detail.slide?.slide_id != null || detail.slide?.id != null;
+
+        if (hasSlide) {
+          setToast?.("질문이 작성된 페이지를 현재 강의자료에서 찾을 수 없습니다.");
+          return;
+        }
+
+        // Questions created from the archive have no slide/pin by design.
+        // Keep them selectable in the lecture panel's document-wide list.
+        setQuestionScope("DOCUMENT");
+        setSelectedQuestion(detail);
+        setDocumentQuestions((previous) => mergeQuestion(previous, detail));
+        setToast?.("질문 페이지에서 작성한 질문입니다.");
+
+        const documentQuestionList = await loadDocumentQuestions();
+        if (requestId !== selectionRequestRef.current) return;
+        setDocumentQuestions((previous) =>
+          mergeQuestion(documentQuestionList ?? previous, detail),
+        );
         return;
       }
       const targetSlideId = slides[targetIndex].id;
