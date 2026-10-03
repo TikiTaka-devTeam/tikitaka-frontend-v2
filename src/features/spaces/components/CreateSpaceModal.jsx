@@ -37,7 +37,7 @@ function formatTimeInput(value) {
   return `${digits.slice(0, 2)} : ${digits.slice(2)}`;
 }
 
-function isValidTime(value) {
+function isValidTime(value, allowEndOfDay = false) {
   const digits = value.replace(/\D/g, "");
 
   if (digits.length !== 4) {
@@ -47,6 +47,10 @@ function isValidTime(value) {
   const hour = Number(digits.slice(0, 2));
 
   const minute = Number(digits.slice(2, 4));
+
+  if (allowEndOfDay && hour === 24) {
+    return minute === 0;
+  }
 
   return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
 }
@@ -285,7 +289,7 @@ function CreateSpaceModal({ initialData = null, onClose, onSave }) {
     (block) =>
       block.days.length >= 1 &&
       isValidTime(block.startTime) &&
-      isValidTime(block.endTime),
+      isValidTime(block.endTime, true),
   );
 
   const isFormComplete =
