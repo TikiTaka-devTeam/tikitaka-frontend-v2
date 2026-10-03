@@ -18,6 +18,10 @@ import MaterialSaveCompleteModal from "../components/MaterialSaveCompleteModal.j
 import MaterialSaveConfirmModal from "../components/MaterialSaveConfirmModal.jsx";
 import MaterialUploadModal from "../components/MaterialUploadModal.jsx";
 import SpaceToolbar from "../components/SpaceToolbar.jsx";
+import {
+  getSpaceMemberPermissions,
+  getSpaceMembers,
+} from "../../members/api/membersApi.js";
 
 import {
   deleteDocument,
@@ -78,11 +82,45 @@ function readUserRole() {
   }
 }
 
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("tikitaka_user") || "null") || {};
+  } catch {
+    return {};
+  }
+}
+
+function isCurrentSpaceMember(member, user) {
+  const memberId = String(member?.member_id ?? member?.id ?? "");
+  const userIds = [
+    user?.member_id,
+    user?.memberId,
+    user?.space_member_id,
+    user?.spaceMemberId,
+    user?.user_id,
+    user?.userId,
+    user?.id,
+  ].filter(Boolean).map(String);
+  const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+  const userNumber = String(
+    user?.member_id_number ?? user?.memberIdNumber ??
+    user?.student_number ?? user?.studentNumber ?? "",
+  );
+
+  return Boolean(
+    (memberId && userIds.includes(memberId)) ||
+    (memberNumber && userNumber && memberNumber === userNumber),
+  );
+}
+
 function SpaceLecturePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { spaceId } = useParams();
   const isProfessor = readUserRole() === "PROFESSOR";
+  const [currentSpaceRole, setCurrentSpaceRole] = useState(isProfessor ? "PROFESSOR" : "STUDENT");
+  const [hasLectureMaterialManagePermission, setHasLectureMaterialManagePermission] = useState(false);
+  const canManageMaterials = isProfessor || hasLectureMaterialManagePermission;
   const spaceName = location.state?.spaceName || "Space";
   const [materialModalStep, setMaterialModalStep] = useState(null);
   const [pendingMaterial, setPendingMaterial] = useState(null);
@@ -101,6 +139,50 @@ function SpaceLecturePage() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("latest");
   const scrollIndicatorTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (isProfessor) return undefined;
+
+    setCurrentSpaceRole("STUDENT");
+    setHasLectureMaterialManagePermission(false);
+    const controller = new AbortController();
+
+    async function loadLectureMaterialPermission() {
+      try {
+        const memberData = await getSpaceMembers(spaceId, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        const currentMember = (memberData?.members ?? []).find((member) =>
+          isCurrentSpaceMember(member, readStoredUser()),
+        );
+        const memberId = currentMember?.member_id ?? currentMember?.id;
+        const memberRole = String(currentMember?.role ?? "STUDENT").toUpperCase();
+        setCurrentSpaceRole(memberRole);
+        if (memberRole !== "ASSISTANT" || !memberId) {
+          setHasLectureMaterialManagePermission(false);
+          return;
+        }
+
+        const permissionData = await getSpaceMemberPermissions(
+          spaceId,
+          memberId,
+          { signal: controller.signal },
+        );
+        if (!controller.signal.aborted) {
+          setHasLectureMaterialManagePermission(
+            Array.isArray(permissionData?.permissions) &&
+              permissionData.permissions.includes("LECTURE_MATERIAL_MANAGE"),
+          );
+        }
+      } catch (error) {
+        if (error.code !== "ERR_CANCELED") {
+          setHasLectureMaterialManagePermission(false);
+        }
+      }
+    }
+
+    loadLectureMaterialPermission();
+    return () => controller.abort();
+  }, [isProfessor, spaceId]);
 
   useEffect(() => {
     const controller =
@@ -296,6 +378,7 @@ function SpaceLecturePage() {
     async () => {
       if (
         !pendingMaterial ||
+        !canManageMaterials ||
         isUploadingMaterial
       ) {
         return;
@@ -421,9 +504,7 @@ function SpaceLecturePage() {
       return;
     }
 
-    const rolePath = isProfessor
-      ? "professor"
-      : "student";
+    const rolePath = currentSpaceRole.toLowerCase();
 
     navigate(
       `/spaces/${spaceId}/documents/${material.id}/lecture/${rolePath}`,
@@ -459,6 +540,7 @@ function SpaceLecturePage() {
   const openEditModal = (
     material,
   ) => {
+    if (!canManageMaterials) return;
     setOpenMaterialMenuId(null);
 
     navigate(
@@ -475,6 +557,7 @@ function SpaceLecturePage() {
   const openDeleteModal = (
     material,
   ) => {
+    if (!canManageMaterials) return;
     setSelectedMaterial(
       material,
     );
@@ -489,6 +572,7 @@ function SpaceLecturePage() {
     async () => {
       if (
         !selectedMaterial ||
+        !canManageMaterials ||
         isDeletingMaterial
       ) {
         return;
@@ -679,7 +763,7 @@ function SpaceLecturePage() {
           aria-label={`${spaceName} 강의자료`}
           data-space-id={spaceId}
         >
-          {isProfessor &&
+          {canManageMaterials &&
             !isLoadingMaterials &&
             !materialsLoadError && (
               <button
@@ -794,7 +878,7 @@ function SpaceLecturePage() {
                       페이지
                     </small>
 
-                    {isProfessor && (
+                    {canManageMaterials && (
                       <div
                         className="lecture-material-card__menu-wrapper"
                         onClick={(
@@ -885,7 +969,7 @@ function SpaceLecturePage() {
               ),
             )}
 
-          {!isProfessor &&
+          {!canManageMaterials &&
             !isLoadingMaterials &&
             !materialsLoadError &&
             materials.length ===
@@ -904,7 +988,7 @@ function SpaceLecturePage() {
         />
       </div>
 
-      {isProfessor &&
+      {canManageMaterials &&
         materialModalStep ===
           "form" && (
           <MaterialUploadModal
@@ -930,7 +1014,7 @@ function SpaceLecturePage() {
           />
         )}
 
-      {isProfessor &&
+      {canManageMaterials &&
         materialModalStep ===
           "confirm" &&
         pendingMaterial && (
@@ -962,7 +1046,7 @@ function SpaceLecturePage() {
           />
         )}
 
-      {isProfessor &&
+      {canManageMaterials &&
         materialModalStep ===
           "complete" && (
           <MaterialSaveCompleteModal
@@ -975,7 +1059,7 @@ function SpaceLecturePage() {
           />
         )}
 
-      {isProfessor &&
+      {canManageMaterials &&
         deleteModalStep ===
           "confirm" &&
         selectedMaterial && (
@@ -1009,7 +1093,7 @@ function SpaceLecturePage() {
           />
         )}
 
-      {isProfessor &&
+      {canManageMaterials &&
         deleteModalStep ===
           "complete" && (
           <DeleteCompleteModal

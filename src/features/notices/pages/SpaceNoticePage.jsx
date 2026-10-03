@@ -24,6 +24,10 @@ import {
 } from "../../../components/common/AppToolbars.jsx";
 
 import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
+import {
+  getSpaceMemberPermissions,
+  getSpaceMembers,
+} from "../../members/api/membersApi.js";
 
 import {
   deleteSpaceNotice,
@@ -124,12 +128,38 @@ function isNoticeWriterRole(
     ).toUpperCase();
 
   return (
-    normalizedRole.includes(
-      "PROFESSOR",
-    ) ||
-    normalizedRole.includes(
-      "ASSISTANT",
-    )
+    normalizedRole.includes("PROFESSOR")
+  );
+}
+
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("tikitaka_user") || "null") || {};
+  } catch {
+    return {};
+  }
+}
+
+function isCurrentSpaceMember(member, user) {
+  const memberId = String(member?.member_id ?? member?.id ?? "");
+  const userIds = [
+    user?.member_id,
+    user?.memberId,
+    user?.space_member_id,
+    user?.spaceMemberId,
+    user?.user_id,
+    user?.userId,
+    user?.id,
+  ].filter(Boolean).map(String);
+  const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+  const userNumber = String(
+    user?.member_id_number ?? user?.memberIdNumber ??
+    user?.student_number ?? user?.studentNumber ?? "",
+  );
+
+  return Boolean(
+    (memberId && userIds.includes(memberId)) ||
+    (memberNumber && userNumber && memberNumber === userNumber),
   );
 }
 
@@ -447,7 +477,7 @@ function SpaceNoticePage() {
     location.state?.spaceName ||
     "Space";
 
-  const showCreateButton =
+  const isProfessor =
     useMemo(
       () =>
         canWriteNotice(
@@ -457,6 +487,50 @@ function SpaceNoticePage() {
         location.state,
       ],
     );
+  const [hasNoticeManagePermission, setHasNoticeManagePermission] = useState(null);
+  const showCreateButton = isProfessor || hasNoticeManagePermission === true;
+
+  useEffect(() => {
+    if (isProfessor) {
+      setHasNoticeManagePermission(true);
+      return undefined;
+    }
+
+    setHasNoticeManagePermission(null);
+    const controller = new AbortController();
+
+    async function loadNoticeManagePermission() {
+      try {
+        const memberData = await getSpaceMembers(spaceId, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        const currentMember = (memberData?.members ?? []).find((member) =>
+          isCurrentSpaceMember(member, readStoredUser()),
+        );
+        const memberId = currentMember?.member_id ?? currentMember?.id;
+        if (String(currentMember?.role ?? "").toUpperCase() !== "ASSISTANT" || !memberId) {
+          setHasNoticeManagePermission(false);
+          return;
+        }
+
+        const permissionData = await getSpaceMemberPermissions(
+          spaceId,
+          memberId,
+          { signal: controller.signal },
+        );
+        if (!controller.signal.aborted) {
+          setHasNoticeManagePermission(
+            Array.isArray(permissionData?.permissions) &&
+              permissionData.permissions.includes("NOTICE_MANAGE"),
+          );
+        }
+      } catch (error) {
+        if (error.code !== "ERR_CANCELED") setHasNoticeManagePermission(false);
+      }
+    }
+
+    loadNoticeManagePermission();
+    return () => controller.abort();
+  }, [isProfessor, spaceId]);
 
   const mode =
     searchParams.get(
@@ -1019,6 +1093,7 @@ function SpaceNoticePage() {
 
   function handleEditNotice() {
     if (
+      !showCreateButton ||
       !selectedNotice
     ) {
       return;
@@ -1041,6 +1116,7 @@ function SpaceNoticePage() {
 
   function handleDeleteNotice() {
     if (
+      !showCreateButton ||
       !selectedNotice
     ) {
       return;
@@ -1077,6 +1153,7 @@ function SpaceNoticePage() {
 
   async function handleConfirmDelete() {
     if (
+      !showCreateButton ||
       !selectedNotice ||
       isDeleting
     ) {
@@ -1222,6 +1299,18 @@ function SpaceNoticePage() {
 
     setEditingNotice(
       null,
+    );
+  }
+
+  if ((isCreateMode || isEditMode) && !showCreateButton) {
+    return (
+      <main className="notice-create-page">
+        <div className="notice-create-edit-loading">
+          {hasNoticeManagePermission === null
+            ? "공지사항 관리 권한을 확인하는 중입니다."
+            : "공지사항 관리 권한이 없습니다."}
+        </div>
+      </main>
     );
   }
 

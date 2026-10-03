@@ -496,23 +496,40 @@
   line-height: 19px;
 }
 
-.member-management__selected-approve {
+.member-management__selected-actions {
   position: absolute;
   top: 60px;
   right: 38px;
+  display: flex;
+  gap: 8px;
+}
+
+.member-management__selected-approve,
+.member-management__selected-deny {
   width: 96px;
   height: 34px;
   padding: 0;
-  border: 0;
+  border: 1px solid #2e6bff;
   border-radius: 12px;
-  background: #2e6bff;
-  color: #ffffff;
+  background: #ffffff;
+  color: #2e6bff;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
 
+.member-management__selected-approve {
+  background: #2e6bff;
+  color: #ffffff;
+}
+
+.member-management__selected-deny {
+  border-color: #e24b63;
+  color: #e24b63;
+}
+
 .member-management__selected-approve:disabled,
+.member-management__selected-deny:disabled,
 .member-management__switch:disabled {
   cursor: default;
   opacity: 0.55;
@@ -731,6 +748,7 @@
 }
 
 .member-management__selected-approve:focus-visible,
+.member-management__selected-deny:focus-visible,
 .member-management__request-header input:focus-visible,
 .member-management__request input:focus-visible,
 .member-management__switch:focus-visible,

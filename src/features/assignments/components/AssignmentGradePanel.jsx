@@ -139,6 +139,7 @@ function triggerDownloadUrl(
 function AssignmentGradePanel({
   assignment,
   mode = "grade",
+  canFinalizeGrades = true,
   onCancel,
   onFinalized,
   onEditSaved,
@@ -498,6 +499,12 @@ function AssignmentGradePanel({
     );
   }
 
+  function handleRequestDraftSave() {
+    if (isSaving || !assignmentId || validateScores() === null) return;
+    setError("");
+    setGradeModalStep("confirm");
+  }
+
   function handleCancelFinalize() {
     if (
       isSaving
@@ -602,6 +609,33 @@ function AssignmentGradePanel({
     }
   }
 
+  async function handleConfirmDraftSave() {
+    if (isSaving || !assignmentId) return;
+    const numericMaxScore = validateScores();
+    if (numericMaxScore === null) {
+      setGradeModalStep(null);
+      return;
+    }
+    setIsSaving(true);
+    setError("");
+    try {
+      if (String(maxScore) !== String(initialMaxScore)) {
+        await updateAssignmentMaxScore(assignmentId, numericMaxScore);
+      }
+      await saveAssignmentGrades(assignmentId, buildGrades());
+      const updatedSubmissions = buildUpdatedSubmissions();
+      setSubmissions(updatedSubmissions);
+      setInitialScores({ ...scores });
+      setInitialMaxScore(String(maxScore));
+      setGradeModalStep("success");
+    } catch (requestError) {
+      setGradeModalStep(null);
+      setError(getApiErrorMessage(requestError, "임시 성적 저장에 실패했습니다."));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   function handleFinalizeSuccess() {
     const updatedSubmissions =
       buildUpdatedSubmissions();
@@ -621,6 +655,16 @@ function AssignmentGradePanel({
 
       submissions:
         updatedSubmissions,
+    });
+  }
+
+  function handleDraftSaveSuccess() {
+    const updatedSubmissions = buildUpdatedSubmissions();
+    setGradeModalStep(null);
+    onFinalized?.({
+      grading_status: "DRAFT",
+      max_score: Number(maxScore),
+      submissions: updatedSubmissions,
     });
   }
 
@@ -1144,7 +1188,9 @@ function AssignmentGradePanel({
               onClick={
                 isGradeEdit
                   ? handleRequestEditSave
-                  : handleRequestFinalize
+                  : canFinalizeGrades
+                    ? handleRequestFinalize
+                    : handleRequestDraftSave
               }
             >
               {isSaving
@@ -1160,7 +1206,7 @@ function AssignmentGradePanel({
       </section>
 
       <AssignmentManageModal
-        action={isGradeEdit ? "gradeEdit" : "grade"}
+        action={isGradeEdit ? "gradeEdit" : canFinalizeGrades ? "grade" : "gradeDraft"}
         step={
           gradeModalStep ??
           "confirm"
@@ -1180,10 +1226,14 @@ function AssignmentGradePanel({
           "success"
             ? isGradeEdit
               ? handleEditSuccess
-              : handleFinalizeSuccess
+              : canFinalizeGrades
+                ? handleFinalizeSuccess
+                : handleDraftSaveSuccess
             : isGradeEdit
               ? handleConfirmEditSave
-              : handleConfirmFinalize
+              : canFinalizeGrades
+                ? handleConfirmFinalize
+                : handleConfirmDraftSave
         }
       />
 

@@ -6,6 +6,7 @@ import questionIcon from "../../../assets/icons/space/space-question.svg";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getSpaceMemberPermissions, getSpaceMembers } from "../../members/api/membersApi.js";
 
 import "../styles/spaceToolbar.css";
 
@@ -61,6 +62,18 @@ function readUserRole() {
   }
 }
 
+function readStoredUser() {
+  try { return JSON.parse(localStorage.getItem("tikitaka_user") || "null") || {}; } catch { return {}; }
+}
+
+function isCurrentSpaceMember(member, user) {
+  const memberId = String(member?.member_id ?? member?.id ?? "");
+  const userIds = [user?.member_id, user?.memberId, user?.space_member_id, user?.spaceMemberId, user?.user_id, user?.userId, user?.id].filter(Boolean).map(String);
+  const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+  const userNumber = String(user?.member_id_number ?? user?.memberIdNumber ?? user?.student_number ?? user?.studentNumber ?? "");
+  return Boolean((memberId && userIds.includes(memberId)) || (memberNumber && userNumber && memberNumber === userNumber));
+}
+
 function SpaceToolbar({
   activeItem = "lecture",
   spaceId,
@@ -77,7 +90,7 @@ function SpaceToolbar({
   const isProfessor =
     readUserRole() === "PROFESSOR";
 
-  const handleNavigation = (itemId) => {
+  const handleNavigation = async (itemId) => {
     if (
       !spaceId ||
       isNavigating ||
@@ -86,10 +99,25 @@ function SpaceToolbar({
       return;
     }
 
+    let assignmentManager = isProfessor;
+    if (itemId === "assignment" && !isProfessor) {
+      try {
+        const memberResponse = await getSpaceMembers(spaceId);
+        const member = (memberResponse?.members ?? []).find((item) => isCurrentSpaceMember(item, readStoredUser()));
+        const memberId = member?.member_id ?? member?.id;
+        if (String(member?.role ?? "").toUpperCase() === "ASSISTANT" && memberId) {
+          const permissionResponse = await getSpaceMemberPermissions(spaceId, memberId);
+          assignmentManager = Array.isArray(permissionResponse?.permissions) && permissionResponse.permissions.includes("ASSIGNMENT_MANAGE");
+        }
+      } catch {
+        assignmentManager = false;
+      }
+    }
+
     const destinations = {
       lecture: `/spaces/${spaceId}`,
       notice: `/spaces/${spaceId}/notices`,
-      assignment: isProfessor
+      assignment: assignmentManager
         ? `/spaces/${spaceId}/assignments/professor`
         : `/spaces/${spaceId}/assignments`,
       question: `/spaces/${spaceId}/questions`,
