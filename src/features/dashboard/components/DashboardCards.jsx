@@ -25,16 +25,16 @@ function readUserRole() {
   }
 }
 
-function isSubmittedTask(task) {
-  return ["SUBMITTED", "LATE", "COMPLETED"].includes(
-    String(task?.submissionStatus ?? "").toUpperCase(),
-  );
+function getTaskStatus(task) {
+  return String(task?.status ?? "").toUpperCase();
 }
 
-function isClosedTask(task) {
-  return task?.isClosed === true || ["CLOSED", "ENDED", "EXPIRED"].includes(
-    String(task?.assignmentStatus ?? "").toUpperCase(),
-  );
+function getSubmissionStatus(task) {
+  return String(task?.submissionStatus ?? "").toUpperCase();
+}
+
+function getGradingStatus(task) {
+  return String(task?.gradingStatus ?? "").toUpperCase();
 }
 
 export function NextClassCard({
@@ -102,30 +102,25 @@ export function TaskSummaryCard({
   const [deletedTask, setDeletedTask] = useState(null);
   const [openingTaskId, setOpeningTaskId] = useState(null);
   const navigate = useNavigate();
-  const isProfessor = readUserRole() === "PROFESSOR";
+  const userRole = readUserRole();
+  const isStudent = userRole === "STUDENT";
   const scopedTasks = selectedCourse
     ? tasks.filter((task) => task.spaceId === selectedCourse.spaceId)
     : tasks;
   const visibleTasks = scopedTasks
-    .filter((task) => isProfessor || !isClosedTask(task))
+    .filter((task) =>
+      isStudent
+        ? true
+        : getTaskStatus(task) === "OPEN" || getGradingStatus(task) === "DRAFT",
+    )
     .sort(
         (firstTask, secondTask) =>
           new Date(firstTask.dueAt).getTime() -
           new Date(secondTask.dueAt).getTime(),
       );
   const pendingTaskCount = visibleTasks.filter(
-    (task) => !(isProfessor ? isClosedTask(task) : isSubmittedTask(task)),
+    (task) => !isStudent || getSubmissionStatus(task) !== "SUBMITTED",
   ).length;
-
-  const markAsRead = (taskId) => {
-    setReadTaskIds((currentIds) => {
-      if (currentIds.has(taskId)) {
-        return currentIds;
-      }
-
-      return new Set([...currentIds, taskId]);
-    });
-  };
 
   async function handleOpenTask(task) {
     if (!task?.id || !task.spaceId || openingTaskId) return;
@@ -185,8 +180,7 @@ export function TaskSummaryCard({
         {visibleTasks.map((task) => (
           <li
             className={
-              readTaskIds.has(task.id)
-              || (isProfessor ? isClosedTask(task) : isSubmittedTask(task))
+              isStudent && getSubmissionStatus(task) === "SUBMITTED"
                 ? "is-read"
                 : ""
             }
@@ -194,10 +188,7 @@ export function TaskSummaryCard({
           >
             <button
               type="button"
-              onClick={() => {
-                markAsRead(task.id);
-                void handleOpenTask(task);
-              }}
+              onClick={() => void handleOpenTask(task)}
               aria-label={`${task.title}, ${task.due}`}
             >
               <span

@@ -110,19 +110,9 @@ function normalizeAssignments(data) {
     title: assignment.title ?? "제목 없는 과제",
     due: formatDueAt(assignment.due_at),
     dueAt: assignment.due_at,
-    submissionStatus: String(
-      assignment.submission_status
-      ?? assignment.submissionStatus
-      ?? assignment.my_submission?.status
-      ?? "",
-    ).toUpperCase(),
-    assignmentStatus: String(
-      assignment.status
-      ?? assignment.assignment_status
-      ?? assignment.assignmentStatus
-      ?? "",
-    ).toUpperCase(),
-    isClosed: assignment.is_closed === true || assignment.isClosed === true,
+    status: String(assignment.status ?? "").toUpperCase(),
+    submissionStatus: String(assignment.submission_status ?? "").toUpperCase(),
+    gradingStatus: String(assignment.grading_status ?? "").toUpperCase(),
     color: getCourseColor(assignment.space_id),
   }));
 }
