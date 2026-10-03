@@ -25,15 +25,7 @@ function createInitialGroups(documents) {
 }
 
 function splitRows(categories, groupId) {
-  const slots = [...categories, { id: `add-category-${groupId}`, isAddButton: true }];
-  const rows = [];
-  let index = 0;
-  while (index < slots.length) {
-    const size = rows.length % 2 === 0 ? 5 : 6;
-    rows.push(slots.slice(index, index + size));
-    index += size;
-  }
-  return rows;
+  return [[...categories, { id: `add-category-${groupId}`, isAddButton: true }]];
 }
 
 export default function QuestionCategoryManager({ documents, onCancel, onCategoriesChanged }) {

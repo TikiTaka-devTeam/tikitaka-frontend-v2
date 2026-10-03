@@ -46,18 +46,6 @@ const SORT_OPTIONS = [
 
 // 1·3·5번째 줄은 최대 5개와 라벨 자리, 2·4·6번째 줄은 왼쪽부터 최대 6개.
 // 카테고리가 늘어나도 이 두 줄 패턴을 반복한다.
-const CATEGORY_ROW_LIMITS = [5, 6];
-
-function splitCategoryRows(categories) {
-  const rows = [];
-  for (let index = 0; index < categories.length;) {
-    const rowSize = CATEGORY_ROW_LIMITS[rows.length % CATEGORY_ROW_LIMITS.length];
-    rows.push(categories.slice(index, index + rowSize));
-    index += rowSize;
-  }
-  return rows;
-}
-
 function readUserRole() {
   try {
     const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
@@ -682,28 +670,24 @@ export default function SpaceQuestionsPage() {
             </div>}
             {shouldShowCategorySection && <>
             <div className="space-questions-categories" aria-label="질문 카테고리">
-              <button
-                type="button"
-                className="space-questions-categories__clear"
-                disabled={selectedCategories.length === 0}
-                onClick={() => setSelectedCategories([])}
-              >Clear</button>
-              {categoryGroups.map((document) => <div className="space-questions-categories__group" key={document.document_id}>
-                {!selectedDocumentId && <span className="space-questions-categories__document">{document.title}</span>}
-                {splitCategoryRows(document.categories).map((row, rowIndex) => <div className="space-questions-categories__row" key={row[0].category_id}>
-                  {rowIndex === 0 && <span className="space-questions-categories__label">{document.categories.some((category) => category.source === "MANUAL") ? "카테고리" : "AI 카테고리"}</span>}
-                  {/* 세 번째 줄부터 홀수 번째 줄은 첫 줄의 라벨 자리를 비워 같은 x축에서 시작한다. */}
-                  {rowIndex > 0 && rowIndex % 2 === 0 && <span className="space-questions-categories__offset" aria-hidden="true" />}
-                  {row.map((category) => <button
-                    type="button"
-                    key={category.category_id}
-                    className={selectedCategories.some((item) => item.category_id === category.category_id) ? "is-selected" : ""}
-                    aria-pressed={selectedCategories.some((item) => item.category_id === category.category_id)}
-                    onClick={() => changeCategory(category)}
-                  >{category.name}</button>)}
-                </div>)}
-              </div>)}
+              {categoryGroups.map((document, documentIndex) => {
+                return <div className="space-questions-categories__group" key={document.document_id}>
+                  {!selectedDocumentId && <span className="space-questions-categories__document">{document.title}</span>}
+                  <div className="space-questions-categories__row">
+                    <span className="space-questions-categories__label">{document.categories.some((category) => category.source === "MANUAL") ? "카테고리" : "AI 카테고리"}</span>
+                    {document.categories.map((category) => <button
+                      type="button"
+                      key={category.category_id}
+                      className={selectedCategories.some((item) => item.category_id === category.category_id) ? "is-selected" : ""}
+                      aria-pressed={selectedCategories.some((item) => item.category_id === category.category_id)}
+                      onClick={() => changeCategory(category)}
+                    >{category.name}</button>)}
+                    {documentIndex === categoryGroups.length - 1 && <button type="button" className="space-questions-categories__clear" disabled={selectedCategories.length === 0} onClick={() => setSelectedCategories([])}>Clear</button>}
+                  </div>
+                </div>;
+              })}
               {!isCategoryLoading && !categoryError && categoryGroups.length === 0 && (view !== "mine" || (mySummary?.total_count ?? 0) > 0) && <p className="space-questions-category-status">등록된 카테고리가 없습니다.</p>}
+              {categoryGroups.length === 0 && <div className="space-questions-categories__row"><button type="button" className="space-questions-categories__clear" disabled={selectedCategories.length === 0} onClick={() => setSelectedCategories([])}>Clear</button></div>}
             </div>
             {isCategoryLoading && <p className="space-questions-category-status" role="status">카테고리를 불러오는 중입니다.</p>}
             {categoryError && <p className="space-questions-category-error" role="alert">{categoryError}</p>}
