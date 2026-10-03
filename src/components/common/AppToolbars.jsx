@@ -86,7 +86,7 @@ export function UtilityToolbar({
         <img src={notificationIcon} alt="" />
         {hasUnreadNotifications && (
           <span
-            className="lecture-toolbar__question-notification"
+            className="dashboard-utility__notification-badge"
             aria-hidden="true"
           />
         )}
