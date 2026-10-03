@@ -56,6 +56,38 @@ function getSubscriptionKeys(subscription) {
   return { p256dh, auth };
 }
 
+function subscriptionUsesVapidKey(subscription, publicKey) {
+  const existingKey = subscription?.options?.applicationServerKey;
+  if (!existingKey || !publicKey) return false;
+  const existingBytes = new Uint8Array(existingKey);
+  const expectedBytes = urlBase64ToUint8Array(publicKey);
+  return existingBytes.length === expectedBytes.length &&
+    existingBytes.every((byte, index) => byte === expectedBytes[index]);
+}
+
+async function getOrCreateSubscription(registration, publicKey) {
+  let subscription = await registration.pushManager.getSubscription();
+  let createdSubscription = false;
+  if (subscription && !subscriptionUsesVapidKey(subscription, publicKey)) {
+    try {
+      await deletePushSubscriptionByEndpoint(subscription.endpoint);
+    } catch (error) {
+      if (error?.response?.status !== 404) throw error;
+    }
+    await subscription.unsubscribe();
+    localStorage.removeItem(PUSH_SUBSCRIPTION_ID_KEY);
+    subscription = null;
+  }
+  if (!subscription) {
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+    createdSubscription = true;
+  }
+  return { subscription, createdSubscription };
+}
+
 async function savePushSubscription(subscription) {
   const keys = getSubscriptionKeys(subscription);
   const response = await registerPushSubscription({
@@ -148,7 +180,6 @@ export async function enableWebPush() {
   }
 
   const registration = await ensurePushServiceWorkerRegistration();
-  const existingSubscription = await registration.pushManager.getSubscription();
   const { data } = await getVapidPublicKey();
   const publicKey = data?.public_key;
 
@@ -159,16 +190,10 @@ export async function enableWebPush() {
     );
   }
 
-  let subscription = existingSubscription;
-  let createdSubscription = false;
-
-  if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey),
-    });
-    createdSubscription = true;
-  }
+  const { subscription, createdSubscription } = await getOrCreateSubscription(
+    registration,
+    publicKey,
+  );
 
   try {
     return await savePushSubscription(subscription);
@@ -184,13 +209,27 @@ export async function syncExistingWebPushSubscription() {
   if (!isWebPushSupported() || Notification.permission !== "granted") {
     return null;
   }
-
   const registration = await getPushServiceWorkerRegistration();
-  const subscription = await registration?.pushManager.getSubscription();
+  if (!registration) return null;
+  const existingSubscription = await registration.pushManager.getSubscription();
+  if (!existingSubscription) return null;
 
-  if (!subscription) return null;
+  const { data } = await getVapidPublicKey();
+  const publicKey = data?.public_key;
+  if (!publicKey) {
+    throw createWebPushError("INVALID_VAPID_KEY", "Push public key response is invalid.");
+  }
 
-  return savePushSubscription(subscription);
+  const { subscription, createdSubscription } = await getOrCreateSubscription(
+    registration,
+    publicKey,
+  );
+  try {
+    return await savePushSubscription(subscription);
+  } catch (error) {
+    if (createdSubscription) await subscription.unsubscribe().catch(() => false);
+    throw error;
+  }
 }
 
 function isAlreadyDeletedError(error) {
