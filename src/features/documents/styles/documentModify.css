@@ -12,6 +12,7 @@
 .document-modify-actions button { width: 20px; height: 20px; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .document-modify-actions button:disabled { opacity: .35; cursor: default; }
 .document-modify-actions img { display: block; width: 20px; height: 20px; }
+.document-modify-actions__history-icon { transform: scale(-1, -1); }
 .document-modify-layout { width: min(calc(100% - 66px), 1130px); height: clamp(320px, calc(100dvh - 170px), 664px); margin: 128px auto 42px; display: grid; grid-template-columns: minmax(0, 1fr) 190px 190px; gap: 14px; }
 .document-modify-preview-panel, .document-modify-pages-panel, .document-modify-upload-panel { min-height: 0; border-radius: 20px; background: rgba(255,255,255,.84); box-shadow: 0 10px 26px rgba(20,36,71,.07); backdrop-filter: blur(9px); }
 .document-modify-preview-panel { position: relative; padding: 45px 38px 24px; display: flex; flex-direction: column; }

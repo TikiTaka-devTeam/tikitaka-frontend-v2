@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import searchIcon from "../../assets/icons/dashboard-search.svg";
+import refreshIcon from "../../assets/icons/members/refresh.svg";
 import notificationIcon from "../../assets/icons/dashboard-notification.svg";
 
 import homeIcon from "../../assets/icons/dashboard-home.svg";
@@ -11,6 +12,7 @@ import spacesIcon from "../../assets/icons/dashboard-spaces.svg";
 import spacesBlackIcon from "../../assets/icons/dashboard-spaces-black.svg";
 
 import NotificationPanel from "../../features/dashboard/components/NotificationPanel.jsx";
+import { getNotifications } from "../../features/notifications/api/notifications.api.js";
 import ProfileActionModal from "../../features/dashboard/components/ProfileActionModal.jsx";
 import ProfileMenu from "../../features/dashboard/components/ProfileMenu.jsx";
 import { getProfileInitial } from "../../utils/profileInitial.js";
@@ -63,6 +65,7 @@ export function UtilityToolbar({
   profilePath = "/profile-setting",
   profileImage,
   profileName,
+  hasUnreadNotifications = false,
 }) {
   const navigate = useNavigate();
 
@@ -75,8 +78,19 @@ export function UtilityToolbar({
         <img src={searchIcon} alt="" />
       </button>
 
-      <button type="button" aria-label="알림" onClick={onNotifications}>
+      <button
+        className="dashboard-utility__notification"
+        type="button"
+        aria-label="알림"
+        onClick={onNotifications}
+      >
         <img src={notificationIcon} alt="" />
+        {hasUnreadNotifications && (
+          <span
+            className="dashboard-utility__notification-badge"
+            aria-hidden="true"
+          />
+        )}
       </button>
 
       <button
@@ -100,36 +114,46 @@ export function UtilityToolbar({
   );
 }
 
-export function SearchToolbar({ value, onChange, onSubmit }) {
+export function SearchToolbar({ value, onChange, onSubmit, isSearching = false }) {
   function handleSubmit(event) {
     event.preventDefault();
     onSubmit?.();
   }
 
   return (
-    <form
-      className="dashboard-search-toolbar"
-      role="search"
-      onSubmit={handleSubmit}
-    >
-      <label className="sr-only" htmlFor="global-search">
-        통합 검색
-      </label>
+    <div className="dashboard-search-toolbar-wrap">
+      {isSearching ? (
+        <img
+          className="dashboard-search-toolbar__loading"
+          src={refreshIcon}
+          alt="검색 중"
+        />
+      ) : null}
 
-      <input
-        id="global-search"
-        name="query"
-        type="search"
-        placeholder="Space, 강의자료, 공지사항, 질문 검색"
-        value={value}
-        onChange={onChange}
-        autoFocus
-      />
+      <form
+        className="dashboard-search-toolbar"
+        role="search"
+        onSubmit={handleSubmit}
+      >
+        <label className="sr-only" htmlFor="global-search">
+          통합 검색
+        </label>
 
-      <button type="submit" aria-label="검색">
-        <img src={searchIcon} alt="" />
-      </button>
-    </form>
+        <input
+          id="global-search"
+          name="query"
+          type="search"
+          placeholder="Space, 강의자료, 공지사항, 질문 검색"
+          value={value}
+          onChange={onChange}
+          autoFocus
+        />
+
+        <button type="submit" aria-label="검색">
+          <img src={searchIcon} alt="" />
+        </button>
+      </form>
+    </div>
   );
 }
 
@@ -181,6 +205,30 @@ export function AppToolbars({
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [profileAction, setProfileAction] = useState(null);
   const [profileImage, setProfileImage] = useState(undefined);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getNotifications()
+      .then(({ data }) => {
+        if (!isMounted) return;
+
+        const notifications = Array.isArray(data?.notifications)
+          ? data.notifications
+          : [];
+        setHasUnreadNotifications(
+          notifications.some((notification) => !notification.is_read),
+        );
+      })
+      .catch(() => {
+        if (isMounted) setHasUnreadNotifications(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleNotifications = () => {
     setIsProfileMenuOpen(false);
@@ -201,9 +249,13 @@ export function AppToolbars({
         onNotifications={handleNotifications}
         onProfile={handleProfile}
         profileImage={profileImage}
+        hasUnreadNotifications={hasUnreadNotifications}
       />
       {isNotificationsOpen ? (
-        <NotificationPanel onClose={() => setIsNotificationsOpen(false)} />
+        <NotificationPanel
+          onClose={() => setIsNotificationsOpen(false)}
+          onUnreadChange={setHasUnreadNotifications}
+        />
       ) : null}
       {isProfileMenuOpen ? (
         <ProfileMenu

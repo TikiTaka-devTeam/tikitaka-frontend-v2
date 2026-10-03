@@ -759,11 +759,13 @@ function SignupInformPage() {
               />
               <button
                 className={`signup-inform-action ${
+                  phoneVerified ? "is-done" : ""
+                } ${
                   phoneVerificationSendCount >= 2 ? "is-exhausted" : ""
                 }`}
                 type="button"
                 disabled={
-                  isSendingPhoneCode || phoneVerificationSendCount >= 2
+                  isSendingPhoneCode || phoneVerified || phoneVerificationSendCount >= 2
                 }
                 onClick={handleSendCode}
               >

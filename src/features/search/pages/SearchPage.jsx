@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { BottomNavigation, SearchToolbar } from "../../../components/common/AppToolbars.jsx";
@@ -11,6 +11,7 @@ import {
   getRecentSearches,
   getRecentSearchItems,
   searchAll,
+  saveRecentSearch,
 } from "../api/searchApi.js";
 import RecentSearchChip from "../components/RecentSearchChip.jsx";
 import SearchDocumentCard from "../components/SearchDocumentCard.jsx";
@@ -141,6 +142,7 @@ function SearchSection({ children, count, title, variant }) {
 function SearchPage() {
   const navigate = useNavigate();
   const searchRequestIdRef = useRef(0);
+  const debounceTimerRef = useRef(null);
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState([]);
@@ -191,7 +193,7 @@ function SearchPage() {
     return () => controller.abort();
   }, []);
 
-  async function runSearch(nextKeyword = query) {
+  const runSearch = useCallback(async (nextKeyword = query) => {
     const keyword = nextKeyword.trim();
 
     if (!keyword) {
@@ -220,15 +222,6 @@ function SearchPage() {
           .map((question) => normalizeResultItem(question, "question")),
       });
 
-      getRecentSearches()
-        .then((searchesResponse) => {
-          setRecentSearches(
-            getArray(searchesResponse, "recent_searches", "searches"),
-          );
-        })
-        .catch(() => {
-          setActionError("최근 검색어를 갱신하지 못했습니다.");
-        });
     } catch (error) {
       if (searchRequestIdRef.current !== requestId) return;
       setResults(null);
@@ -240,7 +233,43 @@ function SearchPage() {
     } finally {
       if (searchRequestIdRef.current === requestId) setIsSearching(false);
     }
-  }
+  }, [query]);
+
+  const confirmSearch = useCallback(async (nextKeyword = query) => {
+    const keyword = nextKeyword.trim();
+
+    if (!keyword) {
+      runSearch(keyword);
+      return;
+    }
+
+    setActionError("");
+
+    try {
+      await saveRecentSearch(keyword);
+      const searchesResponse = await getRecentSearches();
+      setRecentSearches(
+        getArray(searchesResponse, "recent_searches", "searches"),
+      );
+    } catch {
+      setActionError("최근 검색어를 저장하지 못했습니다.");
+    }
+
+    runSearch(keyword);
+  }, [query, runSearch]);
+
+  useEffect(() => {
+    const keyword = query.trim();
+
+    if (!keyword) return undefined;
+
+    const timer = window.setTimeout(() => {
+      runSearch(keyword);
+    }, 350);
+    debounceTimerRef.current = timer;
+
+    return () => window.clearTimeout(timer);
+  }, [query, runSearch]);
 
   async function handleDeleteRecent(searchId) {
     const previousSearches = recentSearches;
@@ -341,8 +370,23 @@ function SearchPage() {
         <span className="search-page__back-label">뒤로 가기</span>
         <SearchToolbar
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onSubmit={() => runSearch()}
+          isSearching={isSearching}
+          onChange={(event) => {
+            const nextQuery = event.target.value;
+            setQuery(nextQuery);
+            if (!nextQuery.trim()) {
+              setSubmittedQuery("");
+              setResults(null);
+              setErrorMessage("");
+              setIsSearching(false);
+            }
+          }}
+          onSubmit={() => {
+            if (debounceTimerRef.current) {
+              window.clearTimeout(debounceTimerRef.current);
+            }
+            confirmSearch(query);
+          }}
         />
 
         <div className={`app-container search-page__content${submittedQuery ? "" : " is-overview-fixed"}`}>
@@ -350,7 +394,6 @@ function SearchPage() {
 
           {submittedQuery ? (
             <div className={`search-results${hasResults ? " is-populated" : ""}`} aria-live="polite" aria-busy={isSearching}>
-              {isSearching ? <p className="search-page__status">검색 중입니다.</p> : null}
               {errorMessage ? <p className="search-page__status search-page__status--error" role="alert">{errorMessage}</p> : null}
               {!isSearching && !errorMessage && !hasResults ? (
                 <p className="search-page__status">‘{submittedQuery}’과 관련된 내용을 찾지 못했습니다.</p>
@@ -408,7 +451,7 @@ function SearchPage() {
                         <RecentSearchChip
                           key={searchId}
                           keyword={item.keyword}
-                          onSearch={() => runSearch(item.keyword)}
+                          onSearch={() => confirmSearch(item.keyword)}
                           onDelete={() => handleDeleteRecent(searchId)}
                         />
                       );
