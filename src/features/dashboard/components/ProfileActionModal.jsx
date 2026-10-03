@@ -12,6 +12,7 @@ import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
 import ModalBackdrop from "../../../components/common/ModalBackdrop.jsx";
 import SystemErrorModal from "../../../components/common/SystemErrorModal.jsx";
+import ContactUsModal from "../../auth/components/ContactUsModal.jsx";
 import { getProfileInitial } from "../../../utils/profileInitial.js";
 import {
   changePassword,
@@ -1025,7 +1026,7 @@ function ProfileActionModal({ action, onClose, onProfileUpdated }) {
   }
 
   if (action === "inquiry") {
-    return <InquiryContent onClose={onClose} />;
+    return <ContactUsModal onClose={onClose} />;
   }
 
   if (action === "logout") {
