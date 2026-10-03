@@ -30,7 +30,6 @@ function formatFileSize(size) {
 }
 
 function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
-  const isEditing = Boolean(initialMaterial);
   const fileInputRef = useRef(null);
   const initialFileTitle = initialMaterial?.file
     ? getFileNameWithoutExtension(initialMaterial.file.name)
@@ -88,12 +87,10 @@ function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
       >
         <header className="material-upload-modal__header">
           <h2 id="material-upload-modal-title">
-            강의자료 {isEditing ? "수정" : "추가"}
+            강의자료 추가
           </h2>
           <p id="material-upload-modal-description">
-            {isEditing
-              ? "강의자료 정보와 첨부파일을 수정해 주세요."
-              : "새로운 강의자료를 업로드 해주세요!"}
+            새로운 강의자료를 업로드 해주세요!
           </p>
         </header>
 
@@ -207,7 +204,7 @@ function MaterialUploadModal({ initialMaterial, onClose, onSave }) {
         <footer className="material-upload-modal__footer">
           <ModalActions
             onCancel={onClose}
-            confirmText={isEditing ? "수정" : "저장"}
+            confirmText="저장"
             confirmType="submit"
             confirmDisabled={!title.trim() || !file}
           />
