@@ -39,7 +39,7 @@
 .search-section { position: relative; min-width: 0; }
 .search-section__heading { height: 22px; margin-left: 20px; display: flex; align-items: center; gap: 11px; }
 .search-section__heading h2 { margin: 0; color: #131824; font-size: 18px; font-weight: 700; line-height: normal; }
-.search-results .search-section__heading { position: sticky; top: 0; z-index: 2; margin-left: 20px; background: #edf0f6; }
+.search-results .search-section__heading { position: sticky; top: 0; z-index: 2; margin-left: 20px; }
 .search-results .search-section__heading h2 { line-height: 22px; }
 .search-results .search-section--documents { margin-top: 53px; }
 .search-results .search-section--questions { margin-top: 40px; }

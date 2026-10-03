@@ -536,31 +536,31 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #758094;
+  background: var(--task-dot-color, #758094);
 }
 
 .dashboard-task__dot--green {
-  background: #1ab878;
+  background: var(--task-dot-color, #1ab878);
 }
 
 .dashboard-task__dot--red {
-  background: #ed4f5c;
+  background: var(--task-dot-color, #ed4f5c);
 }
 
 .dashboard-task__dot--blue {
-  background: #2e66f5;
+  background: var(--task-dot-color, #2e66f5);
 }
 
 .dashboard-task__dot--purple {
-  background: #804ffa;
+  background: var(--task-dot-color, #804ffa);
 }
 
 .dashboard-task__dot--sky {
-  background: #409ced;
+  background: var(--task-dot-color, #409ced);
 }
 
 .dashboard-task__dot--orange {
-  background: #f58a29;
+  background: var(--task-dot-color, #f58a29);
 }
 
 .dashboard-tasks li.is-read .dashboard-task__dot {
