@@ -13,6 +13,7 @@ import DrawingToolOptions from "../components/DrawingToolOptions";
 import PdfSlideStage from "../components/PdfSlideStage";
 import SlidePagination from "../components/SlidePagination";
 import QuestionPanel from "../components/QuestionPanel";
+import { getSpaceMemberPermissions, getSpaceMembers } from "../../members/api/membersApi.js";
 import DownloadModal from "../components/DownloadModal";
 import DocumentChangesModal from "../components/DocumentChangesModal.jsx";
 import { getSlideQuestionMarkers } from "../utils/questionNavigation.js";
@@ -51,6 +52,18 @@ const DRAWING_TOOLS =
     "HIGHLIGHTER",
     "ERASER",
   ]);
+
+function readStoredUser() {
+  try { return JSON.parse(localStorage.getItem("tikitaka_user") || "null") || {}; } catch { return {}; }
+}
+
+function isCurrentSpaceMember(member, user) {
+  const memberId = String(member?.member_id ?? member?.id ?? "");
+  const userIds = [user?.member_id, user?.memberId, user?.space_member_id, user?.spaceMemberId, user?.user_id, user?.userId, user?.id].filter(Boolean).map(String);
+  const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+  const userNumber = String(user?.member_id_number ?? user?.memberIdNumber ?? user?.student_number ?? user?.studentNumber ?? "");
+  return Boolean((memberId && userIds.includes(memberId)) || (memberNumber && userNumber && memberNumber === userNumber));
+}
 
 export default function LectureViewerPage({
   role,
@@ -224,6 +237,33 @@ export default function LectureViewerPage({
     });
 
   const viewerRole = String(role || "").toUpperCase();
+  const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(viewerRole === "PROFESSOR");
+  useEffect(() => {
+    if (viewerRole !== "ASSISTANT") {
+      setHasQuestionManagePermission(viewerRole === "PROFESSOR");
+      return undefined;
+    }
+    setHasQuestionManagePermission(false);
+    const controller = new AbortController();
+    async function loadQuestionPermission() {
+      try {
+        const memberData = await getSpaceMembers(spaceId, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        const member = (memberData?.members ?? []).find((item) => isCurrentSpaceMember(item, readStoredUser()));
+        const memberId = member?.member_id ?? member?.id;
+        if (String(member?.role ?? "").toUpperCase() !== "ASSISTANT" || !memberId) return;
+        const permissionData = await getSpaceMemberPermissions(spaceId, memberId, { signal: controller.signal });
+        if (!controller.signal.aborted) {
+          setHasQuestionManagePermission(Array.isArray(permissionData?.permissions) && permissionData.permissions.includes("QUESTION_MANAGE"));
+        }
+      } catch (error) {
+        if (error?.code !== "ERR_CANCELED") setHasQuestionManagePermission(false);
+      }
+    }
+    loadQuestionPermission();
+    return () => controller.abort();
+  }, [spaceId, viewerRole]);
+  const questionRole = viewerRole === "PROFESSOR" || hasQuestionManagePermission ? "PROFESSOR" : role;
   const editableLayer = ["PROFESSOR", "ASSISTANT"].includes(viewerRole)
     ? "SHARED"
     : "PRIVATE";
@@ -373,7 +413,7 @@ export default function LectureViewerPage({
         resetStrokeHistory();
         setCurrentIndex(index);
       },
-      role,
+      role: questionRole,
 
       questions,
       setQuestions,
@@ -970,7 +1010,7 @@ export default function LectureViewerPage({
           <QuestionPanel
             onArchive={() => navigate(`/spaces/${spaceId}/questions`)}
             onSubmitVoice={handleSubmitVoice}
-            role={role}
+            role={questionRole}
             open={
               panelOpen
             }

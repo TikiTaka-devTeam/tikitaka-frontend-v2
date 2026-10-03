@@ -4,6 +4,7 @@
 } from "react";
 
 import {
+  Navigate,
   useLocation,
   useNavigate,
   useParams,
@@ -37,6 +38,7 @@ import AssignmentCloseModal from "../components/AssignmentCloseModal.jsx";
 import AssignmentEditorForm from "../components/AssignmentEditorForm.jsx";
 import AssignmentGradePanel from "../components/AssignmentGradePanel.jsx";
 import AssignmentManageModal from "../components/AssignmentManageModal.jsx";
+import { getSpaceMemberPermissions, getSpaceMembers } from "../../members/api/membersApi.js";
 
 import "../styles/studentAssignments.css";
 import "../styles/professorAssignments.css";
@@ -128,6 +130,25 @@ function getApiErrorMessage(
     error?.message ??
     fallbackMessage
   );
+}
+
+function readUserRole() {
+  try {
+    const user = JSON.parse(localStorage.getItem("tikitaka_user") || "null");
+    return String(user?.account_type ?? user?.accountType ?? user?.role ?? user?.user?.account_type ?? user?.user?.accountType ?? user?.user?.role ?? localStorage.getItem("tikitaka_account_type") ?? localStorage.getItem("account_type") ?? localStorage.getItem("role") ?? "").toUpperCase();
+  } catch { return ""; }
+}
+
+function readStoredUser() {
+  try { return JSON.parse(localStorage.getItem("tikitaka_user") || "null") || {}; } catch { return {}; }
+}
+
+function isCurrentSpaceMember(member, user) {
+  const memberId = String(member?.member_id ?? member?.id ?? "");
+  const userIds = [user?.member_id, user?.memberId, user?.space_member_id, user?.spaceMemberId, user?.user_id, user?.userId, user?.id].filter(Boolean).map(String);
+  const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+  const userNumber = String(user?.member_id_number ?? user?.memberIdNumber ?? user?.student_number ?? user?.studentNumber ?? "");
+  return Boolean((memberId && userIds.includes(memberId)) || (memberNumber && userNumber && memberNumber === userNumber));
 }
 
 function formatFileSize(size) {
@@ -395,6 +416,32 @@ function ProfessorAssignmentPage() {
     location.state
       ?.spaceName ??
     "Space";
+  const isProfessor = readUserRole() === "PROFESSOR";
+  const [hasAssignmentManagePermission, setHasAssignmentManagePermission] = useState(isProfessor ? true : null);
+  const canManageAssignments = isProfessor || hasAssignmentManagePermission === true;
+
+  useEffect(() => {
+    if (isProfessor) return undefined;
+    const controller = new AbortController();
+    async function loadPermission() {
+      try {
+        const response = await getSpaceMembers(spaceId, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        const member = (response?.members ?? []).find((item) => isCurrentSpaceMember(item, readStoredUser()));
+        const memberId = member?.member_id ?? member?.id;
+        if (String(member?.role ?? "").toUpperCase() !== "ASSISTANT" || !memberId) {
+          setHasAssignmentManagePermission(false);
+          return;
+        }
+        const permissionResponse = await getSpaceMemberPermissions(spaceId, memberId, { signal: controller.signal });
+        if (!controller.signal.aborted) setHasAssignmentManagePermission(Array.isArray(permissionResponse?.permissions) && permissionResponse.permissions.includes("ASSIGNMENT_MANAGE"));
+      } catch (error) {
+        if (error?.code !== "ERR_CANCELED") setHasAssignmentManagePermission(false);
+      }
+    }
+    loadPermission();
+    return () => controller.abort();
+  }, [isProfessor, spaceId]);
 
   const [
     assignments,
@@ -498,7 +545,7 @@ function ProfessorAssignmentPage() {
   ] = useState(null);
 
   useEffect(() => {
-    if (!spaceId) {
+    if (!spaceId || !canManageAssignments) {
       return undefined;
     }
 
@@ -600,7 +647,7 @@ function ProfessorAssignmentPage() {
     return () => {
       controller.abort();
     };
-  }, [spaceId]);
+  }, [canManageAssignments, spaceId]);
 
   async function refreshListData() {
     const [
@@ -843,6 +890,7 @@ function ProfessorAssignmentPage() {
 
   function handleOpenGradeEdit() {
     if (
+      !isProfessor ||
       !assignmentDetail ||
       assignmentDetail
         .grading_status !==
@@ -1514,6 +1562,7 @@ function ProfessorAssignmentPage() {
         "DRAFT";
 
     const canEditGrade =
+      isProfessor &&
       assignmentDetail
         .grading_status ===
       "FINALIZED";
@@ -1562,7 +1611,7 @@ function ProfessorAssignmentPage() {
                 </span>
               </button>
 
-              <button
+              {isProfessor && <button
                 type="button"
                 className="professor-assignment-detail-menu__delete"
                 onClick={
@@ -1576,7 +1625,7 @@ function ProfessorAssignmentPage() {
                 <span>
                   삭제
                 </span>
-              </button>
+              </button>}
             </div>
           )}
         </div>
@@ -1801,6 +1850,11 @@ function ProfessorAssignmentPage() {
     viewMode === "grade" ||
     viewMode === "grade-edit";
 
+  if (hasAssignmentManagePermission === null) {
+    return <main className="assignment-page professor-assignment-page"><div className="assignment-list-state">권한을 확인하는 중입니다.</div></main>;
+  }
+  if (!canManageAssignments) return <Navigate to={`/spaces/${spaceId}/assignments`} replace state={{ spaceName }} />;
+
   return (
     <main className="assignment-page professor-assignment-page">
       <div className="app-frame assignment-frame">
@@ -1854,6 +1908,7 @@ function ProfessorAssignmentPage() {
               assignment={
                 assignmentDetail
               }
+              canFinalizeGrades={isProfessor}
               mode={
                 viewMode
               }

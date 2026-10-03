@@ -116,9 +116,20 @@ function AssignmentManageModal({
     return null;
   }
 
-  const actionContent =
-    MODAL_CONTENT[action] ??
-    MODAL_CONTENT.create;
+  const actionContent = action === "gradeDraft"
+    ? {
+        confirm: {
+          title: "임시 성적을 저장할까요?",
+          description: "입력한 성적을 임시 저장합니다.",
+          confirmLabel: "저장",
+        },
+        success: {
+          title: "저장되었습니다",
+          description: "임시 성적이 저장되었습니다.",
+          confirmLabel: "확인",
+        },
+      }
+    : MODAL_CONTENT[action] ?? MODAL_CONTENT.create;
 
   const content =
     actionContent[step] ??
