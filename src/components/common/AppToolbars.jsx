@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import searchIcon from "../../assets/icons/dashboard-search.svg";
@@ -11,6 +11,7 @@ import spacesIcon from "../../assets/icons/dashboard-spaces.svg";
 import spacesBlackIcon from "../../assets/icons/dashboard-spaces-black.svg";
 
 import NotificationPanel from "../../features/dashboard/components/NotificationPanel.jsx";
+import { getNotifications } from "../../features/notifications/api/notifications.api.js";
 import ProfileActionModal from "../../features/dashboard/components/ProfileActionModal.jsx";
 import ProfileMenu from "../../features/dashboard/components/ProfileMenu.jsx";
 import { getProfileInitial } from "../../utils/profileInitial.js";
@@ -63,6 +64,7 @@ export function UtilityToolbar({
   profilePath = "/profile-setting",
   profileImage,
   profileName,
+  hasUnreadNotifications = false,
 }) {
   const navigate = useNavigate();
 
@@ -75,8 +77,19 @@ export function UtilityToolbar({
         <img src={searchIcon} alt="" />
       </button>
 
-      <button type="button" aria-label="알림" onClick={onNotifications}>
+      <button
+        className="dashboard-utility__notification"
+        type="button"
+        aria-label="알림"
+        onClick={onNotifications}
+      >
         <img src={notificationIcon} alt="" />
+        {hasUnreadNotifications && (
+          <span
+            className="lecture-toolbar__question-notification"
+            aria-hidden="true"
+          />
+        )}
       </button>
 
       <button
@@ -181,6 +194,30 @@ export function AppToolbars({
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [profileAction, setProfileAction] = useState(null);
   const [profileImage, setProfileImage] = useState(undefined);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getNotifications()
+      .then(({ data }) => {
+        if (!isMounted) return;
+
+        const notifications = Array.isArray(data?.notifications)
+          ? data.notifications
+          : [];
+        setHasUnreadNotifications(
+          notifications.some((notification) => !notification.is_read),
+        );
+      })
+      .catch(() => {
+        if (isMounted) setHasUnreadNotifications(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleNotifications = () => {
     setIsProfileMenuOpen(false);
@@ -201,9 +238,13 @@ export function AppToolbars({
         onNotifications={handleNotifications}
         onProfile={handleProfile}
         profileImage={profileImage}
+        hasUnreadNotifications={hasUnreadNotifications}
       />
       {isNotificationsOpen ? (
-        <NotificationPanel onClose={() => setIsNotificationsOpen(false)} />
+        <NotificationPanel
+          onClose={() => setIsNotificationsOpen(false)}
+          onUnreadChange={setHasUnreadNotifications}
+        />
       ) : null}
       {isProfileMenuOpen ? (
         <ProfileMenu

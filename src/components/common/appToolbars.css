@@ -99,6 +99,25 @@
   cursor: pointer;
 }
 
+.dashboard-utility__notification {
+  position: relative;
+}
+
+.dashboard-utility__notification
+  .lecture-toolbar__question-notification {
+  position: absolute;
+  z-index: 2;
+  top: -1px;
+  right: -2px;
+  width: 5px;
+  height: 5px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 50%;
+  background: #e5484d;
+  pointer-events: none;
+}
+
 .dashboard-utility img {
   display: block;
   width: 20px;

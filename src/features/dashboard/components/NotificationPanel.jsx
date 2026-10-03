@@ -51,7 +51,7 @@ function normalizeNotification(notification) {
   };
 }
 
-function NotificationPanel({ onClose }) {
+function NotificationPanel({ onClose, onUnreadChange }) {
   const navigate = useNavigate();
   const panelRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
@@ -68,12 +68,17 @@ function NotificationPanel({ onClose }) {
         const items = Array.isArray(data?.notifications)
           ? data.notifications
           : [];
-        setNotifications(items.map(normalizeNotification));
+        const normalizedNotifications = items.map(normalizeNotification);
+        setNotifications(normalizedNotifications);
+        onUnreadChange?.(
+          normalizedNotifications.some((notification) => !notification.isRead),
+        );
         setErrorMessage("");
       })
       .catch(() => {
         if (!isMounted) return;
         setNotifications([]);
+        onUnreadChange?.(false);
         setErrorMessage("알림을 불러오지 못했습니다.");
       })
       .finally(() => {
@@ -89,20 +94,25 @@ function NotificationPanel({ onClose }) {
       isMounted = false;
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [onClose]);
+  }, [onClose, onUnreadChange]);
 
   const markAsRead = async (notificationId) => {
     const previousNotifications = notifications;
-    setNotifications((items) =>
-      items.map((item) =>
-        item.id === notificationId ? { ...item, isRead: true } : item,
-      ),
+    const nextNotifications = notifications.map((item) =>
+      item.id === notificationId ? { ...item, isRead: true } : item,
+    );
+    setNotifications(nextNotifications);
+    onUnreadChange?.(
+      nextNotifications.some((notification) => !notification.isRead),
     );
 
     try {
       await markNotificationAsRead(notificationId);
     } catch {
       setNotifications(previousNotifications);
+      onUnreadChange?.(
+        previousNotifications.some((notification) => !notification.isRead),
+      );
       setErrorMessage("알림 읽음 처리에 실패했습니다.");
     }
   };
@@ -133,14 +143,20 @@ function NotificationPanel({ onClose }) {
 
   const markAllAsRead = async () => {
     const previousNotifications = notifications;
-    setNotifications((items) =>
-      items.map((item) => ({ ...item, isRead: true })),
-    );
+    const nextNotifications = notifications.map((item) => ({
+      ...item,
+      isRead: true,
+    }));
+    setNotifications(nextNotifications);
+    onUnreadChange?.(false);
 
     try {
       await markAllNotificationsAsRead();
     } catch {
       setNotifications(previousNotifications);
+      onUnreadChange?.(
+        previousNotifications.some((notification) => !notification.isRead),
+      );
       setErrorMessage("전체 읽음 처리에 실패했습니다.");
     }
   };
