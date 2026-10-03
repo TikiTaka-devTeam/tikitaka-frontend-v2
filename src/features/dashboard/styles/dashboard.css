@@ -6,6 +6,14 @@
   background: #edf0f6;
   color: #131824;
   overflow-x: clip;
+  overscroll-behavior-x: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.dashboard-page input,
+.dashboard-page textarea {
+  user-select: text;
 }
 
 .dashboard-background {
@@ -80,18 +88,25 @@
 .dashboard-timetable-scroll {
   width: 100%;
   min-width: 0;
-  height: 568px;
+  height: auto;
+  max-height: calc(100dvh - 180px);
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
   border-radius: 24px;
   scrollbar-width: thin;
   scrollbar-color: rgba(87, 102, 130, 0.35) transparent;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
 }
 
 .dashboard-timetable {
+  --time-label-width: 75px;
+  --hour-height: 57px;
+
   position: relative;
-  width: 763px;
-  height: 568px;
+  width: 100%;
+  min-width: 0;
+  height: var(--timetable-height, 568px);
   overflow: hidden;
   border-radius: 24px;
   background: rgba(251, 253, 255, 0.82);
@@ -108,10 +123,10 @@
 
 .dashboard-timetable__today {
   position: absolute;
-  left: calc(76px + var(--today-index) * 137px);
+  left: var(--today-left);
   top: 55px;
-  width: 136px;
-  height: 495px;
+  width: var(--day-width);
+  height: calc(100% - 73px);
   background: rgba(229, 240, 255, 0.34);
 }
 
@@ -124,11 +139,15 @@
   font-weight: 700;
 }
 
+.dashboard-timetable__day-control {
+  display: none;
+}
+
 .dashboard-timetable__day {
   position: absolute;
-  left: calc(75px + var(--day-index) * 137px);
+  left: var(--day-left);
   top: 0;
-  width: 137px;
+  width: var(--day-width);
   height: 54px;
   display: flex;
   align-items: center;
@@ -165,30 +184,7 @@
   top: 54px;
   bottom: 19px;
   width: 1px;
-}
-
-.dashboard-timetable__grid .vertical:nth-child(1) {
-  left: 75px;
-}
-
-.dashboard-timetable__grid .vertical:nth-child(2) {
-  left: 212px;
-}
-
-.dashboard-timetable__grid .vertical:nth-child(3) {
-  left: 349px;
-}
-
-.dashboard-timetable__grid .vertical:nth-child(4) {
-  left: 486px;
-}
-
-.dashboard-timetable__grid .vertical:nth-child(5) {
-  left: 623px;
-}
-
-.dashboard-timetable__grid .vertical:nth-child(6) {
-  left: 762px;
+  left: var(--line-left);
 }
 
 .dashboard-timetable__grid .horizontal {
@@ -196,49 +192,14 @@
   right: 0;
   height: 1px;
   background: #dee3ed;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(7) {
-  top: 54px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(8) {
-  top: 111px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(9) {
-  top: 168px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(10) {
-  top: 225px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(11) {
-  top: 282px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(12) {
-  top: 339px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(13) {
-  top: 396px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(14) {
-  top: 453px;
-}
-
-.dashboard-timetable__grid .horizontal:nth-child(15) {
-  top: 510px;
+  top: var(--time-top);
 }
 
 .dashboard-timetable__time {
   position: absolute;
-  left: 19px;
-  top: calc(60px + var(--time-index) * 57px);
-  width: 36px;
+  left: 0;
+  top: var(--time-top);
+  width: var(--time-label-width);
   color: #636e85;
   font-size: 12px;
   font-weight: 500;
@@ -249,8 +210,8 @@
   position: absolute;
   z-index: 2;
   top: 50%;
-  right: 75px;
-  left: 75px;
+  right: var(--time-label-width);
+  left: var(--time-label-width);
   margin: 0;
   color: #758094;
   font-size: 13px;
@@ -263,9 +224,9 @@
   --course-color: #2e66f5;
 
   position: absolute;
-  left: calc(84px + var(--course-day) * 137px);
+  left: var(--course-left);
   top: var(--course-top);
-  width: 120px;
+  width: calc(var(--day-width) - 17px);
   height: var(--course-height);
   min-height: 0;
   padding: 0;
@@ -1571,6 +1532,41 @@
     border-radius: 20px;
   }
 
+  .dashboard-timetable {
+    min-width: 405px;
+  }
+
+  .dashboard-timetable__day-control {
+    position: absolute;
+    z-index: 3;
+    top: 14px;
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.72);
+    color: #576682;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .dashboard-timetable__day-control:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .dashboard-timetable__day-control--previous {
+    left: 42px;
+  }
+
+  .dashboard-timetable__day-control--next {
+    right: 12px;
+  }
+
   .dashboard-notifications {
     top: 84px;
     right: 16px;
@@ -1617,6 +1613,10 @@
 
   .dashboard-timetable-scroll {
     overscroll-behavior-x: contain;
+  }
+
+  .dashboard-timetable {
+    min-width: 845px;
   }
 
   .dashboard-sidebar {

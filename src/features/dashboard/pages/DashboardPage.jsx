@@ -23,6 +23,8 @@ const DAY_INDEXES = {
   WEDNESDAY: 2,
   THURSDAY: 3,
   FRIDAY: 4,
+  SATURDAY: 5,
+  SUNDAY: 6,
 };
 
 function formatTime(value) {
