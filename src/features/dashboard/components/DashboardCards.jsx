@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
 import { getAssignmentDetail } from "../../assignments/api/assignmentsApi.js";
+import { getSpaceColor } from "../../spaces/utils/spaceColors.js";
 
 function readUserRole() {
   try {
@@ -95,10 +96,10 @@ export function NextClassCard({
 export function TaskSummaryCard({
   selectedCourse,
   tasks,
+  colorKeysBySpaceId,
   isLoading,
   errorMessage,
 }) {
-  const [readTaskIds, setReadTaskIds] = useState(() => new Set());
   const [deletedTask, setDeletedTask] = useState(null);
   const [openingTaskId, setOpeningTaskId] = useState(null);
   const navigate = useNavigate();
@@ -193,6 +194,15 @@ export function TaskSummaryCard({
             >
               <span
                 className={`dashboard-task__dot dashboard-task__dot--${task.color}`}
+                style={
+                  colorKeysBySpaceId.has(task.spaceId)
+                    ? {
+                        "--task-dot-color": getSpaceColor(
+                          colorKeysBySpaceId.get(task.spaceId),
+                        ).background,
+                      }
+                    : undefined
+                }
                 aria-hidden="true"
               />
               <span className="dashboard-task__title">{task.title}</span>

@@ -157,6 +157,7 @@ function DashboardPage() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [colorKeysBySpaceId, setColorKeysBySpaceId] = useState(() => new Map());
   const [isTimetableLoading, setIsTimetableLoading] = useState(true);
   const [isAssignmentsLoading, setIsAssignmentsLoading] = useState(true);
   const [timetableError, setTimetableError] = useState("");
@@ -188,6 +189,7 @@ function DashboardPage() {
         const colorKeysBySpaceId = new Map(
           activeSpaces.map((space) => [space.space_id, space.color_key]),
         );
+        setColorKeysBySpaceId(colorKeysBySpaceId);
 
         setCourses(
           normalizeTimetable(timetableResult.value, colorKeysBySpaceId),
@@ -262,6 +264,7 @@ function DashboardPage() {
               <TaskSummaryCard
                 selectedCourse={selectedCourse}
                 tasks={tasks}
+                colorKeysBySpaceId={colorKeysBySpaceId}
                 isLoading={isAssignmentsLoading}
                 errorMessage={assignmentsError}
               />
