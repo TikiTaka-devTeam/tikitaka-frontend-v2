@@ -1624,7 +1624,7 @@ function DocumentModifyPage() {
           disabled={!isRevisionEditable || !canUndo || isApplyingRevisionOperation}
           onClick={() => applyRevisionHistory("undo")}
         >
-          <img src={undoIcon} alt="" />
+          <img className="document-modify-actions__history-icon" src={undoIcon} alt="" />
         </button>
         <button
           type="button"
@@ -1632,7 +1632,7 @@ function DocumentModifyPage() {
           disabled={!isRevisionEditable || !canRedo || isApplyingRevisionOperation}
           onClick={() => applyRevisionHistory("redo")}
         >
-          <img src={redoIcon} alt="" />
+          <img className="document-modify-actions__history-icon" src={redoIcon} alt="" />
         </button>
         <button
           type="button"
