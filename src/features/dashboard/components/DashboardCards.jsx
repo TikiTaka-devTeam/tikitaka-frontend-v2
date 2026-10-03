@@ -199,7 +199,7 @@ export function TaskSummaryCard({
                     ? {
                         "--task-dot-color": getSpaceColor(
                           colorKeysBySpaceId.get(task.spaceId),
-                        ).background,
+                        ).accent,
                       }
                     : undefined
                 }
