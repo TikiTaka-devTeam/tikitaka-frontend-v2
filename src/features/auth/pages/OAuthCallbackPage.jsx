@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { getCurrentUser, oauthLogin } from "../api/auth.api.js";
@@ -9,15 +9,26 @@ function OAuthCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState("");
+  const requestStartedRef = useRef(false);
 
   useEffect(() => {
-    let isMounted = true;
+    if (requestStartedRef.current) {
+      return undefined;
+    }
+
+    requestStartedRef.current = true;
 
     const completeOAuthLogin = async () => {
       const authorizationCode = searchParams.get("code");
       const returnedState = searchParams.get("state");
       const expectedState = sessionStorage.getItem("tikitaka_oauth_state");
       const provider = sessionStorage.getItem("tikitaka_oauth_provider");
+      const redirectUri =
+        provider === "GOOGLE"
+          ? import.meta.env.GOOGLE_OAUTH_REDIRECT_URI
+          : provider === "KAKAO"
+            ? import.meta.env.KAKAO_OAUTH_REDIRECT_URI
+            : "";
 
       sessionStorage.removeItem("tikitaka_oauth_state");
       sessionStorage.removeItem("tikitaka_oauth_provider");
@@ -25,6 +36,7 @@ function OAuthCallbackPage() {
       if (
         !authorizationCode ||
         !provider ||
+        !redirectUri ||
         !returnedState ||
         returnedState !== expectedState
       ) {
@@ -33,9 +45,11 @@ function OAuthCallbackPage() {
       }
 
       try {
-        const { data } = await oauthLogin(provider, authorizationCode);
-
-        if (!isMounted) return;
+        const { data } = await oauthLogin(
+          provider,
+          authorizationCode,
+          redirectUri,
+        );
 
         if (data?.signup_required) {
           if (!data.signup_token) {
@@ -69,8 +83,6 @@ function OAuthCallbackPage() {
           // OAuth 로그인 자체는 성공했으므로 기존 응답으로 계속 진행합니다.
         }
 
-        if (!isMounted) return;
-
         if (completeUser) {
           localStorage.setItem("tikitaka_user", JSON.stringify(completeUser));
         }
@@ -84,20 +96,16 @@ function OAuthCallbackPage() {
         sessionStorage.removeItem("tikitaka_notification_redirect");
         navigate(notificationRedirect || "/dashboard", { replace: true });
       } catch (error) {
-        if (isMounted) {
-          setErrorMessage(
-            error.response?.data?.message ||
-              error.message ||
-              "OAuth 로그인에 실패했습니다.",
-          );
-        }
+        setErrorMessage(
+          error.response?.data?.message ||
+            error.message ||
+            "OAuth 로그인에 실패했습니다.",
+        );
       }
     };
 
     void completeOAuthLogin();
-    return () => {
-      isMounted = false;
-    };
+    return undefined;
   }, [navigate, searchParams]);
 
   return (

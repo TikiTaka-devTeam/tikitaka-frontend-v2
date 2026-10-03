@@ -9,8 +9,9 @@ import graduationCapIcon from "../../../assets/icons/members/graduation-cap.svg"
 import inviteCodeCopyIcon from "../../../assets/icons/members/invite-code-copy-blue.svg";
 import joinedDateIcon from "../../../assets/icons/members/member-joined-date.svg";
 import mailIcon from "../../../assets/icons/members/member-mail.svg";
-import profileAvatar from "../../../assets/images/profile-avatar.svg";
+import refreshIcon from "../../../assets/icons/members/refresh.svg";
 import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
+import { getProfileInitial } from "../../../utils/profileInitial.js";
 import { getCurrentUser } from "../../auth/api/auth.api.js";
 import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
 import MemberPermissionModal from "../components/MemberPermissionModal.jsx";
@@ -160,6 +161,7 @@ function SpaceMembersPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [joinRequests, setJoinRequests] = useState([]);
   const [isJoinRequestsLoading, setIsJoinRequestsLoading] = useState(false);
+  const [isRefreshingJoinRequests, setIsRefreshingJoinRequests] = useState(false);
   const [joinRequestsError, setJoinRequestsError] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [autoApprove, setAutoApprove] = useState(false);
@@ -328,6 +330,30 @@ function SpaceMembersPage() {
     setTotalCount(Number(response?.total_count ?? list.length));
   }
 
+  async function handleRefreshJoinRequests() {
+    if (isJoinRequestsLoading || isRefreshingJoinRequests) return;
+
+    setIsRefreshingJoinRequests(true);
+    setJoinRequestsError("");
+
+    try {
+      const response = await getSpaceJoinRequests(spaceId);
+      const requests = Array.isArray(response?.join_requests)
+        ? response.join_requests
+        : [];
+      setJoinRequests(requests.map(normalizeJoinRequest));
+      setSelectedJoinRequestIds([]);
+    } catch (error) {
+      setJoinRequestsError(
+        error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "승인 대기 목록을 새로고침하지 못했습니다.",
+      );
+    } finally {
+      setIsRefreshingJoinRequests(false);
+    }
+  }
+
   function handleToggleJoinRequest(requestId) {
     setSelectedJoinRequestIds((previous) =>
       previous.includes(requestId)
@@ -439,7 +465,11 @@ function SpaceMembersPage() {
   async function handleSelectMember(member) {
     if (!member.id || isDetailLoading) return;
     const hasStudentDetailRestriction = isStudent && !canManageMembers;
-    if (hasStudentDetailRestriction && !isOwnMember(member, currentUser)) return;
+    if (
+      hasStudentDetailRestriction &&
+      member.role !== "PROFESSOR" &&
+      !isOwnMember(member, currentUser)
+    ) return;
     setIsAssistantPermissionMenuOpen(false);
     setSelectedMemberId(member.id);
     setSelectedMember(null);
@@ -671,7 +701,9 @@ function SpaceMembersPage() {
               <div className="members-list">
                 {members.map((member) => {
                   const isDetailRestricted =
-                    hasStudentDetailRestriction && !isOwnMember(member, currentUser);
+                    hasStudentDetailRestriction &&
+                    member.role !== "PROFESSOR" &&
+                    !isOwnMember(member, currentUser);
 
                   return (
                     <button
@@ -686,11 +718,17 @@ function SpaceMembersPage() {
                       }
                       onClick={() => handleSelectMember(member)}
                     >
-                      <img
-                        className="members-list-item__avatar"
-                        src={member.profileUrl || profileAvatar}
-                        alt=""
-                      />
+                      {member.profileUrl ? (
+                        <img
+                          className="members-list-item__avatar"
+                          src={member.profileUrl}
+                          alt=""
+                        />
+                      ) : (
+                        <span className="members-list-item__avatar" aria-hidden="true">
+                          {getProfileInitial(member.name)}
+                        </span>
+                      )}
                       <span className="members-list-item__body">
                         <strong>{member.name}</strong>
                         <small>
@@ -749,7 +787,18 @@ function SpaceMembersPage() {
             ) : null}
             {!selectedMemberId && canManageMembers ? (
               <section className="member-management" aria-label="멤버 참여 관리">
-                <h2>승인 대기</h2>
+                <div className="member-management__heading">
+                  <h2>승인 대기</h2>
+                  <button
+                    type="button"
+                    className={`member-management__refresh${isRefreshingJoinRequests ? " is-loading" : ""}`}
+                    aria-label="승인 대기 목록 새로고침"
+                    disabled={isJoinRequestsLoading || isRefreshingJoinRequests}
+                    onClick={handleRefreshJoinRequests}
+                  >
+                    <img src={refreshIcon} alt="" aria-hidden="true" />
+                  </button>
+                </div>
                 <p className="member-management__description">
                   수강 신청을 확인하고 강의 참여 권한을 관리하세요
                 </p>
@@ -802,7 +851,13 @@ function SpaceMembersPage() {
                               checked={selectedJoinRequestIds.includes(request.id)}
                               onChange={() => handleToggleJoinRequest(request.id)}
                             />
-                            <img src={request.profileUrl || profileAvatar} alt="" />
+                            {request.profileUrl ? (
+                              <img src={request.profileUrl} alt="" />
+                            ) : (
+                              <span className="member-request-avatar" aria-hidden="true">
+                                {getProfileInitial(request.name)}
+                              </span>
+                            )}
                             <strong>{request.name}</strong>
                             <span>{request.studentNumber || "-"}</span>
                             <time dateTime={request.requestedAt}>{formatJoinedDate(request.requestedAt)}</time>
@@ -853,7 +908,13 @@ function SpaceMembersPage() {
             {!isDetailLoading && selectedMember ? (
               <article className="member-detail">
                 <div className="member-detail__profile">
-                  <img src={selectedMember.profileUrl || profileAvatar} alt="" />
+                  {selectedMember.profileUrl ? (
+                    <img src={selectedMember.profileUrl} alt="" />
+                  ) : (
+                    <span className="member-detail__avatar" aria-hidden="true">
+                      {getProfileInitial(selectedMember.name)}
+                    </span>
+                  )}
                   <div>
                     <h2>{selectedMember.name}</h2>
                     <p>

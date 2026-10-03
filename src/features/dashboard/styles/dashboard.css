@@ -738,7 +738,7 @@
 
 .dashboard-profile-menu {
   position: absolute;
-  z-index: 10;
+  z-index: 1000;
   top: 93px;
   right: 20px;
   width: 404px;
@@ -760,12 +760,23 @@
   border-bottom: 1px solid #eaecf0;
 }
 
-.dashboard-profile-menu > header > img {
+.dashboard-profile-menu > header > img,
+.dashboard-profile-menu__avatar {
   width: 60px;
   height: 60px;
   flex: 0 0 auto;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.dashboard-profile-menu__avatar {
+  display: grid;
+  place-items: center;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  color: #667085;
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .dashboard-profile-menu > header div,
@@ -790,7 +801,7 @@
   font-size: 12px;
 }
 
-.dashboard-profile-menu > header span {
+.dashboard-profile-menu > header > div > span {
   max-width: 260px;
   overflow: hidden;
   color: #667085;
@@ -919,7 +930,8 @@
   cursor: pointer;
 }
 
-.profile-edit-dialog__avatar > img {
+.profile-edit-dialog__avatar > img,
+.profile-edit-dialog__avatar-placeholder {
   position: absolute;
   top: 0;
   left: 10px;
@@ -929,7 +941,17 @@
   object-fit: cover;
 }
 
-.profile-edit-dialog__avatar > span {
+.profile-edit-dialog__avatar-placeholder {
+  display: grid;
+  place-items: center;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  color: #667085;
+  font-size: 64px;
+  font-weight: 700;
+}
+
+.profile-edit-dialog__avatar > .profile-edit-dialog__avatar-edit {
   position: absolute;
   right: 10px;
   bottom: 20px;
@@ -941,7 +963,7 @@
   background: #2e6bff;
 }
 
-.profile-edit-dialog__avatar > span img {
+.profile-edit-dialog__avatar-edit img {
   width: 24px;
   height: 24px;
 }
@@ -1488,6 +1510,67 @@
 }
 
 @media (max-width: 600px) {
+  .dashboard-page {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .dashboard-brand {
+    height: 140px;
+  }
+
+  .dashboard-brand p {
+    top: 90px;
+  }
+
+  .dashboard-page__orb--right {
+    right: -280px;
+  }
+
+  .dashboard-content {
+    gap: 16px;
+  }
+
+  .dashboard-next-class {
+    min-height: 151px;
+    height: auto;
+    padding: 17px 16px;
+  }
+
+  .dashboard-next-class__badge {
+    right: 16px;
+  }
+
+  .dashboard-next-class h2 {
+    max-width: calc(100% - 96px);
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-next-class button {
+    right: 16px;
+    bottom: 16px;
+    width: 110px;
+  }
+
+  .dashboard-tasks header {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .dashboard-tasks li button {
+    padding-right: 18px;
+    padding-left: 40px;
+  }
+
+  .dashboard-sidebar {
+    display: flex;
+    width: 100%;
+  }
+
+  .dashboard-timetable-scroll {
+    border-radius: 20px;
+  }
+
   .dashboard-notifications {
     top: 84px;
     right: 16px;
@@ -1527,10 +1610,24 @@
     grid-template-columns: 1fr;
   }
 
+  .dashboard-timetable-scroll,
+  .dashboard-glass-card {
+    max-width: 100%;
+  }
+
+  .dashboard-timetable-scroll {
+    overscroll-behavior-x: contain;
+  }
+
   .dashboard-sidebar {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) minmax(300px, 1fr);
     align-items: start;
+  }
+
+  .dashboard-next-class,
+  .dashboard-tasks {
+    min-width: 0;
   }
 
   .dashboard-shell {
@@ -1538,7 +1635,7 @@
   }
 }
 
-@media (max-width: 700px) {
+@media (min-width: 601px) and (max-width: 700px) {
   .dashboard-brand {
     height: 140px;
   }
@@ -1548,8 +1645,14 @@
   }
 
   .dashboard-sidebar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(0, 1fr);
+    gap: 12px;
     width: 100%;
+  }
+
+  .dashboard-timetable-scroll {
+    border-radius: 20px;
   }
 
   .dashboard-glass-card {
@@ -1558,5 +1661,12 @@
 
   .dashboard-page__orb--right {
     right: -280px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-sidebar {
+    display: flex;
+    width: 100%;
   }
 }

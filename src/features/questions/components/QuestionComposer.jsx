@@ -64,7 +64,13 @@ function StepList({ currentStep }) {
   );
 }
 
-export default function QuestionComposer({ spaceId, documents, documentError, onReturnToMine }) {
+export default function QuestionComposer({
+  spaceId,
+  documents,
+  documentError,
+  onReturnToMine,
+  returnView = "mine",
+}) {
   const [draft, setDraft] = useState(() => readDraft(spaceId));
   const [documentModalOpen, setDocumentModalOpen] = useState(false);
   const [documentDropdownOpen, setDocumentDropdownOpen] = useState(false);
@@ -155,13 +161,14 @@ export default function QuestionComposer({ spaceId, documents, documentError, on
   const previewTitle = createdQuestion?.title ?? draft.title;
   const previewContent = createdQuestion?.content ?? draft.content;
   const previewCategories = createdQuestion?.categories ?? [];
+  const returnLabel = returnView === "all" ? "전체 질문" : "내 질문";
   const createdAt = createdQuestion?.created_at ? new Date(createdQuestion.created_at) : new Date();
   const createdAtText = Number.isNaN(createdAt.getTime()) ? "" : `${createdAt.getMonth() + 1}월 ${createdAt.getDate()}일 ${createdAt.getHours()}:${String(createdAt.getMinutes()).padStart(2, "0")}`;
 
   return (
     <>
       <aside className="space-questions-sidebar question-composer-sidebar" aria-label="질문 작성 단계">
-        <button type="button" className="question-composer-back" onClick={onReturnToMine}>← 내 질문</button>
+        <button type="button" className="question-composer-back" onClick={onReturnToMine}>← {returnLabel}</button>
         <div className="question-composer-sidebar__heading">작성 단계</div>
         <StepList currentStep={currentStep} />
         <div className="question-composer-guide">
@@ -201,7 +208,7 @@ export default function QuestionComposer({ spaceId, documents, documentError, on
               {similarStatus === "error" && <button type="button" onClick={() => loadSimilarQuestions(createdQuestion.question_id)}>다시 확인</button>}
               {similarStatus === "ready" && similarQuestions.length > 0 && <button type="button" onClick={() => setSimilarModalOpen(true)}>유사 질문 보기 →</button>}
             </div>
-            <button type="button" className="question-composer-return" onClick={onReturnToMine}>내 질문으로 돌아가기 →</button>
+            <button type="button" className="question-composer-return" onClick={onReturnToMine}>{returnLabel}으로 돌아가기 →</button>
           </div>
         ) : (
           <div className="question-composer-form">

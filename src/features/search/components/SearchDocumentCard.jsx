@@ -1,9 +1,17 @@
+import { useState } from "react";
+
 function SearchDocumentCard({ document, onSelect }) {
+  const [thumbnailError, setThumbnailError] = useState(false);
+
   return (
     <button type="button" className="search-document-card" onClick={() => onSelect(document)}>
       <span className="search-document-card__preview">
-        {document.thumbnailUrl ? (
-          <img src={document.thumbnailUrl} alt="" />
+        {document.thumbnailUrl && !thumbnailError ? (
+          <img
+            src={document.thumbnailUrl}
+            alt=""
+            onError={() => setThumbnailError(true)}
+          />
         ) : (
           <span className="search-document-card__preview-empty">PDF</span>
         )}

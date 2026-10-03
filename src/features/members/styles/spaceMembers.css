@@ -189,6 +189,13 @@
   flex: none;
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .members-list-item__body {
@@ -343,15 +350,59 @@
   inset: 0;
 }
 
-.member-management > h2 {
+.member-management__heading {
   position: absolute;
   top: 45px;
   left: 38px;
+  right: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.member-management__heading h2 {
   margin: 0;
   color: #1f293b;
   font-size: 20px;
   font-weight: 600;
   line-height: normal;
+}
+
+.member-management__refresh {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.member-management__refresh:hover:not(:disabled) {
+  background: rgba(46, 107, 255, 0.08);
+}
+
+.member-management__refresh:focus-visible {
+  outline: 2px solid #487eff;
+  outline-offset: 2px;
+}
+
+.member-management__refresh img {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.member-management__refresh.is-loading img {
+  animation: member-management-refresh-spin 700ms linear infinite;
+}
+
+@keyframes member-management-refresh-spin {
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
 .member-management__description {
@@ -544,11 +595,22 @@
   cursor: pointer;
 }
 
-.member-management__request > img {
+.member-management__request > img,
+.member-management__request > .member-request-avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.member-request-avatar {
+  display: grid;
+  place-items: center;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .member-management__request > strong {
@@ -688,11 +750,22 @@
   gap: 16px;
 }
 
-.member-detail__profile > img {
+.member-detail__profile > img,
+.member-detail__profile > .member-detail__avatar {
   width: 86px;
   height: 86px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.member-detail__avatar {
+  display: grid;
+  place-items: center;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  color: #667085;
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .member-detail__profile h2,

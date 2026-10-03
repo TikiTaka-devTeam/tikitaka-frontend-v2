@@ -412,12 +412,16 @@ function ProfessorAssignmentPage() {
   const [
     selectedAssignmentId,
     setSelectedAssignmentId,
-  ] = useState(null);
+  ] = useState(
+    location.state?.assignmentDetail?.assignment_id ?? null,
+  );
 
   const [
     assignmentDetail,
     setAssignmentDetail,
-  ] = useState(null);
+  ] = useState(
+    location.state?.assignmentDetail ?? null,
+  );
 
   const [
     viewMode,

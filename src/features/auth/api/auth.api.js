@@ -3,11 +3,12 @@ import { apiClient } from "../../../lib/api/client";
 export const login = (payload) =>
   apiClient.post("/auth/login", payload, { skipAuth: true });
 
-export const oauthLogin = (provider, authorizationCode) =>
+export const oauthLogin = (provider, authorizationCode, redirectUri) =>
   apiClient.post(
     `/auth/oauth/${provider}`,
     {
       authorization_code: authorizationCode,
+      redirect_uri: redirectUri,
     },
     { skipAuth: true },
   );

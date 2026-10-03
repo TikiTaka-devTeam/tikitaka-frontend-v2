@@ -177,7 +177,7 @@ export default function SpaceQuestionsPage() {
   const spaceName = location.state?.spaceName || "Space";
   const userRole = readUserRole();
   const isProfessor = userRole === "PROFESSOR";
-  const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(false);
+  const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(null);
   const [currentSpaceRole, setCurrentSpaceRole] = useState(isProfessor ? "PROFESSOR" : "STUDENT");
   const [view, setView] = useState("all");
   const [sort, setSort] = useState("LATEST");
@@ -211,6 +211,10 @@ export default function SpaceQuestionsPage() {
   const [deleteModal, setDeleteModal] = useState("");
   const [isDeletingQuestion, setIsDeletingQuestion] = useState(false);
   const [deleteQuestionError, setDeleteQuestionError] = useState("");
+  const isQuestionManager = isProfessor || (
+    currentSpaceRole === "ASSISTANT" && hasQuestionManagePermission
+  );
+  const isQuestionPermissionLoading = !isProfessor && hasQuestionManagePermission === null;
 
   useEffect(() => {
     if (isProfessor) return undefined;
@@ -267,7 +271,7 @@ export default function SpaceQuestionsPage() {
     const controller = new AbortController();
     const params = { sort, size: 20 };
     if (selectedDocumentId) params.document_id = selectedDocumentId;
-    const request = view === "mine" && !isProfessor ? getMySpaceQuestions : getSpaceQuestions;
+    const request = view === "mine" && !isQuestionManager ? getMySpaceQuestions : getSpaceQuestions;
     request(spaceId, params, { signal: controller.signal })
       .then((data) => {
         const nextQuestions = (data?.questions ?? []).map((question) => ({
@@ -297,7 +301,7 @@ export default function SpaceQuestionsPage() {
         if (!controller.signal.aborted) setIsLoading(false);
       });
     return () => controller.abort();
-  }, [spaceId, sort, selectedDocumentId, view, isProfessor, refreshKey]);
+  }, [spaceId, sort, selectedDocumentId, view, isQuestionManager, refreshKey]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -313,7 +317,7 @@ export default function SpaceQuestionsPage() {
   }, [spaceId, refreshKey]);
 
   useEffect(() => {
-    if (isProfessor) return undefined;
+    if (isQuestionManager) return undefined;
     const controller = new AbortController();
 
     async function loadMineCategories() {
@@ -357,10 +361,10 @@ export default function SpaceQuestionsPage() {
 
     loadMineCategories();
     return () => controller.abort();
-  }, [spaceId, isProfessor, refreshKey]);
+  }, [spaceId, isQuestionManager, refreshKey]);
 
   useEffect(() => {
-    if (view !== "mine" || isProfessor) return;
+    if (view !== "mine" || isQuestionManager) return;
     const controller = new AbortController();
     getMyQuestionSummary(spaceId, { signal: controller.signal })
       .then((data) => {
@@ -370,7 +374,7 @@ export default function SpaceQuestionsPage() {
         if (cause.code !== "ERR_CANCELED" && !controller.signal.aborted) setMySummary(null);
       });
     return () => controller.abort();
-  }, [spaceId, view, isProfessor, refreshKey]);
+  }, [spaceId, view, isQuestionManager, refreshKey]);
 
   async function loadMore() {
     if (!nextCursor || isLoading) return;
@@ -379,7 +383,7 @@ export default function SpaceQuestionsPage() {
     try {
       const params = { sort, size: 20, cursor: nextCursor };
       if (selectedDocumentId) params.document_id = selectedDocumentId;
-      const request = view === "mine" && !isProfessor ? getMySpaceQuestions : getSpaceQuestions;
+      const request = view === "mine" && !isQuestionManager ? getMySpaceQuestions : getSpaceQuestions;
       const data = await request(spaceId, params);
       const nextQuestions = (data?.questions ?? []).map((question) => ({
         ...question,
@@ -449,7 +453,7 @@ export default function SpaceQuestionsPage() {
         view !== "mine" || Boolean(mineCategoryIds?.[document.document_id]?.has(category.category_id))),
     }))
     .filter((document) => document.categories.length > 0);
-  const isCategoryLoading = (!currentCategoryData && !categoryError) || (view === "mine" && !isProfessor && !currentMineCategoryData && !mineCategoryError);
+  const isCategoryLoading = (!currentCategoryData && !categoryError) || (view === "mine" && !isQuestionManager && !currentMineCategoryData && !mineCategoryError);
   const shouldShowCategorySection = view !== "all" || Boolean(selectedDocumentId);
 
   function changeView(nextView) {
@@ -582,16 +586,18 @@ export default function SpaceQuestionsPage() {
         <AppToolbars showBottomNavigation={false} onSearch={() => navigate("/search")} />
 
         <div className="space-questions-layout app-container">
-          {isComposing && !isProfessor ? (
+          {isQuestionPermissionLoading ? <p className="space-questions-status space-questions-status--permission" role="status">권한을 확인하는 중입니다.</p> : <>
+          {isComposing && !isQuestionManager ? (
             <QuestionComposer
               spaceId={spaceId}
               documents={documents}
               documentError={actionError}
+              returnView={view}
               onReturnToMine={() => {
                 setIsComposing(false);
                 setRefreshKey((value) => value + 1);
                 setCategoryError("");
-                changeView("mine");
+                changeView(view === "all" ? "all" : "mine");
               }}
             />
           ) : <>
@@ -602,8 +608,8 @@ export default function SpaceQuestionsPage() {
                 <img src={view === "all" && !isManagingCategories ? totalQuestionSelectedIcon : totalQuestionIcon} alt="" />
                 <span>전체 질문</span>
               </button>
-              <button type="button" className={isProfessor ? (isManagingCategories ? "is-active" : "") : (view === "mine" ? "is-active" : "")} onClick={() => {
-                if (!isProfessor) {
+              <button type="button" className={isQuestionManager ? (isManagingCategories ? "is-active" : "") : (view === "mine" ? "is-active" : "")} onClick={() => {
+                if (!isQuestionManager) {
                   changeView("mine");
                   return;
                 }
@@ -612,8 +618,8 @@ export default function SpaceQuestionsPage() {
                 setQuestionMenuId("");
                 setIsManagingCategories(true);
               }}>
-                <img src={isProfessor ? (isManagingCategories ? categorySelectedIcon : categoryIcon) : (view === "mine" ? myQuestionSelectedIcon : myQuestionIcon)} alt="" />
-                <span>{isProfessor ? "질문 카테고리 수정" : "내 질문"}</span>
+                <img src={isQuestionManager ? (isManagingCategories ? categorySelectedIcon : categoryIcon) : (view === "mine" ? myQuestionSelectedIcon : myQuestionIcon)} alt="" />
+                <span>{isQuestionManager ? "질문 카테고리 수정" : "내 질문"}</span>
               </button>
             </div>
             <label className="space-questions-sidebar__label" htmlFor="space-questions-document">자료별 질문 탐색</label>
@@ -629,8 +635,8 @@ export default function SpaceQuestionsPage() {
                 })}
               </div>}
             </div>
-            {isProfessor && <button type="button" className="space-questions-sidebar__action" onClick={() => setExportModal("confirm")}>질문 내보내기</button>}
-            {!isProfessor && <button type="button" className="space-questions-sidebar__action" onClick={() => setIsComposing(true)}>질문하기</button>}
+            {isQuestionManager && <button type="button" className="space-questions-sidebar__action" onClick={() => setExportModal("confirm")}>질문 내보내기</button>}
+            {!isQuestionManager && <button type="button" className="space-questions-sidebar__action" onClick={() => setIsComposing(true)}>질문하기</button>}
             {actionError && <p className="space-questions-action-error" role="alert">{actionError}</p>}
           </aside>
 
@@ -648,7 +654,7 @@ export default function SpaceQuestionsPage() {
             questionId={selectedQuestionId}
             role={userRole}
             currentSpaceRole={currentSpaceRole}
-            canManageQuestions={isProfessor || hasQuestionManagePermission}
+            canManageQuestions={isQuestionManager}
             isQuestionAuthor={selectedQuestionIsMine || Boolean(mineQuestionIds?.has(String(selectedQuestionId)))}
             onBack={() => {
               setSelectedQuestionId("");
@@ -660,7 +666,7 @@ export default function SpaceQuestionsPage() {
               <h2 id="space-questions-title">{selectedDocument?.title ?? (view === "mine" ? "내 질문" : "전체 질문")}</h2>
               <p>{selectedDocument ? "질문 모아보기" : view === "mine" ? "해당 SPACE에서 내가 질문한 것들을 모아볼 수 있어요." : "현재 SPACE의 모든 질문을 최근순으로 모아볼 수 있어요."}</p>
             </div>
-            {view === "mine" && !isProfessor && <div className="space-questions-summary" aria-label="내 질문 요약">
+            {view === "mine" && !isQuestionManager && <div className="space-questions-summary" aria-label="내 질문 요약">
               <div className="space-questions-summary__card space-questions-summary__card--total">
                 <strong>{mySummary?.total_count ?? "-"}</strong>
                 <span>내 질문</span>
@@ -701,7 +707,7 @@ export default function SpaceQuestionsPage() {
             </div>
             {isCategoryLoading && <p className="space-questions-category-status" role="status">카테고리를 불러오는 중입니다.</p>}
             {categoryError && <p className="space-questions-category-error" role="alert">{categoryError}</p>}
-            {view === "mine" && mineCategoryError && <p className="space-questions-category-error" role="alert">{mineCategoryError}</p>}
+            {view === "mine" && !isQuestionManager && mineCategoryError && <p className="space-questions-category-error" role="alert">{mineCategoryError}</p>}
             </>}
             <div className="space-questions-sort" aria-label="질문 정렬">
               {SORT_OPTIONS.map((option) => <button key={option.value} type="button" className={sort === option.value ? "is-active" : ""} aria-pressed={sort === option.value} onClick={() => changeSort(option.value)}>{option.label}</button>)}
@@ -714,7 +720,7 @@ export default function SpaceQuestionsPage() {
               return <QuestionRow
                 key={questionId}
                 question={{ ...question, ...(questionLikeOverrides[questionId] ?? {}) }}
-                isProfessor={isProfessor}
+                isProfessor={isQuestionManager}
                 isMenuOpen={questionMenuId === questionId}
                 onMenuToggle={(selectedQuestion) => {
                   const selectedId = selectedQuestion.question_id ?? selectedQuestion.id;
@@ -735,6 +741,7 @@ export default function SpaceQuestionsPage() {
             })}</ul>
             {nextCursor && <button type="button" className="space-questions-more" onClick={loadMore} disabled={isLoading}>{isLoading ? "불러오는 중..." : "더 보기"}</button>}
           </section>}
+          </>}
           </>}
         </div>
         <SpaceToolbar activeItem="question" spaceId={spaceId} spaceName={spaceName} />

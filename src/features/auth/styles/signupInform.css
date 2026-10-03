@@ -355,12 +355,6 @@
   grid-column: 2;
 }
 
-.signup-inform-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.18fr;
-  gap: 13px;
-}
-
 .signup-inform-profile {
   position: relative;
   display: grid;
@@ -464,10 +458,6 @@
     max-height: none;
     overflow: visible;
     padding: 0 0 16px;
-  }
-
-  .signup-inform-grid {
-    grid-template-columns: 1fr;
   }
 
   .signup-inform-card h1 {

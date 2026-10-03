@@ -172,14 +172,13 @@ function updateCommentCollection(comments, targetId, updater) {
 
 export default function SpaceQuestionDetail({
   questionId,
-  role,
-  currentSpaceRole = role,
+  currentSpaceRole = "STUDENT",
   canManageQuestions = false,
   isQuestionAuthor = false,
   onBack,
   onUpdated,
 }) {
-  const isProfessor = role === "PROFESSOR";
+  const isQuestionManager = canManageQuestions;
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -422,7 +421,7 @@ export default function SpaceQuestionDetail({
     const isOwner = isOwnedByCurrentUser(comment);
     const canEdit = !isDeleted && Boolean(comment.can_edit ?? comment.canEdit ?? isOwner);
     const canDelete = !isDeleted && Boolean(
-      comment.can_delete ?? comment.canDelete ?? (isOwner || isProfessor),
+      comment.can_delete ?? comment.canDelete ?? (isOwner || isQuestionManager),
     );
     const isEditing = editingCommentId === commentId;
     const date = comment.updated_at ?? comment.updatedAt ?? comment.created_at ?? comment.createdAt;
@@ -494,7 +493,7 @@ export default function SpaceQuestionDetail({
         <p>{existingAnswer.content}</p>
       </article>}
 
-      {isProfessor && editing && <>
+      {isQuestionManager && editing && <>
         <div className="space-question-detail__editor">
           <span>교수 답변</span>
           <textarea value={answerContent} autoFocus onChange={(event) => setAnswerContent(event.target.value)} placeholder="질문에 대한 답변을 입력해 주세요." />
@@ -506,7 +505,7 @@ export default function SpaceQuestionDetail({
       </>}
 
       {error && <p className="space-question-detail__error" role="alert">{error}</p>}
-      {isProfessor && !editing && <button type="button" className="space-question-detail__answer-button" onClick={() => setEditing(true)}>{existingAnswer ? "답변 수정" : "답변하기"}</button>}
+      {isQuestionManager && !editing && <button type="button" className="space-question-detail__answer-button" onClick={() => setEditing(true)}>{existingAnswer ? "답변 수정" : "답변하기"}</button>}
 
       {commentThreads.length > 0 && <section className="space-question-detail__comments" aria-labelledby="space-question-comments-title">
         <strong id="space-question-comments-title">댓글</strong>

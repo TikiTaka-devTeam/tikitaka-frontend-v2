@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { BottomNavigation, SearchToolbar } from "../../../components/common/AppToolbars.jsx";
-import BrandLogo from "../../../components/common/BrandLogo.jsx";
+import backIcon from "../../../assets/icons/go-back.svg";
+import { apiClient } from "../../../lib/api/client.js";
 import { getDocumentSlides } from "../../lecture/api/lectureApi.js";
 import {
   deleteAllRecentSearches,
@@ -56,6 +57,19 @@ function getArray(value, ...keys) {
   return [];
 }
 
+function resolveThumbnailUrl(value) {
+  if (!value) return "";
+
+  try {
+    return new URL(
+      value,
+      `${apiClient.defaults.baseURL.replace(/\/$/, "")}/`,
+    ).href;
+  } catch {
+    return "";
+  }
+}
+
 function normalizeDocument(document) {
   const uploadedAt = document.uploaded_at ?? document.uploadedAt;
   const viewedAt = document.viewed_at ?? document.viewedAt;
@@ -72,7 +86,9 @@ function normalizeDocument(document) {
     spaceId: document.space_id ?? document.spaceId,
     spaceName: document.space_name ?? document.spaceName ?? "Space",
     title: document.title ?? "강의자료",
-    thumbnailUrl: document.thumbnail_url ?? document.thumbnailUrl ?? "",
+    thumbnailUrl: resolveThumbnailUrl(
+      document.thumbnail_url ?? document.thumbnailUrl,
+    ),
     pageCount,
     uploadedAt,
     meta: detailParts.filter(Boolean).join(" · "),
@@ -303,26 +319,34 @@ function SearchPage() {
     || results.questions.length > 0
   );
   return (
-    <main className="search-page space-page-transition">
+    <>
+      <main className="search-page space-page-transition">
       <div className="search-page__background" aria-hidden="true">
         <div className="search-page__orb search-page__orb--left" />
         <div className="search-page__orb search-page__orb--right" />
       </div>
 
       <div className={`app-frame search-page__frame${submittedQuery ? "" : " is-overview"}`}>
-        <BrandLogo variant="blue" className="app-brand" />
+        <button
+          type="button"
+          className="search-page__back"
+          aria-label="이전 페이지로 돌아가기"
+          onClick={() => navigate(-1)}
+        >
+          <img src={backIcon} alt="" />
+        </button>
+        <span className="search-page__back-label">뒤로 가기</span>
         <SearchToolbar
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onSubmit={() => runSearch()}
         />
-        <BottomNavigation />
 
         <div className={`app-container search-page__content${submittedQuery ? "" : " is-overview-fixed"}`}>
           {actionError ? <p className="search-page__action-error" role="alert">{actionError}</p> : null}
 
           {submittedQuery ? (
-            <div className="search-results" aria-live="polite" aria-busy={isSearching}>
+            <div className={`search-results${hasResults ? " is-populated" : ""}`} aria-live="polite" aria-busy={isSearching}>
               {isSearching ? <p className="search-page__status">검색 중입니다.</p> : null}
               {errorMessage ? <p className="search-page__status search-page__status--error" role="alert">{errorMessage}</p> : null}
               {!isSearching && !errorMessage && !hasResults ? (
@@ -419,7 +443,9 @@ function SearchPage() {
           )}
         </div>
       </div>
-    </main>
+      </main>
+      <BottomNavigation />
+    </>
   );
 }
 
