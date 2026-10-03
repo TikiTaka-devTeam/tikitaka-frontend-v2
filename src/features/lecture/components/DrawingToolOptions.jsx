@@ -12,16 +12,9 @@ import ThicknessThumbIcon from "../../../assets/icons/thickness-thumb.svg";
 import {
   getToolThicknessConfig,
 } from "../utils/lectureData.js";
+import { DRAWING_PALETTE_COLORS } from "../utils/drawingColorPreferences.js";
 
 import "../styles/drawing-tool-options.css";
-
-const COLORS = [
-  "#EF4444",
-  "#F97316",
-  "#FACC15",
-  "#4ADE80",
-  "#6366F1",
-];
 
 const SUPPORTED_TOOLS =
   new Set([
@@ -32,9 +25,6 @@ const SUPPORTED_TOOLS =
 
 const TRACK_WIDTH = 106;
 const THUMB_SIZE = 13;
-
-const ERASER_TRACK_HEIGHT = 180;
-const ERASER_THUMB_SIZE = 17;
 
 function formatThickness(
   value,
@@ -161,14 +151,7 @@ function getAnchorSelector(
   panel,
 ) {
   if (
-    tool === "ERASER"
-  ) {
-    return '.lecture-toolbar__button[data-tool="ERASER"]';
-  }
-
-  if (
-    panel ===
-    "THICKNESS"
+    panel === "THICKNESS" || tool === "ERASER"
   ) {
     return ".lecture-toolbar__thickness-button";
   }
@@ -180,14 +163,8 @@ function getAnchorSelector(
   return null;
 }
 
-function getAnchorGap(
-  tool,
-) {
-  return (
-    tool === "ERASER"
-      ? 15
-      : 5
-  );
+function getAnchorGap() {
+  return 5;
 }
 
 function useAnchoredPanelPosition({
@@ -283,9 +260,7 @@ function useAnchoredPanelPosition({
         ) || 1;
 
       const gap =
-        getAnchorGap(
-          tool,
-        ) *
+        getAnchorGap() *
         lectureUnit;
 
       const wrapLeft =
@@ -428,8 +403,10 @@ function DrawingToolOptionsContent({
   tool,
   thickness,
   color,
+  customColors = [],
   onThicknessChange,
   onColorChange,
+  onSaveCustomColor,
 }) {
   const [
     openPanel,
@@ -577,15 +554,8 @@ function DrawingToolOptionsContent({
   if (
     tool === "ERASER"
   ) {
-    const minimumCenter =
-      ERASER_THUMB_SIZE /
-      2;
-
-    const maximumCenter =
-      ERASER_TRACK_HEIGHT -
-      ERASER_THUMB_SIZE /
-        2;
-
+    const minimumCenter = THUMB_SIZE / 2;
+    const maximumCenter = TRACK_WIDTH - THUMB_SIZE / 2;
     const thumbCenter =
       minimumCenter +
       progress *
@@ -597,32 +567,41 @@ function DrawingToolOptionsContent({
     const thumbCenterPercent =
       (
         thumbCenter /
-        ERASER_TRACK_HEIGHT
+        TRACK_WIDTH
       ) *
       100;
 
     return (
       <div
         ref={panelRef}
-        className="drawing-options drawing-options--eraser drawing-options--figma-eraser"
+        className="drawing-options drawing-options--thickness drawing-options--figma-thickness drawing-options--figma-eraser"
         style={
           anchoredPanelStyle
         }
       >
-        <div className="drawing-options__eraser-slider">
-          <span
-            className="drawing-options__eraser-track"
+        <strong className="drawing-options__thickness-label">
+          {formatThickness(thickness)}
+        </strong>
+
+        <div className="drawing-options__thickness-slider">
+          <img
+            src={ThicknessTrackIcon}
+            className="drawing-options__thickness-track-image"
+            alt=""
+            draggable="false"
             aria-hidden="true"
           />
 
           <span
-            className="drawing-options__eraser-thumb"
+            className="drawing-options__thickness-thumb"
             style={{
-              top:
+              left:
                 `${thumbCenterPercent}%`,
             }}
             aria-hidden="true"
-          />
+          >
+            <img src={ThicknessThumbIcon} alt="" draggable="false" />
+          </span>
 
           <input
             type="range"
@@ -642,11 +621,12 @@ function DrawingToolOptionsContent({
                 ),
               )
             }
-            aria-label={`지우개 굵기 ${formatThickness(
+            aria-label={`지우개 크기 ${formatThickness(
               thickness,
             )}`}
           />
         </div>
+
       </div>
     );
   }
@@ -805,7 +785,7 @@ function DrawingToolOptionsContent({
         className="drawing-options drawing-options--colors"
         style={anchoredPanelStyle}
       >
-        {COLORS.map((swatch) => {
+        {[...DRAWING_PALETTE_COLORS, ...customColors].map((swatch) => {
           const isSelected = isSameColor(color, swatch);
           return (
             <button
@@ -813,7 +793,7 @@ function DrawingToolOptionsContent({
               key={swatch}
               className={isSelected ? "is-active" : ""}
               style={{ background: swatch }}
-              aria-label={`색상 ${swatch}`}
+              aria-label={`${DRAWING_PALETTE_COLORS.includes(swatch) ? "기본 색상" : "저장한 색"} ${swatch}`}
               aria-pressed={isSelected}
               onClick={() => onColorChange(swatch)}
             />
@@ -901,7 +881,9 @@ function DrawingToolOptionsContent({
             className="drawing-options__color-apply"
             disabled={!validDraft}
             onClick={() => {
-              onColorChange(draftHex.toUpperCase());
+              const nextColor = draftHex.toUpperCase();
+              onColorChange(nextColor);
+              onSaveCustomColor?.(nextColor);
               setOpenPanel(null);
             }}
           >

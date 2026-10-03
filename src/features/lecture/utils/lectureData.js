@@ -26,7 +26,7 @@ export const TOOL_THICKNESS_MM = {
     max: 15,
     step: 0.5,
     default: 8,
-    presets: [],
+    presets: [2, 5, 8, 12, 15],
   },
 };
 

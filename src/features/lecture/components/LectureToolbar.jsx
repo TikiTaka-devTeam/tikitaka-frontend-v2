@@ -17,10 +17,13 @@ import LassoIcon from "../../../assets/icons/lasso.svg";
 import ImageAddIcon from "../../../assets/icons/image-add.svg";
 import KeyboardIcon from "../../../assets/icons/keyboard.svg";
 import QuestionIcon from "../../../assets/icons/question.svg";
+import QuestionActiveIcon from "../../../assets/icons/question-active.svg";
 import QuestionListIcon from "../../../assets/icons/question-list.svg";
 import FixerIcon from "../../../assets/icons/fixer.svg";
 import FixerActiveIcon from "../../../assets/icons/fixer-active.svg";
 import ColorAddIcon from "../../../assets/icons/color-add.svg";
+import { DRAWING_PALETTE_COLORS } from "../utils/drawingColorPreferences.js";
+import { TOOL_THICKNESS_MM } from "../utils/lectureData.js";
 
 import "../styles/lecture-toolbar.css";
 import "../styles/lecture-question-toolbar.css";
@@ -78,14 +81,6 @@ const COMMON_TOOLS = [
     label: "키보드",
     icon: KeyboardIcon,
   },
-];
-
-const QUICK_COLORS = [
-  "#212326",
-  "#6366F1",
-  "#FFC7A8",
-  "#FFB800",
-  "#38D6B1",
 ];
 
 function normalizeColor(value) {
@@ -267,9 +262,12 @@ export default function LectureToolbar({
   role,
   activeTool,
   activeColor,
+  activeThickness,
+  toolOptionsOpen,
   panelOpen,
   onToolChange,
   onColorChange,
+  onThicknessChange,
   onUnsupportedTool,
 }) {
   const [
@@ -336,6 +334,7 @@ export default function LectureToolbar({
             id: "Q_POINT",
             label: "질문 등록",
             icon: QuestionIcon,
+            activeIcon: QuestionActiveIcon,
           },
           {
             id: "Q_LIST",
@@ -353,6 +352,8 @@ export default function LectureToolbar({
     OPTION_TOOLS.has(
       activeTool,
     );
+  const showThicknessControl =
+    showDrawingControls || activeTool === "ERASER";
 
   const drawingColor =
     normalizeColor(
@@ -385,6 +386,14 @@ export default function LectureToolbar({
   }
 
   function handleThicknessClick() {
+    if (activeTool === "ERASER") {
+      emitDrawingOptions(
+        toolOptionsOpen ? null : "ERASER",
+        "ERASER",
+      );
+      return;
+    }
+
     if (
       !showDrawingControls
     ) {
@@ -440,6 +449,7 @@ export default function LectureToolbar({
               id,
               label,
               icon,
+              activeIcon,
               activeSvg,
               dynamicFill,
               uiOnly,
@@ -501,7 +511,11 @@ export default function LectureToolbar({
                       ) : (
                         <img
                           src={
-                            id === "FIXER" && isActive ? FixerActiveIcon : icon
+                            isActive && activeIcon
+                              ? activeIcon
+                              : id === "FIXER" && isActive
+                                ? FixerActiveIcon
+                                : icon
                           }
                           alt=""
                           draggable="false"
@@ -524,14 +538,14 @@ export default function LectureToolbar({
         </div>
 
         <span className="lecture-toolbar__end-divider" aria-hidden="true" />
-        {showDrawingControls && (
+        {showThicknessControl && (
           <>
 
             <div className="lecture-toolbar__drawing-controls">
               <button
                 type="button"
                 className="lecture-toolbar__thickness-button"
-                aria-label="굵기 설정"
+                aria-label={activeTool === "ERASER" ? "지우개 크기 설정" : "굵기 설정"}
                 onClick={
                   handleThicknessClick
                 }
@@ -539,14 +553,14 @@ export default function LectureToolbar({
                 <span
                   className="lecture-toolbar__thickness-preview"
                   style={{
-                    background:
-                      drawingColor,
+                    background: activeTool === "ERASER" ? "#666b74" : drawingColor,
                   }}
                 />
               </button>
 
+              {showDrawingControls && (
               <div className="lecture-toolbar__quick-palette">
-                {(panelOpen ? [drawingColor] : QUICK_COLORS).map(
+                {(panelOpen ? [drawingColor] : DRAWING_PALETTE_COLORS).map(
                   (
                     swatch,
                   ) => {
@@ -617,6 +631,23 @@ export default function LectureToolbar({
                   />
                 </button>
               </div>
+              )}
+              {activeTool === "ERASER" && (
+                <div className="lecture-toolbar__eraser-sizes" aria-label="지우개 크기">
+                  {TOOL_THICKNESS_MM.ERASER.presets.map((size, index) => (
+                    <button
+                      type="button"
+                      key={size}
+                      className={`lecture-toolbar__eraser-size-option lecture-toolbar__eraser-size-option--${["small", "medium", "large", "larger", "largest"][index]}${Math.abs(activeThickness - size) < 0.001 ? " is-active" : ""}`}
+                      aria-label={`지우개 크기 ${size} mm`}
+                      aria-pressed={Math.abs(activeThickness - size) < 0.001}
+                      onClick={() => onThicknessChange?.(size)}
+                    >
+                      <span className={`lecture-toolbar__eraser-size lecture-toolbar__eraser-size--${["small", "medium", "large", "larger", "largest"][index]}`} />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}

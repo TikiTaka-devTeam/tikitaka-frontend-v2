@@ -5,6 +5,13 @@
   font-weight: 100 900;
 }
 
+@font-face {
+  font-family: "Pretendard";
+  src: url("../assets/fonts/PretendardVariable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+}
+
 :root {
   font-family: "Tikitaka UI", sans-serif;
   color: #212326;
