@@ -242,13 +242,15 @@ export function TaskSummaryCard({
         {visibleTasks.map((task) => {
           const isSubmitted =
             isStudent && getSubmissionStatus(task) === "SUBMITTED";
+          const isAwaitingGrading =
+            task.status === "CLOSED" && task.gradingStatus === "DRAFT";
 
           return (
             <li className={isSubmitted ? "is-read" : ""} key={task.id}>
               <button
                 type="button"
                 onClick={() => void handleOpenTask(task)}
-                aria-label={`${task.title}, ${task.due}`}
+                aria-label={`${task.title}, ${isAwaitingGrading ? "채점 전" : task.due}`}
               >
                 <span
                   className={`dashboard-task__dot dashboard-task__dot--${task.color}`}
@@ -266,6 +268,8 @@ export function TaskSummaryCard({
                 <span className="dashboard-task__title">{task.title}</span>
                 {isSubmitted ? (
                   <span className="dashboard-task__submitted">제출완료</span>
+                ) : isAwaitingGrading ? (
+                  <span className="dashboard-task__submitted">채점 전</span>
                 ) : (
                   <time dateTime={task.dueAt}>{task.due}</time>
                 )}
