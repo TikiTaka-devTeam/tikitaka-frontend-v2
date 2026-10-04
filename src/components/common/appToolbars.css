@@ -82,21 +82,6 @@
   height: 20px;
 }
 
-.dashboard-search-toolbar__loading {
-  position: absolute;
-  top: 16px;
-  left: -21px;
-  width: 16px !important;
-  height: 16px !important;
-  animation: dashboard-search-toolbar-refresh 0.9s linear infinite;
-}
-
-@keyframes dashboard-search-toolbar-refresh {
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
 .dashboard-utility {
   position: absolute;
   top: 35px;

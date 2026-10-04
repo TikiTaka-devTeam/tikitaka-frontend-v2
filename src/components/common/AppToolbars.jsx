@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import searchIcon from "../../assets/icons/dashboard-search.svg";
-import refreshIcon from "../../assets/icons/members/refresh.svg";
 import notificationIcon from "../../assets/icons/dashboard-notification.svg";
 
 import homeIcon from "../../assets/icons/dashboard-home.svg";
@@ -114,7 +113,7 @@ export function UtilityToolbar({
   );
 }
 
-export function SearchToolbar({ value, onChange, onSubmit, isSearching = false }) {
+export function SearchToolbar({ value, onChange, onSubmit }) {
   function handleSubmit(event) {
     event.preventDefault();
     onSubmit?.();
@@ -122,14 +121,6 @@ export function SearchToolbar({ value, onChange, onSubmit, isSearching = false }
 
   return (
     <div className="dashboard-search-toolbar-wrap">
-      {isSearching ? (
-        <img
-          className="dashboard-search-toolbar__loading"
-          src={refreshIcon}
-          alt="검색 중"
-        />
-      ) : null}
-
       <form
         className="dashboard-search-toolbar"
         role="search"
