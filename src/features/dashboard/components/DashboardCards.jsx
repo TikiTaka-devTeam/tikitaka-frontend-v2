@@ -175,7 +175,7 @@ export function TaskSummaryCard({
 
       let canManageAssignments = readUserRole() === "PROFESSOR";
 
-      if (!canManageAssignments && readUserRole() === "ASSISTANT") {
+      if (!canManageAssignments) {
         try {
           const memberResponse = await getSpaceMembers(task.spaceId);
           const currentMember = (memberResponse?.members ?? []).find((member) =>
