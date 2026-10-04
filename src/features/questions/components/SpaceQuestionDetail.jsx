@@ -7,6 +7,7 @@ import questionSubmitIcon from "../../../assets/icons/questions/question-submit.
 import viewIcon from "../../../assets/icons/questions/view-count.svg";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   createAnswer,
   createQuestionComment,
@@ -178,7 +179,8 @@ export default function SpaceQuestionDetail({
   onBack,
   onUpdated,
 }) {
-  const isQuestionManager = canManageQuestions;
+  const { readOnly } = useSpaceAccess();
+  const isQuestionManager = !readOnly && canManageQuestions;
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -218,7 +220,7 @@ export default function SpaceQuestionDetail({
 
   const existingAnswer = question?.answers?.[0] ?? null;
   const categories = question?.categories ?? [];
-  const canCreateComment = Boolean(
+  const canCreateComment = !readOnly && Boolean(
     canManageQuestions || isQuestionAuthor || isOwnedByCurrentUser(question),
   );
   const isViewingOwnQuestion = Boolean(
@@ -238,11 +240,13 @@ export default function SpaceQuestionDetail({
   }
 
   function requestSaveAnswer() {
+    if (readOnly) return;
     if (!answerContent.trim()) return;
     setAnswerModal("confirm");
   }
 
   async function toggleLike() {
+    if (readOnly) return;
     if (updatingLike) return;
     const wasLiked = Boolean(question.liked);
     const previousCount = question.like_count ?? 0;
@@ -269,6 +273,7 @@ export default function SpaceQuestionDetail({
   }
 
   async function saveAnswer() {
+    if (readOnly) return;
     if (saving) return;
     setSaving(true);
     setError("");
@@ -298,6 +303,7 @@ export default function SpaceQuestionDetail({
 
   async function submitComment(event) {
     event.preventDefault();
+    if (readOnly) return;
     const content = commentContent.trim();
     if (!content || commentSaving) return;
 
@@ -327,6 +333,7 @@ export default function SpaceQuestionDetail({
 
   async function submitReply(event, parentCommentId) {
     event.preventDefault();
+    if (readOnly) return;
     const content = replyContent.trim();
     if (!content || commentActionId) return;
 
@@ -357,6 +364,7 @@ export default function SpaceQuestionDetail({
   }
 
   function startEditingComment(comment) {
+    if (readOnly) return;
     setReplyingToId("");
     setReplyContent("");
     setEditingCommentId(getCommentId(comment));
@@ -366,6 +374,7 @@ export default function SpaceQuestionDetail({
 
   async function saveCommentEdit(event, commentId) {
     event.preventDefault();
+    if (readOnly) return;
     const content = editingCommentContent.trim();
     if (!content || commentActionId) return;
 
@@ -391,6 +400,7 @@ export default function SpaceQuestionDetail({
   }
 
   async function removeComment(commentId) {
+    if (readOnly) return;
     if (commentActionId) return;
     setCommentActionId(commentId);
     setCommentActionError("");
@@ -419,11 +429,11 @@ export default function SpaceQuestionDetail({
     const commentId = getCommentId(comment);
     const isDeleted = Boolean(comment.is_deleted ?? comment.isDeleted);
     const isOwner = isOwnedByCurrentUser(comment);
-    const canEdit = !isDeleted && Boolean(comment.can_edit ?? comment.canEdit ?? isOwner);
-    const canDelete = !isDeleted && Boolean(
+    const canEdit = !readOnly && !isDeleted && Boolean(comment.can_edit ?? comment.canEdit ?? isOwner);
+    const canDelete = !readOnly && !isDeleted && Boolean(
       comment.can_delete ?? comment.canDelete ?? (isOwner || isQuestionManager),
     );
-    const isEditing = editingCommentId === commentId;
+    const isEditing = !readOnly && editingCommentId === commentId;
     const date = comment.updated_at ?? comment.updatedAt ?? comment.created_at ?? comment.createdAt;
 
     return <article className="space-question-detail__comment-card">
@@ -470,7 +480,7 @@ export default function SpaceQuestionDetail({
         </div>
         <div className="space-question-detail__stats" aria-label={`조회 ${question.view_count ?? 0}, 공감 ${question.like_count ?? 0}`}>
           <span><img src={viewIcon} alt="" />{question.view_count ?? 0}</span>
-          <button type="button" aria-label={question.liked ? "공감 취소" : "공감하기"} aria-pressed={Boolean(question.liked)} disabled={updatingLike} onClick={toggleLike}>
+          <button type="button" aria-label={question.liked ? "공감 취소" : "공감하기"} aria-pressed={Boolean(question.liked)} disabled={readOnly || updatingLike} onClick={toggleLike}>
             <img src={question.liked ? selectedHeartIcon : heartIcon} alt="" />{question.like_count ?? 0}
           </button>
         </div>
@@ -488,7 +498,7 @@ export default function SpaceQuestionDetail({
         <img src={question.slide.thumbnail_url} alt={`${question.document?.title ?? "강의자료"} ${question.slide.page_number ?? ""}페이지`} />
       </div>}
 
-      {existingAnswer && !editing && <article className="space-question-detail__answer">
+      {existingAnswer && (readOnly || !editing) && <article className="space-question-detail__answer">
         <span>교수 답변</span>
         <p>{existingAnswer.content}</p>
       </article>}
@@ -513,7 +523,7 @@ export default function SpaceQuestionDetail({
           const parentCommentId = getCommentId(comment);
           return <li className="space-question-detail__comment-thread" key={parentCommentId}>
             {renderComment(comment)}
-            {replyingToId === parentCommentId ? <form className="space-question-detail__reply-form" onSubmit={(event) => submitReply(event, parentCommentId)}>
+            {!readOnly && replyingToId === parentCommentId ? <form className="space-question-detail__reply-form" onSubmit={(event) => submitReply(event, parentCommentId)}>
               <textarea
                 value={replyContent}
                 maxLength={1000}

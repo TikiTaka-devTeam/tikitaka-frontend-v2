@@ -3,14 +3,13 @@
   useState,
 } from "react";
 
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   Navigate,
   useLocation,
-  useNavigate,
   useParams,
 } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/go-back.svg";
 import assignmentEmptyIcon from "../../../assets/icons/assignment-empty.svg";
 import DeleteIcon from "../../../assets/icons/delete.svg?react";
 import noticeCreateIcon from "../../../assets/icons/notice-create.svg";
@@ -18,11 +17,7 @@ import pdfIcon from "../../../assets/icons/pdf.svg";
 import PencilEditIcon from "../../../assets/icons/pencil-edit.svg?react";
 import moreIcon from "../../../assets/icons/space/space-more.svg";
 
-import {
-  AppToolbars,
-} from "../../../components/common/AppToolbars.jsx";
 
-import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
 
 import {
   closeAssignment,
@@ -402,8 +397,7 @@ function AssignmentEmptyState() {
 }
 
 function ProfessorAssignmentPage() {
-  const navigate =
-    useNavigate();
+  const { readOnly } = useSpaceAccess();
 
   const location =
     useLocation();
@@ -810,6 +804,7 @@ function ProfessorAssignmentPage() {
   }
 
   function handleOpenCreate() {
+    if (readOnly) return;
     if (
       isManaging ||
       isClosing
@@ -843,6 +838,7 @@ function ProfessorAssignmentPage() {
   }
 
   function handleOpenEdit() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       isManaging ||
@@ -864,6 +860,7 @@ function ProfessorAssignmentPage() {
   }
 
   function handleOpenGrade() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       assignmentDetail.status !==
@@ -889,6 +886,7 @@ function ProfessorAssignmentPage() {
   }
 
   function handleOpenGradeEdit() {
+    if (readOnly) return;
     if (
       !isProfessor ||
       !assignmentDetail ||
@@ -951,6 +949,7 @@ function ProfessorAssignmentPage() {
   }
 
   function handleRequestDelete() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       isManaging ||
@@ -1027,6 +1026,7 @@ function ProfessorAssignmentPage() {
   }
 
   async function handleConfirmManage() {
+    if (readOnly) return;
     if (
       !manageModalAction ||
       isManaging
@@ -1271,6 +1271,7 @@ function ProfessorAssignmentPage() {
   }
 
   function handleRequestClose() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       assignmentDetail
@@ -1299,6 +1300,7 @@ function ProfessorAssignmentPage() {
   }
 
   async function handleConfirmClose() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       assignmentDetail
@@ -1553,7 +1555,7 @@ function ProfessorAssignmentPage() {
       assignmentDetail
         .status === "OPEN";
 
-    const canGrade =
+    const canGrade = !readOnly &&
       assignmentDetail
         .status ===
         "CLOSED" &&
@@ -1561,7 +1563,7 @@ function ProfessorAssignmentPage() {
         .grading_status ===
         "DRAFT";
 
-    const canEditGrade =
+    const canEditGrade = !readOnly &&
       isProfessor &&
       assignmentDetail
         .grading_status ===
@@ -1569,7 +1571,7 @@ function ProfessorAssignmentPage() {
 
     return (
       <article className="assignment-detail professor-assignment-detail">
-        <div className="professor-assignment-detail__menu-wrapper">
+        {!readOnly && <div className="professor-assignment-detail__menu-wrapper">
           <button
             type="button"
             className={`professor-assignment-detail__more${
@@ -1628,7 +1630,7 @@ function ProfessorAssignmentPage() {
               </button>}
             </div>
           )}
-        </div>
+        </div>}
 
         <h2>
           {
@@ -1689,7 +1691,7 @@ function ProfessorAssignmentPage() {
           }
         </div>
 
-        {isOpen && (
+        {!readOnly && isOpen && (
           <button
             type="button"
             className="assignment-detail__submit-button"
@@ -1704,6 +1706,10 @@ function ProfessorAssignmentPage() {
             제출 마감하기
           </button>
         )}
+
+        {readOnly && <button type="button" className="assignment-detail__submit-button" onClick={() => setViewMode("grade")}>
+          제출 현황 보기
+        </button>}
 
         {canGrade && (
           <button
@@ -1835,10 +1841,10 @@ function ProfessorAssignmentPage() {
 
   function renderRightPanel() {
     if (
-      viewMode ===
+      !readOnly && (viewMode ===
         "create" ||
       viewMode ===
-        "edit"
+        "edit")
     ) {
       return renderEditor();
     }
@@ -1858,42 +1864,7 @@ function ProfessorAssignmentPage() {
   return (
     <main className="assignment-page professor-assignment-page">
       <div className="app-frame assignment-frame">
-        <button
-          type="button"
-          className="assignment-back"
-          aria-label="Space 목록으로 돌아가기"
-          onClick={() =>
-            navigate(
-              "/spaces",
-            )
-          }
-        >
-          <img
-            src={backIcon}
-            alt=""
-          />
-        </button>
-
-        <header className="assignment-header">
-          <h1>
-            {spaceName}
-          </h1>
-
-          <p>
-            과제
-          </p>
-        </header>
-
-        <AppToolbars
-          showBottomNavigation={
-            false
-          }
-          onSearch={() =>
-            navigate(
-              "/search",
-            )
-          }
-        />
+        
 
         <section
           className={`assignment-layout${
@@ -1908,7 +1879,7 @@ function ProfessorAssignmentPage() {
               assignment={
                 assignmentDetail
               }
-              canFinalizeGrades={isProfessor}
+              canFinalizeGrades={!readOnly && isProfessor}
               mode={
                 viewMode
               }
@@ -2027,7 +1998,7 @@ function ProfessorAssignmentPage() {
                   </div>
                 )}
 
-                <button
+                {!readOnly && <button
                   type="button"
                   className="professor-assignment-create-button"
                   aria-label="과제 작성"
@@ -2041,7 +2012,7 @@ function ProfessorAssignmentPage() {
                     }
                     alt=""
                   />
-                </button>
+                </button>}
               </aside>
 
               <section className="assignment-right-panel">
@@ -2050,12 +2021,6 @@ function ProfessorAssignmentPage() {
             </>
           )}
         </section>
-
-        <SpaceToolbar
-          activeItem="assignment"
-          spaceId={spaceId}
-          spaceName={spaceName}
-        />
 
         <AssignmentCloseModal
           type={

@@ -752,7 +752,7 @@ function SpacesPage() {
   };
 
   const handleOpenSpace = (space) => {
-    if (space.isPending || selectedTab !== "active") {
+    if (space.isPending) {
       return;
     }
 
@@ -862,9 +862,7 @@ function SpacesPage() {
                   onActivate={handleActivate}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
-                  onOpen={
-                    selectedTab === "active" ? handleOpenSpace : undefined
-                  }
+                  onOpen={handleOpenSpace}
                 />
               ))}
             </div>

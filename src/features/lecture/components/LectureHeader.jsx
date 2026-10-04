@@ -1,3 +1,4 @@
+import SpaceArchiveStatus from "../../spaces/components/SpaceArchiveStatus.jsx";
 import BackIcon from "../../../assets/icons/go-back.svg";
 import UndoIcon from "../../../assets/icons/undo.svg?react";
 import RedoIcon from "../../../assets/icons/redo.svg?react";
@@ -18,7 +19,7 @@ export default function LectureHeader({
   onMore,
 }) {
   return (
-    <header className="lecture-header">
+<header className="lecture-header">
       <button
         type="button"
         className="lecture-header__back"
@@ -30,7 +31,7 @@ export default function LectureHeader({
 
       <div className="lecture-header__titles">
         <h1>{title}</h1>
-        <p>{spaceName}</p>
+        <p><span className="lecture-header__space-name">{spaceName}</span><SpaceArchiveStatus /></p>
       </div>
 
       <div className="lecture-header__actions">

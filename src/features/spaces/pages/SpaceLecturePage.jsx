@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/go-back.svg";
 import materialThumbnail from "../../../assets/images/ci-cd-pipeline-notes.png";
 import listIcon from "../../../assets/icons/space/space-list.svg";
 import moreIcon from "../../../assets/icons/space/space-more.svg";
@@ -10,14 +9,12 @@ import sortSelectedIcon from "../../../assets/icons/square-arrow-down-02.svg";
 import DeleteIcon from "../../../assets/icons/delete.svg?react";
 import PencilEditIcon from "../../../assets/icons/pencil-edit.svg?react";
 
-import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
 
 import DeleteCompleteModal from "../components/DeleteCompleteModal.jsx";
 import MaterialDeleteConfirmModal from "../components/MaterialDeleteConfirmModal.jsx";
 import MaterialSaveCompleteModal from "../components/MaterialSaveCompleteModal.jsx";
 import MaterialSaveConfirmModal from "../components/MaterialSaveConfirmModal.jsx";
 import MaterialUploadModal from "../components/MaterialUploadModal.jsx";
-import SpaceToolbar from "../components/SpaceToolbar.jsx";
 import {
   getSpaceMemberPermissions,
   getSpaceMembers,
@@ -30,6 +27,7 @@ import {
 } from "../api/documentsApi.js";
 
 import "../styles/spaceLecture.css";
+import { useSpaceAccess } from "../context/SpaceAccessContext.js";
 
 function normalizeDocument(document, fileName) {
   const title = document.title || "강의자료";
@@ -114,13 +112,14 @@ function isCurrentSpaceMember(member, user) {
 }
 
 function SpaceLecturePage() {
+  const { readOnly } = useSpaceAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const { spaceId } = useParams();
   const isProfessor = readUserRole() === "PROFESSOR";
   const [currentSpaceRole, setCurrentSpaceRole] = useState(isProfessor ? "PROFESSOR" : "STUDENT");
   const [hasLectureMaterialManagePermission, setHasLectureMaterialManagePermission] = useState(false);
-  const canManageMaterials = isProfessor || hasLectureMaterialManagePermission;
+  const canManageMaterials = !readOnly && (isProfessor || hasLectureMaterialManagePermission);
   const spaceName = location.state?.spaceName || "Space";
   const [materialModalStep, setMaterialModalStep] = useState(null);
   const [pendingMaterial, setPendingMaterial] = useState(null);
@@ -617,7 +616,7 @@ function SpaceLecturePage() {
     };
 
   return (
-    <main className="space-lecture-page space-page-transition">
+    <main className="space-lecture-page">
       <div
         className="space-lecture-background"
         aria-hidden="true"
@@ -627,33 +626,7 @@ function SpaceLecturePage() {
       </div>
 
       <div className="app-frame space-lecture-frame">
-        <button
-          type="button"
-          className="space-lecture-back"
-          aria-label="Space 목록으로 돌아가기"
-          onClick={() =>
-            navigate("/spaces")
-          }
-        >
-          <img
-            src={backIcon}
-            alt=""
-          />
-        </button>
-
-        <header className="space-lecture-header">
-          <h1>{spaceName}</h1>
-          <p>강의자료</p>
-        </header>
-
-        <AppToolbars
-          showBottomNavigation={
-            false
-          }
-          onSearch={() =>
-            navigate("/search")
-          }
-        />
+        
 
         <div className="space-lecture-sort">
           <button
@@ -760,6 +733,7 @@ function SpaceLecturePage() {
 
         <section
           className="space-lecture-content"
+          data-loading={isLoadingMaterials}
           aria-label={`${spaceName} 강의자료`}
           data-space-id={spaceId}
         >
@@ -980,12 +954,6 @@ function SpaceLecturePage() {
               </p>
             )}
         </section>
-
-        <SpaceToolbar
-          activeItem="lecture"
-          spaceId={spaceId}
-          spaceName={spaceName}
-        />
       </div>
 
       {canManageMaterials &&

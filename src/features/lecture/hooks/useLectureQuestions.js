@@ -1,3 +1,4 @@
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   useEffect,
   useRef,
@@ -124,6 +125,7 @@ export default function useLectureQuestions({
     String(
       role || "STUDENT",
     ).toUpperCase();
+  const { readOnly } = useSpaceAccess();
 
   const [
     selectedQuestion,
@@ -210,6 +212,7 @@ export default function useLectureQuestions({
   function handleQuestionPoint(
     point,
   ) {
+    if (readOnly) return;
     if (
       normalizedRole !==
       "STUDENT"
@@ -413,6 +416,7 @@ export default function useLectureQuestions({
     title,
     content,
   }) {
+    if (readOnly) return null;
     if (
       normalizedRole !==
       "STUDENT"
@@ -715,6 +719,7 @@ export default function useLectureQuestions({
     answer,
     content,
   }) {
+    if (readOnly) return;
     if (
       normalizedRole !==
       "PROFESSOR"
@@ -807,6 +812,7 @@ export default function useLectureQuestions({
   }
 
   async function handleSubmitVoice(file, questionId) {
+    if (readOnly) return;
     if (normalizedRole !== "PROFESSOR" || !questionId) return;
     const answer = await createVoiceAnswer(questionId, file);
     const update = (question) => String(question.id) === String(questionId)

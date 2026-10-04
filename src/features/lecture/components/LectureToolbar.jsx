@@ -1,3 +1,4 @@
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   useEffect,
   useState,
@@ -343,17 +344,18 @@ export default function LectureToolbar({
           },
         ];
 
+  const { readOnly } = useSpaceAccess();
   const tools = [
     ...COMMON_TOOLS,
     ...tailTools,
-  ];
+  ].filter((tool) => !readOnly || tool.id === "Q_LIST");
 
   const showDrawingControls =
-    OPTION_TOOLS.has(
+    !readOnly && OPTION_TOOLS.has(
       activeTool,
     );
   const showThicknessControl =
-    showDrawingControls || activeTool === "ERASER";
+    showDrawingControls || (!readOnly && activeTool === "ERASER");
 
   const drawingColor =
     normalizeColor(

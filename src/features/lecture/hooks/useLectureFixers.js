@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 
 import {
   checkFixer,
@@ -16,6 +17,7 @@ export default function useLectureFixers({
   setToolOptionsOpen,
   setToast,
 }) {
+  const { readOnly } = useSpaceAccess();
   const [
     fixerDraftPoint,
     setFixerDraftPoint,
@@ -31,6 +33,7 @@ export default function useLectureFixers({
   function handleFixerPoint(
     point,
   ) {
+    if (readOnly) return;
     if (
       role !==
       "PROFESSOR"
@@ -50,6 +53,7 @@ export default function useLectureFixers({
   async function handleCreateFixer(
     content,
   ) {
+    if (readOnly) return;
     if (
       !currentSlideId ||
       !fixerDraftPoint
@@ -103,6 +107,7 @@ export default function useLectureFixers({
   async function handleFixerSelect(
     fixer,
   ) {
+    if (readOnly) return;
     if (
       role !==
         "PROFESSOR" ||

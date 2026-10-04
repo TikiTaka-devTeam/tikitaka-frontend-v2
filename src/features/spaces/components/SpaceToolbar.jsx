@@ -81,8 +81,7 @@ function SpaceToolbar({
 }) {
   const navigate = useNavigate();
 
-  const [selectedItem, setSelectedItem] =
-    useState(activeItem);
+  const selectedItem = activeItem;
 
   const [isNavigating, setIsNavigating] =
     useState(false);
@@ -99,6 +98,7 @@ function SpaceToolbar({
       return;
     }
 
+    setIsNavigating(true);
     let assignmentManager = isProfessor;
     if (itemId === "assignment" && !isProfessor) {
       try {
@@ -125,17 +125,9 @@ function SpaceToolbar({
     };
 
     if (destinations[itemId]) {
-      setSelectedItem(itemId);
-      setIsNavigating(true);
-
-      window.setTimeout(() => {
-        navigate(destinations[itemId], {
-          state: {
-            spaceName,
-          },
-        });
-      }, 260);
+      navigate(destinations[itemId], { state: { spaceName } });
     }
+    setIsNavigating(false);
   };
 
   const activeIndex = Math.max(
