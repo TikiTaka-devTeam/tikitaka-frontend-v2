@@ -353,8 +353,9 @@ function DocumentModifyPage() {
 
   const material = location.state?.material ?? {};
   const spaceName = location.state?.spaceName ?? "강의 Space";
-  const initialDocumentName = material.title ?? material.fileName ?? "강의자료.pdf";
-  const initialDocumentNameRef = useRef(initialDocumentName);
+  const [initialDocumentName, setInitialDocumentName] = useState(
+    () => material.title ?? material.fileName ?? "강의자료.pdf",
+  );
   const [documentName, setDocumentName] = useState(initialDocumentName);
   const [documentNameDraft, setDocumentNameDraft] = useState(initialDocumentName);
   const [isEditingDocumentName, setIsEditingDocumentName] = useState(false);
@@ -379,7 +380,7 @@ function DocumentModifyPage() {
     || isCompletingRevision;
   const canUndo = Boolean(revisionSession?.can_undo ?? revisionSession?.canUndo);
   const canRedo = Boolean(revisionSession?.can_redo ?? revisionSession?.canRedo);
-  const hasUnsavedChanges = canUndo || documentName !== initialDocumentNameRef.current;
+  const hasUnsavedChanges = canUndo || documentName !== initialDocumentName;
   const isRevisionEditable = revisionSession?.status === "EDITING";
   const isRevisionInteractionLocked = !isRevisionEditable
     || isApplyingRevisionOperation;
@@ -581,7 +582,7 @@ function DocumentModifyPage() {
           setRevisionSlides(normalizeRevisionSlides(normalizedRevision));
 
           if (normalizedRevision.title) {
-            initialDocumentNameRef.current = normalizedRevision.title;
+            setInitialDocumentName(normalizedRevision.title);
             setDocumentName(normalizedRevision.title);
             setDocumentNameDraft(normalizedRevision.title);
           }
