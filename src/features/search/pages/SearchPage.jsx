@@ -401,29 +401,29 @@ function SearchPage() {
 
               {!isSearching && !errorMessage && hasResults ? (
                 <>
-                  <SearchSection title="공지" count={results.notices.length} variant="notices">
+                  {results.notices.length > 0 ? <SearchSection title="공지" count={results.notices.length} variant="notices">
                     <div className="search-result-card-grid">
                       {results.notices.map((notice) => (
                         <SearchResultCard key={notice.id} item={notice} type="notice" onSelect={openNotice} />
                       ))}
                     </div>
-                  </SearchSection>
+                  </SearchSection> : null}
 
-                  <SearchSection title="강의자료" count={results.documents.length} variant="documents">
+                  {results.documents.length > 0 ? <SearchSection title="강의자료" count={results.documents.length} variant="documents">
                     <div className="search-document-card-grid">
                       {results.documents.map((document) => (
                         <SearchDocumentCard key={document.id} document={document} onSelect={openDocument} />
                       ))}
                     </div>
-                  </SearchSection>
+                  </SearchSection> : null}
 
-                  <SearchSection title="질문" count={results.questions.length} variant="questions">
+                  {results.questions.length > 0 ? <SearchSection title="질문" count={results.questions.length} variant="questions">
                     <div className="search-result-card-grid">
                       {results.questions.map((question) => (
                         <SearchResultCard key={question.id} item={question} onSelect={openQuestion} />
                       ))}
                     </div>
-                  </SearchSection>
+                  </SearchSection> : null}
                 </>
               ) : null}
             </div>
