@@ -112,8 +112,8 @@
 .dashboard-utility__notification-badge {
   position: absolute;
   z-index: 2;
-  top: -1px;
-  right: -2px;
+  top: 2px;
+  right: 1px;
   width: 5px;
   height: 5px;
   box-sizing: border-box;

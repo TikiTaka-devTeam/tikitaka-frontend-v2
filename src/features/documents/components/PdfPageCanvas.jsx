@@ -1,6 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 
+const thumbnailCanvasCache = new WeakMap();
+const MAX_CACHED_THUMBNAILS_PER_DOCUMENT = 120;
+
+function getThumbnailCache(pdfDocument) {
+  let cache = thumbnailCanvasCache.get(pdfDocument);
+
+  if (!cache) {
+    cache = new Map();
+    thumbnailCanvasCache.set(pdfDocument, cache);
+  }
+
+  return cache;
+}
+
+function displayRenderedCanvas(targetCanvas, renderedCanvas, cssWidth, cssHeight) {
+  targetCanvas.width = renderedCanvas.width;
+  targetCanvas.height = renderedCanvas.height;
+  targetCanvas.style.width = `${cssWidth}px`;
+  targetCanvas.style.height = `${cssHeight}px`;
+  targetCanvas.getContext("2d")?.drawImage(renderedCanvas, 0, 0);
+}
+
 function PdfPageCanvas({
+  cacheRenderedPage = false,
   className = "",
   emptyMessage = "PDF 페이지를 불러오는 중입니다.",
   pageNumber,
@@ -9,6 +32,7 @@ function PdfPageCanvas({
 }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
+  const hasRenderedPageRef = useRef(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [renderError, setRenderError] = useState("");
 
@@ -62,12 +86,29 @@ function PdfPageCanvas({
 
         if (!canvas) return;
 
-        canvas.width = Math.round(renderViewport.width);
-        canvas.height = Math.round(renderViewport.height);
-        canvas.style.width = `${cssViewport.width}px`;
-        canvas.style.height = `${cssViewport.height}px`;
+        const cache = cacheRenderedPage ? getThumbnailCache(pdfDocument) : null;
+        const cacheKey = `${pageNumber}:${containerSize.width}:${containerSize.height}:${zoom}:${pixelRatio}`;
+        const cachedCanvas = cache?.get(cacheKey);
 
-        const context = canvas.getContext("2d");
+        if (cachedCanvas) {
+          cache.delete(cacheKey);
+          cache.set(cacheKey, cachedCanvas);
+          displayRenderedCanvas(
+            canvas,
+            cachedCanvas,
+            cssViewport.width,
+            cssViewport.height,
+          );
+          hasRenderedPageRef.current = true;
+          setRenderError("");
+          return;
+        }
+
+        const renderCanvas = document.createElement("canvas");
+        renderCanvas.width = Math.round(renderViewport.width);
+        renderCanvas.height = Math.round(renderViewport.height);
+
+        const context = renderCanvas.getContext("2d");
 
         if (!context) throw new Error("PDF canvas context를 생성하지 못했습니다.");
 
@@ -77,7 +118,24 @@ function PdfPageCanvas({
         });
         await renderTask.promise;
 
-        if (!cancelled) setRenderError("");
+        if (!cancelled) {
+          displayRenderedCanvas(
+            canvas,
+            renderCanvas,
+            cssViewport.width,
+            cssViewport.height,
+          );
+          hasRenderedPageRef.current = true;
+
+          if (cache) {
+            cache.set(cacheKey, renderCanvas);
+            if (cache.size > MAX_CACHED_THUMBNAILS_PER_DOCUMENT) {
+              cache.delete(cache.keys().next().value);
+            }
+          }
+
+          setRenderError("");
+        }
       } catch (error) {
         if (!cancelled && error?.name !== "RenderingCancelledException") {
           setRenderError("PDF 페이지를 렌더링하지 못했습니다.");
@@ -91,9 +149,10 @@ function PdfPageCanvas({
       cancelled = true;
       renderTask?.cancel();
     };
-  }, [containerSize.height, containerSize.width, pageNumber, pdfDocument, zoom]);
+  }, [cacheRenderedPage, containerSize.height, containerSize.width, pageNumber, pdfDocument, zoom]);
 
-  const statusMessage = renderError || (!pdfDocument ? emptyMessage : "");
+  const statusMessage = renderError
+    || (!pdfDocument && !hasRenderedPageRef.current ? emptyMessage : "");
 
   return (
     <div
