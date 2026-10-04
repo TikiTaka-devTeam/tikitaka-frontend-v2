@@ -1305,7 +1305,7 @@ function SpaceNoticePage() {
   if ((isCreateMode || isEditMode) && !showCreateButton) {
     return (
       <main className="notice-create-page">
-        <div className="notice-create-edit-loading">
+        <div className={`notice-create-edit-loading${hasNoticeManagePermission === null ? " is-loading" : ""}`}>
           {hasNoticeManagePermission === null
             ? "공지사항 관리 권한을 확인하는 중입니다."
             : "공지사항 관리 권한이 없습니다."}
@@ -1347,7 +1347,7 @@ function SpaceNoticePage() {
     ) {
       return (
         <main className="notice-create-page">
-          <div className="notice-create-edit-loading">
+          <div className="notice-create-edit-loading is-loading">
             공지사항을 불러오는 중입니다.
           </div>
         </main>
@@ -1445,7 +1445,7 @@ function SpaceNoticePage() {
             <div className="notice-list-panel__divider" />
 
             {isLoading && (
-              <div className="notice-list-panel__state">
+              <div className="notice-list-panel__state is-loading">
                 공지사항을 불러오는 중입니다.
               </div>
             )}

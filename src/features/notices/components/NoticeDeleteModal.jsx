@@ -1,5 +1,6 @@
 import ConfirmCheckIcon from "../../../assets/icons/confirm-check.svg?react";
 import deleteIcon from "../../../assets/icons/delete.svg";
+import { closeWithModalTransition } from "../../../components/common/modalTransition.js";
 
 function NoticeDeleteModal({
   type = "confirm",
@@ -80,7 +81,7 @@ function NoticeDeleteModal({
               type="button"
               className="notice-delete-modal__cancel"
               disabled={isDeleting}
-              onClick={onCancel}
+              onClick={(event) => closeWithModalTransition(event, onCancel)}
             >
               취소
             </button>

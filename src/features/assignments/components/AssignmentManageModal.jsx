@@ -1,5 +1,6 @@
 import { createPortal } from "react-dom";
 
+import { closeWithModalTransition } from "../../../components/common/modalTransition.js";
 import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 import deleteIcon from "../../../assets/icons/delete.svg";
 import DownloadIcon from "../../../assets/icons/download2.svg?react";
@@ -264,7 +265,7 @@ function AssignmentManageModal({
                 type="button"
                 className="assignment-manage-modal__cancel"
                 disabled={isProcessing}
-                onClick={onCancel}
+                onClick={(event) => closeWithModalTransition(event, onCancel)}
               >
                 취소
               </button>

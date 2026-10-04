@@ -14,6 +14,7 @@ import {
 } from "../api/dashboardApi.js";
 import { getCourseColor } from "../utils/courseColor.js";
 import { getSpaces } from "../../spaces/api/spacesApi.js";
+import { setSpaceListCache } from "../../spaces/utils/spaceListCache.js";
 
 import "../styles/dashboard.css";
 
@@ -184,10 +185,14 @@ function DashboardPage() {
           throw timetableResult.reason;
         }
 
-        const activeSpaces =
+        const activeSpacesResponse =
           spacesResult.status === "fulfilled"
-            ? (spacesResult.value?.spaces ?? [])
-            : [];
+            ? spacesResult.value
+            : null;
+        if (activeSpacesResponse) {
+          setSpaceListCache(activeSpacesResponse, "ACTIVE");
+        }
+        const activeSpaces = activeSpacesResponse?.spaces ?? [];
         const colorKeysBySpaceId = new Map(
           activeSpaces.map((space) => [space.space_id, space.color_key]),
         );

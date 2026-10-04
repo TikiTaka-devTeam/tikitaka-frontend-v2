@@ -513,6 +513,10 @@
   font-weight: 500;
 }
 
+.dashboard-page.space-page-transition {
+  animation-duration: 160ms;
+}
+
 .dashboard-task__submitted {
   margin-left: auto;
   color: #758094;
