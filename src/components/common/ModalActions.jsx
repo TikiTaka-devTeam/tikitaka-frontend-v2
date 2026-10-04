@@ -1,3 +1,6 @@
+import { useContext } from "react";
+import { ModalCloseTransitionContext } from "./ModalBackdrop.jsx";
+import { closeWithModalTransition } from "./modalTransition.js";
 import "./modalActions.css";
 
 function ModalActions({
@@ -11,13 +14,30 @@ function ModalActions({
   showCancel = true,
   className = "",
 }) {
+  const requestModalClose = useContext(ModalCloseTransitionContext);
+  const runModalClose = (callback, event) => {
+    if (requestModalClose) {
+      requestModalClose(() => callback?.(event));
+      return;
+    }
+    closeWithModalTransition(event, callback);
+  };
+  const handleCancel = (event) => runModalClose(onCancel, event);
+  const handleConfirm = (event) => {
+    if (confirmType !== "submit" && onConfirm) {
+      runModalClose(onConfirm, event);
+      return;
+    }
+    onConfirm?.(event);
+  };
+
   return (
     <div className={`modal-actions${showCancel ? "" : " modal-actions--single"} ${className}`}>
       {showCancel && (
         <button
           type="button"
           className="modal-actions__button modal-actions__cancel"
-          onClick={onCancel}
+          onClick={handleCancel}
           disabled={cancelDisabled}
         >
           {cancelText}
@@ -27,7 +47,7 @@ function ModalActions({
       <button
         type={confirmType}
         className="modal-actions__button modal-actions__confirm"
-        onClick={onConfirm}
+        onClick={handleConfirm}
         disabled={confirmDisabled}
       >
         {confirmText}

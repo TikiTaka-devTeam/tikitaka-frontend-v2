@@ -1956,7 +1956,7 @@ function ProfessorAssignmentPage() {
                 <div className="assignment-list-panel__divider" />
 
                 {isListLoading ? (
-                  <div className="assignment-list-state">
+                  <div className="assignment-list-state is-loading">
                     과제를 불러오는 중입니다.
                   </div>
                 ) : listError ? (

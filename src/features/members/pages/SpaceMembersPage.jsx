@@ -749,7 +749,7 @@ function SpaceMembersPage() {
           <aside className="members-list-panel">
             <div className="members-list-panel__header"><strong>멤버</strong><span>{totalCount}명</span></div>
             <div className="members-list-panel__divider" aria-hidden="true" />
-            {isLoading ? <p className="members-state">멤버를 불러오는 중입니다.</p> : null}
+            {isLoading ? <p className="members-state is-loading">멤버를 불러오는 중입니다.</p> : null}
             {!isLoading && errorMessage && !selectedMemberId ? <p className="members-state members-state--error">{errorMessage}</p> : null}
             {!isLoading && !errorMessage && members.length === 0 ? <p className="members-state">참여 중인 멤버가 없습니다.</p> : null}
             {!isLoading && members.length > 0 ? (
@@ -969,7 +969,7 @@ function SpaceMembersPage() {
               </section>
             ) : null}
             {!selectedMemberId && !canManageMembers ? <div className="member-detail-empty"><img src={memberBackgroundIcon} alt="" /><strong>멤버를 선택해 확인하세요</strong><p>왼쪽 목록에서 확인할 멤버를 선택해 주세요.</p></div> : null}
-            {isDetailLoading ? <p className="members-state">멤버 정보를 불러오는 중입니다.</p> : null}
+            {isDetailLoading ? <p className="members-state is-loading">멤버 정보를 불러오는 중입니다.</p> : null}
             {!isDetailLoading && selectedMember ? (
               <article className="member-detail">
                 <div className="member-detail__profile">

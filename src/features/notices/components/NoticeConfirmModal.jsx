@@ -1,5 +1,6 @@
 import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
 import noticeWriteIcon from "../../../assets/icons/notice-write.svg";
+import { closeWithModalTransition } from "../../../components/common/modalTransition.js";
 
 function NoticeConfirmModal({
   type = "confirm",
@@ -72,7 +73,7 @@ function NoticeConfirmModal({
               type="button"
               className="notice-modal__cancel"
               disabled={isSaving}
-              onClick={onCancel}
+              onClick={(event) => closeWithModalTransition(event, onCancel)}
             >
               취소
             </button>

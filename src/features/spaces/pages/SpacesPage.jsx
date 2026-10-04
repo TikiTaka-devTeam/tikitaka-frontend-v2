@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +28,7 @@ import {
   restoreSpace,
   updateSpace,
 } from "../api/spacesApi.js";
+import { getSpaceListCache, setSpaceListCache } from "../utils/spaceListCache.js";
 
 import "../styles/spaces.css";
 
@@ -267,9 +268,18 @@ function SpacesPage() {
 
   const [selectedTab, setSelectedTab] = useState("active");
 
-  const [spaces, setSpaces] = useState([]);
+  const [spaces, setSpaces] = useState(() => {
+    const cachedSpaces = getSpaceListCache("ACTIVE");
+    return cachedSpaces ? getSpaceList(cachedSpaces, "ACTIVE") : [];
+  });
 
-  const [isSpacesLoading, setIsSpacesLoading] = useState(true);
+  const [isSpacesLoading, setIsSpacesLoading] = useState(
+    () => !getSpaceListCache("ACTIVE"),
+  );
+
+  const [isSpaceGridVisible, setIsSpaceGridVisible] = useState(true);
+  const [isSpaceGridEntering, setIsSpaceGridEntering] = useState(false);
+  const tabTransitionTimerRef = useRef(null);
 
   const [spacesError, setSpacesError] = useState("");
 
@@ -313,6 +323,7 @@ function SpacesPage() {
       try {
         const data = await getSpaces(status);
 
+        setSpaceListCache(data, status);
         setSpaces(getSpaceList(data, status));
         setSpacesError("");
       } catch (error) {
@@ -331,6 +342,7 @@ function SpacesPage() {
     const controller = new AbortController();
 
     const status = selectedTab === "active" ? "ACTIVE" : "ARCHIVED";
+    const cachedSpaces = getSpaceListCache(status);
 
     getSpaces(status, { signal: controller.signal })
       .then((data) => {
@@ -338,6 +350,7 @@ function SpacesPage() {
           return;
         }
 
+        setSpaceListCache(data, status);
         setSpaces(getSpaceList(data, status));
         setSpacesError("");
       })
@@ -348,7 +361,7 @@ function SpacesPage() {
 
         console.error("Space 목록 조회 실패:", error);
 
-        setSpaces([]);
+        if (!cachedSpaces) setSpaces([]);
         setSpacesError("Space 목록을 불러오지 못했습니다.");
       })
       .finally(() => {
@@ -364,24 +377,39 @@ function SpacesPage() {
     };
   }, [selectedTab]);
 
-  const handleActiveTab = () => {
-    if (selectedTab === "active") {
+  useEffect(() => () => {
+    if (tabTransitionTimerRef.current !== null) {
+      window.clearTimeout(tabTransitionTimerRef.current);
+    }
+  }, []);
+
+  const switchSpaceTab = (nextTab) => {
+    if (selectedTab === nextTab || tabTransitionTimerRef.current !== null) {
       return;
     }
 
-    setIsSpacesLoading(true);
+    setIsSpaceGridEntering(false);
+    setIsSpaceGridVisible(false);
+    tabTransitionTimerRef.current = window.setTimeout(() => {
+      tabTransitionTimerRef.current = null;
 
-    setSelectedTab("active");
+      const status = nextTab === "active" ? "ACTIVE" : "ARCHIVED";
+      const cachedSpaces = getSpaceListCache(status);
+      setSpaces(cachedSpaces ? getSpaceList(cachedSpaces, status) : []);
+      setSpacesError("");
+      setIsSpacesLoading(!cachedSpaces);
+      setSelectedTab(nextTab);
+      setIsSpaceGridVisible(true);
+      setIsSpaceGridEntering(true);
+    }, 120);
+  };
+
+  const handleActiveTab = () => {
+    switchSpaceTab("active");
   };
 
   const handleArchivedTab = () => {
-    if (selectedTab === "archived") {
-      return;
-    }
-
-    setIsSpacesLoading(true);
-
-    setSelectedTab("archived");
+    switchSpaceTab("archived");
   };
 
   const handleAddSpace = () => {
@@ -816,7 +844,11 @@ function SpacesPage() {
           </div>
 
           {!isSpacesLoading && spaces.length > 0 && (
-            <div className="space-grid">
+            <div
+              key={selectedTab}
+              className={`space-grid${isSpaceGridVisible ? "" : " space-grid--fading-out"}${isSpaceGridEntering ? " space-grid--fade-in" : ""}`}
+              onAnimationEnd={() => setIsSpaceGridEntering(false)}
+            >
               {spaces.map((space) => (
                 <SpaceCard
                   key={

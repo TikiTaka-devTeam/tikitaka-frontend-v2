@@ -165,6 +165,45 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   align-items: start;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.spaces-page.space-page-transition {
+  animation-duration: 160ms;
+}
+
+.space-grid--fading-out {
+  opacity: 0;
+  transform: translateY(5px);
+  pointer-events: none;
+}
+
+.space-grid--fade-in {
+  animation: space-grid-fade-in 160ms ease both;
+}
+
+@keyframes space-grid-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .space-grid {
+    transition: none;
+  }
+
+  .space-grid--fade-in {
+    animation: none;
+  }
 }
 
 .space-card {
@@ -364,6 +403,10 @@
   text-align: center;
   white-space: nowrap;
   pointer-events: none;
+}
+
+.spaces-loading[role="status"] {
+  display: none;
 }
 
 .space-empty__text {

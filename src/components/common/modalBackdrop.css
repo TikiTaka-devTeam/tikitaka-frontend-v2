@@ -14,3 +14,23 @@
 .modal-backdrop--light {
   background: rgba(10, 18, 31, 0.08);
 }
+
+.modal-backdrop.is-closing {
+  pointer-events: none;
+  animation: app-popup-backdrop-exit 160ms ease both;
+}
+
+.modal-backdrop.is-closing [role="dialog"],
+.modal-backdrop.is-closing [role="alertdialog"] {
+  animation: app-popup-exit 160ms ease both;
+}
+
+@keyframes app-popup-backdrop-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes app-popup-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}

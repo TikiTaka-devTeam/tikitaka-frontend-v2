@@ -1,4 +1,5 @@
 import confirmCheckIcon from "../../../assets/icons/confirm-check.svg";
+import { closeWithModalTransition } from "../../../components/common/modalTransition.js";
 
 function AssignmentSubmitModal({
   type = "confirm",
@@ -67,7 +68,7 @@ function AssignmentSubmitModal({
               type="button"
               className="assignment-modal__cancel"
               disabled={isSubmitting}
-              onClick={onCancel}
+              onClick={(event) => closeWithModalTransition(event, onCancel)}
             >
               취소
             </button>
