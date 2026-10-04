@@ -3,7 +3,7 @@
    rule switches the student panel to position: static !important. */
 .lecture-page.is-panel-open .question-panel.professor-question-panel { position: relative !important; }
 .professor-question-panel .question-panel__header { gap: 8px; }
-.professor-question-panel__back { min-width: 64px; height: 28px; padding: 0 10px; border: 1px solid #d8dbe7; border-radius: 12px; background: #fafafa; color: #292e3d; font: 600 11px "Tikitaka UI", sans-serif; cursor: pointer; }
+.professor-question-panel__back { width: 70px; min-width: 70px; height: 28px; margin-top: 3px; padding: 0; border: 1px solid #d8dbe7; border-radius: 12px; background: #fafafa; color: #292e3d; font: 600 10px "Tikitaka UI", sans-serif; cursor: pointer; }
 .professor-question-panel__back:disabled { opacity: 0.55; cursor: default; }
 .professor-question-panel__questions { padding: 0 0 19px; min-height: 0; flex: 1 1 0; display: flex; flex-direction: column; overflow: hidden; }
 /* Override both the student list's height AND its 192px flex basis. The
@@ -14,6 +14,11 @@
 .professor-question-panel .question-panel__scope-row,
 .professor-question-panel__selected { flex-shrink: 0; }
 .professor-question-panel__selected { padding-top: 15px; }
+.professor-question-panel__question-detail { flex: 0 0 auto; margin: 20px 24px 0; }
+.professor-question-panel__question-detail p { margin: 0; color: #758094; font-size: 12px; line-height: 17px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.professor-question-panel__selected-detail { min-height: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
+.professor-question-panel__answer-label { margin: 0 24px; color: #131a29; font-size: 14px; font-weight: 600; line-height: 18px; }
+.professor-question-panel__answer-section { margin: 0 24px 24px; }
 .professor-question-panel__selected .question-panel__list-viewport,
 .professor-question-panel__selected .question-panel__list-scroll { height: 64px; flex-basis: 64px; }
 .professor-question-panel__actions,
