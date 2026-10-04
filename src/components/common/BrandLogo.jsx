@@ -13,6 +13,7 @@ function BrandLogo({
   className = "",
   imageClassName = "",
   interactive = true,
+  onNavigate,
 }) {
   const navigate = useNavigate();
   const logoSrc = LOGO_SOURCES[variant] ?? LOGO_SOURCES.blue;
@@ -35,7 +36,7 @@ function BrandLogo({
       type="button"
       className={`brand-logo${className ? ` ${className}` : ""}`}
       aria-label="대시보드로 이동"
-      onClick={() => navigate("/dashboard")}
+      onClick={() => (onNavigate ?? navigate)("/dashboard")}
     >
       {logoImage}
     </button>

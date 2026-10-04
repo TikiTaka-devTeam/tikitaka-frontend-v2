@@ -2,8 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import BrandLogo from "../../../components/common/BrandLogo.jsx";
-import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
 
 import ActivateCompleteModal from "../components/ActivateCompleteModal.jsx";
 import ActivateConfirmModal from "../components/ActivateConfirmModal.jsx";
@@ -743,13 +741,6 @@ function SpacesPage() {
     setDeleteModalStep(null);
   };
 
-  const handleSearch = () => {
-    navigate("/search");
-  };
-
-  const handleNotifications = () => {
-    console.log("알림");
-  };
 
   const handleOpenSpace = (space) => {
     if (space.isPending) {
@@ -762,19 +753,13 @@ function SpacesPage() {
   };
 
   return (
-    <main className="spaces-page space-page-transition">
+    <main className="spaces-page">
       <div className="spaces-background" aria-hidden="true">
         <div className="spaces-page__orb spaces-page__orb--left" />
         <div className="spaces-page__orb spaces-page__orb--right" />
       </div>
 
       <div className="app-frame spaces-frame">
-        <BrandLogo variant="blue" className="app-brand" />
-
-        <AppToolbars
-          onSearch={handleSearch}
-          onNotifications={handleNotifications}
-        />
 
         <div className="app-container spaces-container">
           <div className="spaces-header">

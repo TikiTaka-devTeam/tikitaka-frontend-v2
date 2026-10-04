@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
-import BrandLogo from "../../../components/common/BrandLogo.jsx";
 import {
   NextClassCard,
   TaskSummaryCard,
@@ -156,7 +153,6 @@ function getNextCourse(courses) {
 }
 
 function DashboardPage() {
-  const navigate = useNavigate();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -232,16 +228,13 @@ function DashboardPage() {
   }, [semester, year]);
 
   return (
-    <main className="dashboard-page space-page-transition">
+    <main className="dashboard-page">
       <div className="dashboard-background" aria-hidden="true">
         <div className="dashboard-page__orb dashboard-page__orb--left" />
         <div className="dashboard-page__orb dashboard-page__orb--right" />
       </div>
 
       <div className="app-frame dashboard-frame">
-        <BrandLogo variant="blue" className="app-brand" />
-
-        <AppToolbars onSearch={() => navigate("/search")} />
 
         <div className="app-container dashboard-shell">
           <header className="dashboard-brand">

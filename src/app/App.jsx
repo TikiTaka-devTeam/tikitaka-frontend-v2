@@ -27,6 +27,7 @@ import StudentLecturePage from "../features/lecture/pages/StudentLecturePage.jsx
 import ProfessorLecturePage from "../features/lecture/pages/ProfessorLecturePage.jsx";
 import LectureViewerPage from "../features/lecture/pages/LectureViewerPage.jsx";
 import NotificationRedirectPage from "../features/notifications/pages/NotificationRedirectPage.jsx";
+import MainLayout from "../components/common/MainLayout.jsx";
 
 function App() {
   const accessToken =
@@ -36,6 +37,7 @@ function App() {
 
   return (
     <Routes>
+      <Route element={<MainLayout />}>
       <Route
         path="/"
         element={
@@ -51,8 +53,9 @@ function App() {
       />
 
       <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/search" element={<SearchPage />} />
       <Route path="/spaces" element={<SpacesPage />} />
+      </Route>
+      <Route path="/search" element={<SearchPage />} />
       <Route path="/spaces/:spaceId" element={<SpaceAccessBoundary />}>
       <Route path="/spaces/:spaceId" element={<SpaceLecturePage />} />
       <Route path="/spaces/:spaceId/questions" element={<SpaceQuestionsPage />} />

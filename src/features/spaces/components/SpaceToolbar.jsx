@@ -78,6 +78,8 @@ function SpaceToolbar({
   activeItem = "lecture",
   spaceId,
   spaceName,
+  onNavigate,
+  transitioning = false,
 }) {
   const navigate = useNavigate();
 
@@ -92,7 +94,7 @@ function SpaceToolbar({
   const handleNavigation = async (itemId) => {
     if (
       !spaceId ||
-      isNavigating ||
+      isNavigating || transitioning ||
       itemId === selectedItem
     ) {
       return;
@@ -125,7 +127,7 @@ function SpaceToolbar({
     };
 
     if (destinations[itemId]) {
-      navigate(destinations[itemId], { state: { spaceName } });
+      (onNavigate ?? navigate)(destinations[itemId], { state: { spaceName } });
     }
     setIsNavigating(false);
   };
@@ -250,7 +252,7 @@ function SpaceToolbar({
                   ? "page"
                   : undefined
               }
-              disabled={isNavigating}
+              disabled={isNavigating || transitioning}
               onClick={() =>
                 handleNavigation(
                   item.id,

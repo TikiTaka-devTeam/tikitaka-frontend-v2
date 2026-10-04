@@ -148,7 +148,7 @@ export function SearchToolbar({ value, onChange, onSubmit }) {
   );
 }
 
-export function BottomNavigation({ items = DEFAULT_NAV_ITEMS }) {
+export function BottomNavigation({ items = DEFAULT_NAV_ITEMS, onNavigate, disabled = false }) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -173,7 +173,8 @@ export function BottomNavigation({ items = DEFAULT_NAV_ITEMS }) {
             type="button"
             className={isActive ? "is-active" : undefined}
             aria-current={isActive ? "page" : undefined}
-            onClick={() => navigate(path)}
+            disabled={disabled}
+            onClick={() => (onNavigate ?? navigate)(path)}
           >
             <img src={resolvedIcon} alt="" />
 
@@ -190,6 +191,8 @@ export function AppToolbars({
   onNotifications,
   onProfile,
   showBottomNavigation = true,
+  onNavigate,
+  navigationDisabled = false,
   ...utilityProps
 }) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -263,7 +266,7 @@ export function AppToolbars({
           onProfileUpdated={setProfileImage}
         />
       ) : null}
-      {showBottomNavigation ? <BottomNavigation items={items} /> : null}
+      {showBottomNavigation ? <BottomNavigation items={items} onNavigate={onNavigate} disabled={navigationDisabled} /> : null}
     </>
   );
 }
