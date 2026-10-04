@@ -98,7 +98,7 @@
   width: 100%;
   min-width: 0;
   height: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   overflow-y: auto;
   border-radius: 24px;
   background: rgba(251, 253, 255, 0.82);
@@ -107,7 +107,7 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(87, 102, 130, 0.35) transparent;
   overscroll-behavior: contain;
-  touch-action: pan-x pan-y;
+  touch-action: pan-y;
 }
 
 .dashboard-timetable {
@@ -481,7 +481,7 @@
 }
 
 .dashboard-tasks li.is-read {
-  background: rgba(147, 147, 147, 0.1);
+  background: transparent;
 }
 
 .dashboard-tasks li:last-child {
@@ -507,6 +507,13 @@
 }
 
 .dashboard-tasks li time {
+  margin-left: auto;
+  color: #758094;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.dashboard-task__submitted {
   margin-left: auto;
   color: #758094;
   font-size: 10px;
@@ -1556,7 +1563,7 @@
   }
 
   .dashboard-timetable {
-    min-width: 405px;
+    min-width: 0;
   }
 
   .dashboard-timetable__day-control {
@@ -1653,12 +1660,6 @@
 
   .dashboard-shell {
     padding-bottom: 105px;
-  }
-}
-
-@media (min-width: 601px) and (max-width: 900px) {
-  .dashboard-timetable {
-    min-width: 845px;
   }
 }
 
