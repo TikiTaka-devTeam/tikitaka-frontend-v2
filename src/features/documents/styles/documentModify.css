@@ -2,13 +2,13 @@
 .document-modify-page__orb { position: fixed; border-radius: 50%; background: rgba(185, 212, 255, .13); filter: blur(50px); pointer-events: none; }
 .document-modify-page__orb--left { width: 410px; height: 410px; top: 560px; left: -180px; }
 .document-modify-page__orb--right { width: 460px; height: 460px; top: -230px; right: -150px; }
-.document-modify-back { position: absolute; top: 24px; left: 0; z-index: 2; width: 84px; height: 88px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.document-modify-back { position: absolute; top: 24px; left: max(0px, calc((100vw - var(--app-frame-max)) / 2)); z-index: 2; width: 84px; height: 88px; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .document-modify-back img { display: block; width: 84px; height: 88px; }
-.document-modify-header { position: absolute; top: 40px; left: 83px; z-index: 1; }
+.document-modify-header { position: absolute; top: 40px; left: max(83px, calc((100vw - var(--app-frame-max)) / 2 + 83px)); z-index: 1; }
 .document-modify-header h1, .document-modify-header p { margin: 0; line-height: normal; white-space: nowrap; }
 .document-modify-header h1 { max-width: calc(100vw - 320px); overflow: hidden; font-size: 20px; font-weight: 600; text-overflow: ellipsis; }
 .document-modify-header p { margin-top: 5px; color: #386eeb; font-size: 14px; font-weight: 600; }
-.document-modify-actions { position: absolute; top: 35px; right: 50px; z-index: 2; width: 172px; height: 48px; display: flex; align-items: center; justify-content: space-around; padding: 0 13px; border: 1px solid rgba(255,255,255,.75); border-radius: 28px; background: rgba(255,255,255,.7); box-shadow: 0 8px 12px rgba(0,0,0,.1), inset 0 1px 1px rgba(255,255,255,.6); backdrop-filter: blur(15px); }
+.document-modify-actions { position: absolute; top: 35px; right: max(20px, calc((100vw - var(--app-frame-max)) / 2 + 20px)); z-index: 2; width: 172px; height: 48px; display: flex; align-items: center; justify-content: space-around; padding: 0 13px; border: 1px solid rgba(255,255,255,.75); border-radius: 28px; background: rgba(255,255,255,.7); box-shadow: 0 8px 12px rgba(0,0,0,.1), inset 0 1px 1px rgba(255,255,255,.6); backdrop-filter: blur(15px); }
 .document-modify-actions button { width: 20px; height: 20px; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .document-modify-actions button:disabled { opacity: .35; cursor: default; }
 .document-modify-actions.is-applying-history button:disabled { opacity: 1; }
@@ -119,7 +119,7 @@
 .document-revision-save-modal__actions.is-complete .modal-actions__button { width: 244px; }
 @keyframes document-revision-save-spin { to { transform: rotate(360deg); } }
 .modal-backdrop.document-modify-help-backdrop { display: block; padding: 0; overflow: hidden; background: rgba(9,13,20,.74); }
-.document-modify-help { position: absolute; inset: 0; overflow: hidden; color: #fff; pointer-events: none; }
+.document-modify-help { position: relative; width: min(100%, var(--app-frame-max)); height: 100%; margin-inline: auto; overflow: hidden; color: #fff; pointer-events: none; }
 .document-modify-help-close { position: absolute; top: 34px; right: 24px; z-index: 1; width: 36px; height: 36px; padding: 10px; border: 0; border-radius: 18px; background: rgba(255,255,255,.14); cursor: pointer; pointer-events: auto; }
 .document-modify-help-close img { display: block; width: 16px; height: 16px; }
 .document-modify-help > h2 { position: absolute; top: 63px; left: 50%; margin: 0; font-size: 24px; font-weight: 700; line-height: 34.8px; text-align: center; white-space: nowrap; transform: translateX(-50%); }
@@ -148,3 +148,4 @@
 .document-modify-help-delete-guide { position: absolute; top: 506px; right: 159px; width: 197px; height: 16.288px; }
 @media (max-width: 900px) { .document-modify-layout { width: calc(100% - 40px); grid-template-columns: minmax(0, 1fr) 170px 170px; } .document-modify-slide-block { width: 134px; } }
 @media (max-width: 700px) { .document-modify-page { overflow: auto; } .document-modify-actions { right: 20px; } .document-modify-layout { height: auto; grid-template-columns: 1fr; } .document-modify-preview-panel, .document-modify-pages-panel, .document-modify-upload-panel { height: clamp(320px, calc(100dvh - 170px), 664px); } .document-modify-slide-block { width: 154px; } }
+@media (max-width: 600px) { .document-modify-actions { right: 16px; } .document-modify-header h1 { max-width: calc(100vw - 260px); font-size: 17px; } }

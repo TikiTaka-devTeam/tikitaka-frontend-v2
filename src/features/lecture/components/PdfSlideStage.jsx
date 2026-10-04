@@ -278,13 +278,6 @@ export default function PdfSlideStage({
               }
             />
 
-            {pageChangeNotice && (
-              <div className="slide-change-notice" role="status">
-                <span>※ 이 페이지는 {pageChangeNotice.kind === "DELETED" ? "삭제된" : "수정된"} 페이지 입니다.</span>
-                <strong>({pageChangeNotice.index} / {pageChangeNotice.total})</strong>
-                <button type="button" aria-label="현재 변경 확인 및 다음 변경으로 이동" onClick={onAcknowledgePageChange}><img src={CheckCircleIcon} alt="" /></button>
-              </div>
-            )}
             <SlideMarkers
               role={
                 role
@@ -338,6 +331,13 @@ export default function PdfSlideStage({
                 onFixerDraftSubmit
               }
             />
+          </div>
+        )}
+        {pageChangeNotice && (
+          <div className="slide-change-notice" role="status">
+            <span>※ 이 페이지는 {pageChangeNotice.kind === "DELETED" ? "삭제된" : "수정된"} 페이지 입니다.</span>
+            <strong>({pageChangeNotice.index} / {pageChangeNotice.total})</strong>
+            <button type="button" aria-label="현재 변경 확인 및 다음 변경으로 이동" onClick={onAcknowledgePageChange}><img src={CheckCircleIcon} alt="" /></button>
           </div>
         )}
       </div>
