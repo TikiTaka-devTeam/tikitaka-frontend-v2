@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
 import { getAssignmentDetail } from "../../assignments/api/assignmentsApi.js";
+import {
+  getSpaceMemberPermissions,
+  getSpaceMembers,
+} from "../../members/api/membersApi.js";
 import { getSpaceColor } from "../../spaces/utils/spaceColors.js";
 
 function readUserRole() {
@@ -36,6 +40,40 @@ function getSubmissionStatus(task) {
 
 function getGradingStatus(task) {
   return String(task?.gradingStatus ?? "").toUpperCase();
+}
+
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("tikitaka_user") || "null") || {};
+  } catch {
+    return {};
+  }
+}
+
+function isCurrentSpaceMember(member, user) {
+  const memberId = String(member?.member_id ?? member?.id ?? "");
+  const userIds = [
+    user?.member_id,
+    user?.memberId,
+    user?.space_member_id,
+    user?.spaceMemberId,
+    user?.user_id,
+    user?.userId,
+    user?.id,
+  ].filter(Boolean).map(String);
+  const memberNumber = String(member?.student_number ?? member?.studentNumber ?? "");
+  const userNumber = String(
+    user?.member_id_number
+      ?? user?.memberIdNumber
+      ?? user?.student_number
+      ?? user?.studentNumber
+      ?? "",
+  );
+
+  return Boolean(
+    (memberId && userIds.includes(memberId))
+      || (memberNumber && userNumber && memberNumber === userNumber),
+  );
 }
 
 export function NextClassCard({
@@ -135,7 +173,30 @@ export function TaskSummaryCard({
         return;
       }
 
-      const assignmentPath = readUserRole() === "PROFESSOR"
+      let canManageAssignments = readUserRole() === "PROFESSOR";
+
+      if (!canManageAssignments && readUserRole() === "ASSISTANT") {
+        try {
+          const memberResponse = await getSpaceMembers(task.spaceId);
+          const currentMember = (memberResponse?.members ?? []).find((member) =>
+            isCurrentSpaceMember(member, readStoredUser()),
+          );
+          const memberId = currentMember?.member_id ?? currentMember?.id;
+
+          if (String(currentMember?.role ?? "").toUpperCase() === "ASSISTANT" && memberId) {
+            const permissionsResponse = await getSpaceMemberPermissions(
+              task.spaceId,
+              memberId,
+            );
+            canManageAssignments = Array.isArray(permissionsResponse?.permissions)
+              && permissionsResponse.permissions.includes("ASSIGNMENT_MANAGE");
+          }
+        } catch {
+          canManageAssignments = false;
+        }
+      }
+
+      const assignmentPath = canManageAssignments
         ? "assignments/professor"
         : "assignments";
 
@@ -178,38 +239,40 @@ export function TaskSummaryCard({
             {errorMessage}
           </li>
         ) : null}
-        {visibleTasks.map((task) => (
-          <li
-            className={
-              isStudent && getSubmissionStatus(task) === "SUBMITTED"
-                ? "is-read"
-                : ""
-            }
-            key={task.id}
-          >
-            <button
-              type="button"
-              onClick={() => void handleOpenTask(task)}
-              aria-label={`${task.title}, ${task.due}`}
-            >
-              <span
-                className={`dashboard-task__dot dashboard-task__dot--${task.color}`}
-                style={
-                  colorKeysBySpaceId.has(task.spaceId)
-                    ? {
-                        "--task-dot-color": getSpaceColor(
-                          colorKeysBySpaceId.get(task.spaceId),
-                        ).accent,
-                      }
-                    : undefined
-                }
-                aria-hidden="true"
-              />
-              <span className="dashboard-task__title">{task.title}</span>
-              <time dateTime={task.dueAt}>{task.due}</time>
-            </button>
-          </li>
-        ))}
+        {visibleTasks.map((task) => {
+          const isSubmitted =
+            isStudent && getSubmissionStatus(task) === "SUBMITTED";
+
+          return (
+            <li className={isSubmitted ? "is-read" : ""} key={task.id}>
+              <button
+                type="button"
+                onClick={() => void handleOpenTask(task)}
+                aria-label={`${task.title}, ${task.due}`}
+              >
+                <span
+                  className={`dashboard-task__dot dashboard-task__dot--${task.color}`}
+                  style={
+                    colorKeysBySpaceId.has(task.spaceId)
+                      ? {
+                          "--task-dot-color": getSpaceColor(
+                            colorKeysBySpaceId.get(task.spaceId),
+                          ).accent,
+                        }
+                      : undefined
+                  }
+                  aria-hidden="true"
+                />
+                <span className="dashboard-task__title">{task.title}</span>
+                {isSubmitted ? (
+                  <span className="dashboard-task__submitted">제출완료</span>
+                ) : (
+                  <time dateTime={task.dueAt}>{task.due}</time>
+                )}
+              </button>
+            </li>
+          );
+        })}
         {!isLoading && !errorMessage && visibleTasks.length === 0 ? (
           <li className="dashboard-tasks__empty">등록된 할 일이 없습니다.</li>
         ) : null}

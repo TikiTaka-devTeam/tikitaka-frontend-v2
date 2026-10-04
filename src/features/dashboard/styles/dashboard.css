@@ -481,7 +481,7 @@
 }
 
 .dashboard-tasks li.is-read {
-  background: rgba(147, 147, 147, 0.1);
+  background: transparent;
 }
 
 .dashboard-tasks li:last-child {
@@ -507,6 +507,13 @@
 }
 
 .dashboard-tasks li time {
+  margin-left: auto;
+  color: #758094;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.dashboard-task__submitted {
   margin-left: auto;
   color: #758094;
   font-size: 10px;
