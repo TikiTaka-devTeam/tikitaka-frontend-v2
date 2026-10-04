@@ -78,11 +78,12 @@ function SpaceToolbar({
   activeItem = "lecture",
   spaceId,
   spaceName,
+  onNavigate,
+  transitioning = false,
 }) {
   const navigate = useNavigate();
 
-  const [selectedItem, setSelectedItem] =
-    useState(activeItem);
+  const selectedItem = activeItem;
 
   const [isNavigating, setIsNavigating] =
     useState(false);
@@ -93,12 +94,13 @@ function SpaceToolbar({
   const handleNavigation = async (itemId) => {
     if (
       !spaceId ||
-      isNavigating ||
+      isNavigating || transitioning ||
       itemId === selectedItem
     ) {
       return;
     }
 
+    setIsNavigating(true);
     let assignmentManager = isProfessor;
     if (itemId === "assignment" && !isProfessor) {
       try {
@@ -125,17 +127,9 @@ function SpaceToolbar({
     };
 
     if (destinations[itemId]) {
-      setSelectedItem(itemId);
-      setIsNavigating(true);
-
-      window.setTimeout(() => {
-        navigate(destinations[itemId], {
-          state: {
-            spaceName,
-          },
-        });
-      }, 260);
+      (onNavigate ?? navigate)(destinations[itemId], { state: { spaceName } });
     }
+    setIsNavigating(false);
   };
 
   const activeIndex = Math.max(
@@ -258,7 +252,7 @@ function SpaceToolbar({
                   ? "page"
                   : undefined
               }
-              disabled={isNavigating}
+              disabled={isNavigating || transitioning}
               onClick={() =>
                 handleNavigation(
                   item.id,

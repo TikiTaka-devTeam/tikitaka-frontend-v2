@@ -1,4 +1,5 @@
 import DrawingCursor from "./DrawingCursor";
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import SlideMarkers from "./SlideMarkers";
 import CheckCircleIcon from "../../../assets/icons/check-circle.svg";
 import "../styles/slide-change-notice.css";
@@ -79,6 +80,7 @@ export default function PdfSlideStage({
 
   onFixerDraftSubmit,
 }) {
+  const { readOnly } = useSpaceAccess();
   const {
     containerRef,
 
@@ -125,7 +127,7 @@ export default function PdfSlideStage({
     cancelPointer,
   } =
     useDrawingInteraction({
-      activeTool,
+      activeTool: readOnly ? null : activeTool,
 
       thickness,
 
@@ -301,7 +303,7 @@ export default function PdfSlideStage({
                 questionDraftTitle
               }
               createQuestionMode={
-                createQuestionMode
+                !readOnly && createQuestionMode
               }
               questionSubmitting={
                 questionSubmitting
@@ -322,7 +324,7 @@ export default function PdfSlideStage({
                 onFixerSelect
               }
               fixerDraftPoint={
-                fixerDraftPoint
+                readOnly ? null : fixerDraftPoint
               }
               onFixerDraftCancel={
                 onFixerDraftCancel

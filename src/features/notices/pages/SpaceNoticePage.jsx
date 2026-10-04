@@ -1,3 +1,4 @@
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   useEffect,
   useMemo,
@@ -6,12 +7,11 @@ import {
 
 import {
   useLocation,
-  useNavigate,
+  Navigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/go-back.svg";
 import DeleteIcon from "../../../assets/icons/delete.svg?react";
 import noticeCreateIcon from "../../../assets/icons/notice-create.svg";
 import noticeEmptyIcon from "../../../assets/icons/notice-empty.svg";
@@ -19,11 +19,7 @@ import pdfIcon from "../../../assets/icons/pdf.svg";
 import PencilEditIcon from "../../../assets/icons/pencil-edit.svg?react";
 import moreIcon from "../../../assets/icons/space/space-more.svg";
 
-import {
-  AppToolbars,
-} from "../../../components/common/AppToolbars.jsx";
 
-import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
 import {
   getSpaceMemberPermissions,
   getSpaceMembers,
@@ -457,8 +453,6 @@ function NoticeEmptyState({
 }
 
 function SpaceNoticePage() {
-  const navigate =
-    useNavigate();
 
   const location =
     useLocation();
@@ -488,7 +482,8 @@ function SpaceNoticePage() {
       ],
     );
   const [hasNoticeManagePermission, setHasNoticeManagePermission] = useState(null);
-  const showCreateButton = isProfessor || hasNoticeManagePermission === true;
+  const { readOnly } = useSpaceAccess();
+  const showCreateButton = !readOnly && (isProfessor || hasNoticeManagePermission === true);
 
   useEffect(() => {
     if (isProfessor) {
@@ -1302,6 +1297,10 @@ function SpaceNoticePage() {
     );
   }
 
+  if ((isCreateMode || isEditMode) && readOnly) {
+    return <Navigate to={`/spaces/${spaceId}/notices`} replace state={{ spaceName }} />;
+  }
+
   if ((isCreateMode || isEditMode) && !showCreateButton) {
     return (
       <main className="notice-create-page">
@@ -1380,7 +1379,7 @@ function SpaceNoticePage() {
   }
 
   return (
-    <main className="notice-page space-page-transition">
+    <main className="notice-page">
       <div
         className="notice-background"
         aria-hidden="true"
@@ -1390,42 +1389,7 @@ function SpaceNoticePage() {
       </div>
 
       <div className="app-frame notice-frame">
-        <button
-          type="button"
-          className="notice-back"
-          aria-label="Space 목록으로 돌아가기"
-          onClick={() =>
-            navigate(
-              "/spaces",
-            )
-          }
-        >
-          <img
-            src={backIcon}
-            alt=""
-          />
-        </button>
-
-        <header className="notice-header">
-          <h1>
-            {spaceName}
-          </h1>
-
-          <p>
-            공지사항
-          </p>
-        </header>
-
-        <AppToolbars
-          showBottomNavigation={
-            false
-          }
-          onSearch={() =>
-            navigate(
-              "/search",
-            )
-          }
-        />
+        
 
         <section className="notice-layout">
           <aside className="notice-list-panel">
@@ -1725,16 +1689,6 @@ function SpaceNoticePage() {
             ) : null}
           </section>
         </section>
-
-        <SpaceToolbar
-          activeItem="notice"
-          spaceId={
-            spaceId
-          }
-          spaceName={
-            spaceName
-          }
-        />
 
         <NoticeDeleteModal
           type={

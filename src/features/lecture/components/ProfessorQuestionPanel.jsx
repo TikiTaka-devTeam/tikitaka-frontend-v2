@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import SubmitIcon from "../../../assets/icons/submit.svg";
 import SubmitActiveIcon from "../../../assets/icons/submit-professor-active.svg";
 import MoreIcon from "../../../assets/icons/professor-answer-more.svg";
@@ -8,6 +9,7 @@ import RecordStopIcon from "../../../assets/icons/professor-record-stop.svg";
 import "../styles/professor-question-panel.css";
 
 function AnswerView({ question, initialMode, onBack, onSubmitAnswer, onSubmitVoice }) {
+  const { readOnly } = useSpaceAccess();
   const answer = question.answers?.[0];
   const [editing, setEditing] = useState(!answer);
   const [content, setContent] = useState("");
@@ -94,6 +96,7 @@ function AnswerView({ question, initialMode, onBack, onSubmitAnswer, onSubmitVoi
   }, []);
 
   async function submitText(event) {
+    if (readOnly) { event.preventDefault(); return; }
     event.preventDefault();
     if (!content.trim() || busy) return;
     setBusy(true);
@@ -109,6 +112,7 @@ function AnswerView({ question, initialMode, onBack, onSubmitAnswer, onSubmitVoi
   }
 
   async function toggleRecording() {
+    if (readOnly) return;
     if (recording) {
       setRecording(false);
       setBusy(true);
@@ -186,10 +190,10 @@ function AnswerView({ question, initialMode, onBack, onSubmitAnswer, onSubmitVoi
         <section className="professor-question-panel__answer-section">
           <div className="professor-question-panel__answer-heading">
             <h3 className="question-panel__answer-heading">{"\uB2F5\uBCC0"}</h3>
-            <button type="button" className="professor-question-panel__more" aria-label={"\uB2F5\uBCC0 \uBA54\uB274"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><img src={MoreIcon} alt="" /></button>
-            {menuOpen && <button type="button" className="professor-question-panel__edit-menu" onClick={() => { setEditing(true); setContent(answer.content ?? ""); setMenuOpen(false); }}><img src={EditIcon} alt="" />{"\uC218\uC815"}</button>}
+            {!readOnly && <button type="button" className="professor-question-panel__more" aria-label={"\uB2F5\uBCC0 \uBA54\uB274"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><img src={MoreIcon} alt="" /></button>}
+            {!readOnly && menuOpen && <button type="button" className="professor-question-panel__edit-menu" onClick={() => { setEditing(true); setContent(answer.content ?? ""); setMenuOpen(false); }}><img src={EditIcon} alt="" />{"\uC218\uC815"}</button>}
           </div>
-          {!editing ? <div className="question-panel__answer-readonly"><p>{answer.content}</p></div> : <form className="professor-question-panel__input professor-question-panel__input--inline" onSubmit={submitText}>
+          {readOnly || !editing ? <div className="question-panel__answer-readonly"><p>{answer.content}</p></div> : <form className="professor-question-panel__input professor-question-panel__input--inline" onSubmit={submitText}>
             <textarea aria-label={"\uB2F5\uBCC0 \uC218\uC815"} placeholder={"\uC218\uC815\uC0AC\uD56D \uC785\uB825"} value={content} disabled={busy} onChange={(event) => setContent(event.target.value)} />
             <button type="submit" aria-label={"\uC218\uC815 \uC800\uC7A5"} disabled={busy || !content.trim()}><img src={!busy && content.trim() ? SubmitActiveIcon : SubmitIcon} alt="" /></button>
           </form>}
@@ -233,10 +237,11 @@ function AnswerView({ question, initialMode, onBack, onSubmitAnswer, onSubmitVoi
 }
 
 export default function ProfessorQuestionPanel({ selectedQuestion, questions, questionScope, loading, onQuestionScopeChange, onSubmitAnswer, onSubmitVoice, onArchive, onSelectQuestion, renderList }) {
+  const { readOnly } = useSpaceAccess();
   const [mode, setMode] = useState(null);
   const [selectionId, setSelectionId] = useState(selectedQuestion?.id);
   if (selectionId !== selectedQuestion?.id) { setSelectionId(selectedQuestion?.id); setMode(null); }
-  const answerMode = mode ?? (selectedQuestion?.answers?.[0] ? selectedQuestion.answers[0].answer_type ?? "TEXT" : null);
+  const answerMode = (!readOnly ? mode : null) ?? (selectedQuestion?.answers?.[0] ? selectedQuestion.answers[0].answer_type ?? "TEXT" : null);
   return <aside className="question-panel question-panel--list professor-question-panel" data-answer-mode={answerMode || undefined}>
     {answerMode && selectedQuestion ? <AnswerView key={`${selectedQuestion.id}:${answerMode}`} question={selectedQuestion} initialMode={answerMode} onBack={() => selectedQuestion.answers?.[0] ? onSelectQuestion?.(null) : setMode(null)} onSubmitAnswer={onSubmitAnswer} onSubmitVoice={onSubmitVoice} /> : selectedQuestion ? <>
       <div className="question-panel__header">
@@ -248,7 +253,7 @@ export default function ProfessorQuestionPanel({ selectedQuestion, questions, qu
         <div className="question-panel__student-detail-divider" />
         <h3 className="professor-question-panel__answer-label">{"\uB2F5\uBCC0"}</h3>
       </div>
-      <div className="professor-question-panel__actions"><strong>{"\uC9C8\uBB38 \uB2F5\uBCC0\uD558\uAE30"}</strong><button type="button" onClick={() => setMode("TEXT")}>{"\uD14D\uC2A4\uD2B8 \uB2F5\uBCC0"}</button><button type="button" onClick={() => setMode("VOICE")}>{"\uC74C\uC131 \uB2F5\uBCC0"}</button></div>
+      {!readOnly && <div className="professor-question-panel__actions"><strong>{"\uC9C8\uBB38 \uB2F5\uBCC0\uD558\uAE30"}</strong><button type="button" onClick={() => setMode("TEXT")}>{"\uD14D\uC2A4\uD2B8 \uB2F5\uBCC0"}</button><button type="button" onClick={() => setMode("VOICE")}>{"\uC74C\uC131 \uB2F5\uBCC0"}</button></div>}
     </> : <>
       <div className="question-panel__header">
         <div className="question-panel__header-copy"><h2>질문 리스트</h2><p>{questionScope === "SLIDE" ? "해당 페이지" : "전체"}</p></div>
@@ -258,7 +263,7 @@ export default function ProfessorQuestionPanel({ selectedQuestion, questions, qu
       </div>
       <div className="question-panel__scope-row">{[["SLIDE", "해당페이지"], ["DOCUMENT", "전체"]].map(([value, label]) => <button key={value} type="button" className={`question-panel__scope-button${questionScope === value ? " is-active" : ""}`} aria-pressed={questionScope === value} onClick={() => onQuestionScopeChange(value)}>{label}</button>)}</div>
       <div className="professor-question-panel__questions">{loading ? <p className="question-panel__empty">불러오는 중...</p> : renderList(questions)}</div>
-      {selectedQuestion && <div className="professor-question-panel__actions"><strong>질문 답변하기</strong><button type="button" onClick={() => setMode("TEXT")}>텍스트답변</button><button type="button" onClick={() => setMode("VOICE")}>음성답변</button></div>}
+      {!readOnly && selectedQuestion && <div className="professor-question-panel__actions"><strong>질문 답변하기</strong><button type="button" onClick={() => setMode("TEXT")}>텍스트답변</button><button type="button" onClick={() => setMode("VOICE")}>음성답변</button></div>}
     </>}
   </aside>;
 }

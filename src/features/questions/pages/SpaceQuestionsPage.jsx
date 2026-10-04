@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/go-back.svg";
 import totalQuestionIcon from "../../../assets/icons/questions/total-question.svg";
 import totalQuestionSelectedIcon from "../../../assets/icons/questions/total-question-selected.svg";
 import myQuestionIcon from "../../../assets/icons/questions/my-question.svg";
@@ -14,9 +13,9 @@ import selectedHeartIcon from "../../../assets/icons/questions/selected-heart.sv
 import deleteQuestionIcon from "../../../assets/icons/questions/delete-question.svg";
 import downloadIcon from "../../../assets/icons/download.svg";
 import moreIcon from "../../../assets/icons/space/space-more.svg";
-import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   getSpaceMemberPermissions,
   getSpaceMembers,
@@ -24,7 +23,6 @@ import {
 import { getDocuments } from "../../spaces/api/documentsApi.js";
 import DeleteCompleteModal from "../../spaces/components/DeleteCompleteModal.jsx";
 import DeleteConfirmModal from "../../spaces/components/DeleteConfirmModal.jsx";
-import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
 import { deleteQuestion } from "../../lecture/api/questionApi.js";
 import {
   exportSpaceQuestions,
@@ -158,11 +156,9 @@ function QuestionRow({ question, isProfessor, isMenuOpen, onDeleteRequest, onMen
 }
 
 export default function SpaceQuestionsPage() {
+  const { readOnly } = useSpaceAccess();
   const { spaceId } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const spaceName = location.state?.spaceName || "Space";
   const userRole = readUserRole();
   const isProfessor = userRole === "PROFESSOR";
   const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(null);
@@ -517,6 +513,7 @@ export default function SpaceQuestionsPage() {
   }
 
   function requestQuestionDelete(question) {
+    if (readOnly) return;
     setQuestionMenuId("");
     setDeleteTarget(question);
     setDeleteQuestionError("");
@@ -524,6 +521,7 @@ export default function SpaceQuestionsPage() {
   }
 
   async function confirmQuestionDelete() {
+    if (readOnly) return;
     const questionId = deleteTarget?.question_id ?? deleteTarget?.id;
     if (!questionId || isDeletingQuestion) return;
     setIsDeletingQuestion(true);
@@ -561,21 +559,17 @@ export default function SpaceQuestionsPage() {
     : questions;
 
   return (
-    <main className="space-questions-page space-page-transition">
+    <main className="space-questions-page">
       <div className="space-questions-background" aria-hidden="true">
         <div className="space-questions-page__orb space-questions-page__orb--left" />
         <div className="space-questions-page__orb space-questions-page__orb--right" />
       </div>
       <div className="app-frame space-questions-frame">
-        <button type="button" className="space-questions-back" aria-label="Space 목록으로 돌아가기" onClick={() => navigate("/spaces")}>
-          <img src={backIcon} alt="" />
-        </button>
-        <header className="space-questions-header"><h1>{spaceName}</h1><p>질문</p></header>
-        <AppToolbars showBottomNavigation={false} onSearch={() => navigate("/search")} />
+        
 
         <div className="space-questions-layout app-container">
           {isQuestionPermissionLoading ? <p className="space-questions-status space-questions-status--permission" role="status">권한을 확인하는 중입니다.</p> : <>
-          {isComposing && !isQuestionManager ? (
+          {!readOnly && isComposing && !isQuestionManager ? (
             <QuestionComposer
               spaceId={spaceId}
               documents={documents}
@@ -596,7 +590,8 @@ export default function SpaceQuestionsPage() {
                 <img src={view === "all" && !isManagingCategories ? totalQuestionSelectedIcon : totalQuestionIcon} alt="" />
                 <span>전체 질문</span>
               </button>
-              <button type="button" className={isQuestionManager ? (isManagingCategories ? "is-active" : "") : (view === "mine" ? "is-active" : "")} onClick={() => {
+              <button type="button" disabled={readOnly && isQuestionManager} className={isQuestionManager ? (isManagingCategories ? "is-active" : "") : (view === "mine" ? "is-active" : "")} onClick={() => {
+                if (readOnly && isQuestionManager) return;
                 if (!isQuestionManager) {
                   changeView("mine");
                   return;
@@ -624,11 +619,11 @@ export default function SpaceQuestionsPage() {
               </div>}
             </div>
             {isQuestionManager && <button type="button" className="space-questions-sidebar__action" onClick={() => setExportModal("confirm")}>질문 내보내기</button>}
-            {!isQuestionManager && <button type="button" className="space-questions-sidebar__action" onClick={() => setIsComposing(true)}>질문하기</button>}
+            {!readOnly && !isQuestionManager && <button type="button" className="space-questions-sidebar__action" onClick={() => setIsComposing(true)}>질문하기</button>}
             {actionError && <p className="space-questions-action-error" role="alert">{actionError}</p>}
           </aside>
 
-          {isManagingCategories ? <QuestionCategoryManager
+          {!readOnly && isManagingCategories ? <QuestionCategoryManager
             key={`${spaceId}-${refreshKey}-${currentCategoryData ? "loaded" : "loading"}`}
             documents={currentCategoryData?.documents ?? []}
             onCancel={() => setIsManagingCategories(false)}
@@ -704,7 +699,7 @@ export default function SpaceQuestionsPage() {
               return <QuestionRow
                 key={questionId}
                 question={{ ...question, ...(questionLikeOverrides[questionId] ?? {}) }}
-                isProfessor={isQuestionManager}
+                isProfessor={!readOnly && isQuestionManager}
                 isMenuOpen={questionMenuId === questionId}
                 onMenuToggle={(selectedQuestion) => {
                   const selectedId = selectedQuestion.question_id ?? selectedQuestion.id;
@@ -728,7 +723,6 @@ export default function SpaceQuestionsPage() {
           </>}
           </>}
         </div>
-        <SpaceToolbar activeItem="question" spaceId={spaceId} spaceName={spaceName} />
       </div>
       {exportModal && <CompactModal
         onClose={isExporting ? undefined : closeExportModal}

@@ -1,3 +1,4 @@
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   useEffect,
   useState,
@@ -144,6 +145,7 @@ function AssignmentGradePanel({
   onFinalized,
   onEditSaved,
 }) {
+  const { readOnly } = useSpaceAccess();
   const isGradeEdit =
     mode === "grade-edit";
 
@@ -518,6 +520,7 @@ function AssignmentGradePanel({
   }
 
   async function handleConfirmFinalize() {
+    if (readOnly) return;
     if (
       isSaving ||
       !assignmentId
@@ -610,6 +613,7 @@ function AssignmentGradePanel({
   }
 
   async function handleConfirmDraftSave() {
+    if (readOnly) return;
     if (isSaving || !assignmentId) return;
     const numericMaxScore = validateScores();
     if (numericMaxScore === null) {
@@ -690,6 +694,7 @@ function AssignmentGradePanel({
   }
 
   async function handleConfirmEditSave() {
+    if (readOnly) return;
     if (
       isSaving ||
       !assignmentId
@@ -963,7 +968,7 @@ function AssignmentGradePanel({
             </h2>
 
             <p>
-              {isGradeEdit
+              {readOnly ? "학생별 제출물과 성적을 확인하세요" : isGradeEdit
                 ? "학생별 제출물을 확인하고 성적을 수정하세요"
                 : "학생별 제출물을 확인하고 성적을 입력하세요"}
             </p>
@@ -976,7 +981,7 @@ function AssignmentGradePanel({
               pattern="[0-9]*"
               value={maxScore}
               disabled={
-                isSaving
+                readOnly || isSaving
               }
               aria-label="과제 만점"
               onChange={(
@@ -1104,7 +1109,7 @@ function AssignmentGradePanel({
                           ] ?? ""
                         }
                         disabled={
-                          isSaving
+                          readOnly || isSaving
                         }
                         placeholder="점수 입력"
                         aria-label={`${submission.name} 성적`}
@@ -1181,9 +1186,9 @@ function AssignmentGradePanel({
 
             <button
               type="button"
-              className="assignment-grade-panel__save"
-              disabled={
-                isSaving
+            className="assignment-grade-panel__save"
+            disabled={
+                readOnly || isSaving
               }
               onClick={
                 isGradeEdit

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/go-back.svg";
 import moreIcon from "../../../assets/icons/more.svg";
 import memberBackgroundIcon from "../../../assets/icons/members/Notice-Member-Background.svg";
 import assistantSaveIcon from "../../../assets/icons/members/assistant-save.svg";
@@ -10,12 +9,11 @@ import inviteCodeCopyIcon from "../../../assets/icons/members/invite-code-copy-b
 import joinedDateIcon from "../../../assets/icons/members/member-joined-date.svg";
 import mailIcon from "../../../assets/icons/members/member-mail.svg";
 import refreshIcon from "../../../assets/icons/members/refresh.svg";
-import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
 import { getProfileInitial } from "../../../utils/profileInitial.js";
 import { getCurrentUser } from "../../auth/api/auth.api.js";
-import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
 import MemberPermissionModal from "../components/MemberPermissionModal.jsx";
 import MemberStatusModal from "../components/MemberStatusModal.jsx";
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   approveSpaceJoinRequests,
   deleteSpaceMember,
@@ -145,7 +143,7 @@ function formatJoinedDate(value) {
 }
 
 function SpaceMembersPage() {
-  const navigate = useNavigate();
+  const { readOnly, archived } = useSpaceAccess();
   const location = useLocation();
   const { spaceId } = useParams();
   const userRole = readUserRole();
@@ -395,6 +393,7 @@ function SpaceMembersPage() {
   }
 
   async function handleConfirmApproval() {
+    if (readOnly) return;
     if (approvalTargets.length === 0 || isApprovingJoinRequests) return;
 
     const approvedIds = approvalTargets.map((request) => request.id);
@@ -438,6 +437,7 @@ function SpaceMembersPage() {
   }
 
   async function handleConfirmDenial() {
+    if (readOnly) return;
     if (denialTargets.length === 0 || isDenyingJoinRequests) return;
 
     const deniedIds = denialTargets.map((request) => request.id);
@@ -470,6 +470,7 @@ function SpaceMembersPage() {
   }
 
   async function handleAutoApproveChange() {
+    if (readOnly) return;
     if (isUpdatingAutoApprove) return;
 
     const previousAutoApprove = autoApprove;
@@ -497,6 +498,7 @@ function SpaceMembersPage() {
   }
 
   async function handleCopyInviteCode() {
+    if (readOnly) return;
     if (!inviteCode) return;
 
     try {
@@ -543,7 +545,7 @@ function SpaceMembersPage() {
     if (!selectedMember?.id || !isProfessor) return;
 
     setIsAssistantPermissionMenuOpen(false);
-    setIsPermissionReadOnly(false);
+    setIsPermissionReadOnly(readOnly);
     setIsPermissionModalOpen(true);
     setPermissionSaveModalStep(null);
     setIsPermissionsLoading(true);
@@ -617,6 +619,7 @@ function SpaceMembersPage() {
   }
 
   function handleRequestPermissionSave() {
+    if (readOnly) return;
     if (isPermissionsLoading || permissionsError) return;
     setPermissionSaveError("");
     setIsPermissionModalOpen(false);
@@ -624,6 +627,7 @@ function SpaceMembersPage() {
   }
 
   async function handleConfirmPermissionSave() {
+    if (readOnly) return;
     if (!selectedMember?.id || isPermissionsSaving) return;
 
     setIsPermissionsSaving(true);
@@ -682,6 +686,7 @@ function SpaceMembersPage() {
   }
 
   async function handleConfirmKick() {
+    if (readOnly) return;
     if (!kickTarget?.id || isKickingMember) return;
 
     setIsKickingMember(true);
@@ -716,15 +721,15 @@ function SpaceMembersPage() {
   }
 
   const canManageSelectedMember =
-    isProfessor &&
+    !readOnly && isProfessor &&
     selectedMember &&
     ["STUDENT", "ASSISTANT"].includes(selectedMember.role);
   const canKickSelectedMember = Boolean(
-    canManageMembers &&
+    !readOnly && canManageMembers &&
       selectedMember?.role === "STUDENT" &&
       !isOwnMember(selectedMember, currentUser),
   ) || Boolean(
-    isProfessor &&
+    !readOnly && isProfessor &&
       selectedMember?.role === "ASSISTANT" &&
       !isOwnMember(selectedMember, currentUser),
   );
@@ -733,17 +738,13 @@ function SpaceMembersPage() {
     isCurrentUserAssistant && selectedMember?.id === currentSpaceMemberId;
 
   return (
-    <main className="members-page space-page-transition">
+    <main className="members-page">
       <div className="members-background" aria-hidden="true">
         <div className="members-page__orb members-page__orb--left" />
         <div className="members-page__orb members-page__orb--right" />
       </div>
       <div className="app-frame members-frame">
-        <button type="button" className="members-back" aria-label="Space 목록으로 돌아가기" onClick={() => navigate("/spaces")}>
-          <img src={backIcon} alt="" />
-        </button>
-        <header className="members-header"><h1>{spaceName}</h1><p>{canManageMembers ? "멤버 관리" : "멤버"}</p></header>
-        <AppToolbars showBottomNavigation={false} onSearch={() => navigate("/search")} />
+        
 
         <section className="members-layout" aria-label={`${spaceName} 멤버`}>
           <aside className="members-list-panel">
@@ -855,14 +856,16 @@ function SpaceMembersPage() {
                   </button>
                 </div>
                 <p className="member-management__description">
-                  수강 신청을 확인하고 강의 참여 권한을 관리하세요
+                  {archived
+                    ? "보관된 Space입니다. 승인 대기 목록은 조회만 가능하며 승인·거절할 수 없습니다."
+                    : "수강 신청을 확인하고 강의 참여 권한을 관리하세요"}
                 </p>
                 {joinRequests.length > 0 ? (
                   <div className="member-management__selected-actions">
                     <button
                       type="button"
                       className="member-management__selected-deny"
-                      disabled={selectedJoinRequestIds.length === 0}
+                      disabled={readOnly || selectedJoinRequestIds.length === 0}
                       onClick={handleOpenDenialModal}
                     >
                       선택 거절
@@ -870,7 +873,7 @@ function SpaceMembersPage() {
                     <button
                       type="button"
                       className="member-management__selected-approve"
-                      disabled={selectedJoinRequestIds.length === 0}
+                      disabled={readOnly || selectedJoinRequestIds.length === 0}
                       onClick={handleOpenApprovalModal}
                     >
                       선택 승인
@@ -890,7 +893,9 @@ function SpaceMembersPage() {
                     <div className="member-management__empty">
                       <img src={memberBackgroundIcon} alt="" />
                       <strong>현재 승인 대기 중인 학생이 없습니다</strong>
-                      <p>새로운 참여 신청이 들어오면<br />이곳에서 승인 또는 거절할 수 있습니다</p>
+                      <p>{archived
+                        ? "보관된 Space에서는 새로운 학생을 초대하거나 참여 신청을 승인·거절할 수 없습니다."
+                        : <>새로운 참여 신청이 들어오면<br />이곳에서 승인 또는 거절할 수 있습니다</>}</p>
                     </div>
                   ) : null}
                   {!isJoinRequestsLoading && !joinRequestsError && joinRequests.length > 0 ? (
@@ -899,6 +904,7 @@ function SpaceMembersPage() {
                         <input
                           type="checkbox"
                           aria-label="승인 대기 요청 전체 선택"
+                          disabled={readOnly}
                           checked={selectedJoinRequestIds.length === joinRequests.length}
                           onChange={handleToggleAllJoinRequests}
                         />
@@ -913,6 +919,7 @@ function SpaceMembersPage() {
                             <input
                               type="checkbox"
                               aria-label={`${request.name} 참여 요청 선택`}
+                              disabled={readOnly}
                               checked={selectedJoinRequestIds.includes(request.id)}
                               onChange={() => handleToggleJoinRequest(request.id)}
                             />
@@ -933,8 +940,8 @@ function SpaceMembersPage() {
                   ) : null}
                 </div>
 
-                <div className="member-management__divider member-management__divider--settings" aria-hidden="true" />
-                {isProfessor ? (
+                {!readOnly && <div className="member-management__divider member-management__divider--settings" aria-hidden="true" />}
+                {!readOnly && isProfessor ? (
                   <div className="member-management__auto-approve">
                     <div>
                       <strong>자동 승인</strong>
@@ -948,14 +955,14 @@ function SpaceMembersPage() {
                       role="switch"
                       aria-checked={autoApprove}
                       aria-label="강의 참여 자동 승인"
-                      disabled={isUpdatingAutoApprove}
+                      disabled={readOnly || isUpdatingAutoApprove}
                       onClick={handleAutoApproveChange}
                     >
                       <span />
                     </button>
                   </div>
                 ) : null}
-                <div className="member-management__invite-code">
+                {!readOnly && <div className="member-management__invite-code">
                   <strong>초대 코드</strong>
                   {inviteCode ? (
                     <button type="button" onClick={handleCopyInviteCode}>
@@ -965,7 +972,7 @@ function SpaceMembersPage() {
                   ) : (
                     <span className="member-management__invite-code-empty">-</span>
                   )}
-                </div>
+                </div>}
               </section>
             ) : null}
             {!selectedMemberId && !canManageMembers ? <div className="member-detail-empty"><img src={memberBackgroundIcon} alt="" /><strong>멤버를 선택해 확인하세요</strong><p>왼쪽 목록에서 확인할 멤버를 선택해 주세요.</p></div> : null}
@@ -1033,7 +1040,6 @@ function SpaceMembersPage() {
             {!isDetailLoading && selectedMemberId && !selectedMember && errorMessage ? <p className="members-state members-state--error">{errorMessage}</p> : null}
           </section>
         </section>
-        <SpaceToolbar activeItem="member" spaceId={spaceId} spaceName={spaceName} />
       </div>
 
       {approvalModalStep ? (
@@ -1101,7 +1107,7 @@ function SpaceMembersPage() {
           permissions={memberPermissions}
           isLoading={isPermissionsLoading}
           errorMessage={permissionsError}
-          readOnly={isPermissionReadOnly}
+          readOnly={readOnly || isPermissionReadOnly}
           onRoleChange={handlePermissionRoleChange}
           onPermissionToggle={handlePermissionToggle}
           onCancel={() => {

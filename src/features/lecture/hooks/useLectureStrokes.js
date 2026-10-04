@@ -1,3 +1,4 @@
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   useCallback,
   useEffect,
@@ -52,6 +53,7 @@ export default function useLectureStrokes({
 
   setToast,
 }) {
+  const { readOnly } = useSpaceAccess();
   const [
     undoStack,
     setUndoStack,
@@ -140,6 +142,7 @@ export default function useLectureStrokes({
   }, [currentSlideId, spaceId, sharedVersionsRef, setSharedStrokes, setToast]);
 
   const handleLiveStroke = useCallback((stroke, phase = "UPDATE") => {
+    if (readOnly) return;
     const session = sessionRef.current;
     if (editableLayer !== "SHARED" || session?.slideId !== currentSlideId) return;
     if (phase === "CANCEL") {
@@ -149,7 +152,11 @@ export default function useLectureStrokes({
     session.ownDraftIds.add(stroke.clientStrokeId);
     session.sender.update(stroke);
     if (phase === "END") session.sender.end(stroke.clientStrokeId);
-  }, [editableLayer, currentSlideId]);
+  }, [editableLayer, currentSlideId, readOnly]);
+
+  useEffect(() => {
+    if (readOnly) sessionRef.current?.sender?.reset();
+  }, [readOnly]);
 
   function getLayerState(
     layer,
@@ -238,6 +245,7 @@ export default function useLectureStrokes({
     stroke,
     recordHistory = true,
   ) {
+    if (readOnly) return null;
     if (!currentSlideId) {
       return null;
     }
@@ -386,6 +394,7 @@ export default function useLectureStrokes({
     strokeIds,
     recordHistory = true,
   ) {
+    if (readOnly) return [];
     if (
       !currentSlideId ||
       !strokeIds.length
@@ -526,6 +535,7 @@ export default function useLectureStrokes({
   }
 
   async function handleUndo() {
+    if (readOnly) return;
     const action =
       undoStack[
         undoStack.length - 1
@@ -587,6 +597,7 @@ export default function useLectureStrokes({
   }
 
   async function handleRedo() {
+    if (readOnly) return;
     const action =
       redoStack[
         redoStack.length - 1

@@ -1,0 +1,13 @@
+.space-access-state button {
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid #d8deeb;
+  border-radius: 12px;
+  background: #fff;
+  color: #25283c;
+  font: inherit;
+  cursor: pointer;
+}
+
+.space-access-state button:disabled { opacity: 0.6; cursor: default; }
+.space-access-state { padding: 40px 16px; text-align: center; color: #25283c; }

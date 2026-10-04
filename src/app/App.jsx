@@ -15,6 +15,7 @@ import DocumentModifyPage from "../features/documents/pages/DocumentModifyPage.j
 import SearchPage from "../features/search/pages/SearchPage.jsx";
 import SpaceLecturePage from "../features/spaces/pages/SpaceLecturePage.jsx";
 import SpacesPage from "../features/spaces/pages/SpacesPage.jsx";
+import SpaceAccessBoundary from "../features/spaces/components/SpaceAccessBoundary.jsx";
 
 import SpaceNoticePage from "../features/notices/pages/SpaceNoticePage.jsx";
 import SpaceMembersPage from "../features/members/pages/SpaceMembersPage.jsx";
@@ -26,6 +27,7 @@ import StudentLecturePage from "../features/lecture/pages/StudentLecturePage.jsx
 import ProfessorLecturePage from "../features/lecture/pages/ProfessorLecturePage.jsx";
 import LectureViewerPage from "../features/lecture/pages/LectureViewerPage.jsx";
 import NotificationRedirectPage from "../features/notifications/pages/NotificationRedirectPage.jsx";
+import MainLayout from "../components/common/MainLayout.jsx";
 
 function App() {
   const accessToken =
@@ -35,6 +37,7 @@ function App() {
 
   return (
     <Routes>
+      <Route element={<MainLayout />}>
       <Route
         path="/"
         element={
@@ -50,8 +53,10 @@ function App() {
       />
 
       <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/search" element={<SearchPage />} />
       <Route path="/spaces" element={<SpacesPage />} />
+      </Route>
+      <Route path="/search" element={<SearchPage />} />
+      <Route path="/spaces/:spaceId" element={<SpaceAccessBoundary />}>
       <Route path="/spaces/:spaceId" element={<SpaceLecturePage />} />
       <Route path="/spaces/:spaceId/questions" element={<SpaceQuestionsPage />} />
 
@@ -91,11 +96,6 @@ function App() {
       />
 
       <Route
-        path="/notification-redirect"
-        element={<NotificationRedirectPage />}
-      />
-
-      <Route
         path="/spaces/:spaceId/documents/:documentId/lecture/student"
         element={
           <StudentLecturePage />
@@ -113,6 +113,9 @@ function App() {
         path="/spaces/:spaceId/documents/:documentId/lecture/assistant"
         element={<LectureViewerPage role="ASSISTANT" />}
       />
+      </Route>
+
+      <Route path="/notification-redirect" element={<NotificationRedirectPage />} />
 
       <Route
         path="/login"

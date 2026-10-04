@@ -1,0 +1,29 @@
+.space-archive-status {
+  display: inline-block;
+  max-width: 100%;
+  margin-left: 8px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: #ebeef5;
+  color: #758094;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.lecture-page .lecture-header__titles p:has(.space-archive-status) {
+  display: flex;
+  align-items: center;
+}
+
+.lecture-page .lecture-header__titles p:has(.space-archive-status) > .lecture-header__space-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lecture-header__titles .space-archive-status {
+  flex-shrink: 0;
+}

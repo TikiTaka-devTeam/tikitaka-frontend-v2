@@ -46,6 +46,7 @@ import {
 } from "../utils/lectureViewerUtils";
 
 import "../styles/lecture.css";
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 
 const DRAWING_TOOLS =
   new Set([
@@ -78,6 +79,7 @@ export default function LectureViewerPage({
 }) {
   const navigate =
     useNavigate();
+  const { readOnly } = useSpaceAccess();
 
   const [
     toast,
@@ -491,6 +493,7 @@ export default function LectureViewerPage({
   function handleToolChange(
     tool,
   ) {
+    if (readOnly && tool !== "Q_LIST") return;
     setFixerDraftPoint(null);
 
     if (tool === "Q_LIST" && panelOpen && !createQuestionMode) {
@@ -646,7 +649,7 @@ export default function LectureViewerPage({
 
     try {
       try {
-        await waitForPendingSaves(retrySavesRef.current);
+        if (!readOnly) await waitForPendingSaves(retrySavesRef.current);
         retrySavesRef.current = false;
       } catch (error) {
         retrySavesRef.current = true;
@@ -823,10 +826,10 @@ export default function LectureViewerPage({
             spaceName
           }
           canUndo={
-            canUndo
+            !readOnly && canUndo
           }
           canRedo={
-            canRedo
+            !readOnly && canRedo
           }
           onBack={() =>
             navigate(-1)
@@ -884,7 +887,7 @@ export default function LectureViewerPage({
                 }
               />
 
-              {toolOptionsOpen && (
+              {!readOnly && toolOptionsOpen && (
                 <DrawingToolOptions
                   tool={
                     activeTool
@@ -1050,7 +1053,7 @@ export default function LectureViewerPage({
               panelOpen
             }
             createMode={
-              createQuestionMode
+              !readOnly && createQuestionMode
             }
             submitting={
               isCreatingQuestion

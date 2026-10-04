@@ -4,7 +4,6 @@ import MoreIcon from "../../../assets/icons/more.svg?react";
 import ArchiveIcon from "../../../assets/icons/archive.svg?react";
 import PencilEditIcon from "../../../assets/icons/pencil-edit.svg?react";
 import ActivityIcon from "../../../assets/icons/activity.svg?react";
-import DeleteIcon from "../../../assets/icons/delete.svg?react";
 import { getSpaceColor } from "../utils/spaceColors.js";
 
 const MENU_LABEL_STYLE = {
@@ -32,7 +31,6 @@ function SpaceCard({
   onArchive,
   onActivate,
   onEdit,
-  onDelete,
   onOpen,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -212,18 +210,6 @@ function SpaceCard({
                     <span>활성화</span>
                   </button>
 
-                  <button
-                    type="button"
-                    className="space-menu__item space-menu__item--delete"
-                    onClick={(event) => handleAction(event, onDelete)}
-                  >
-                    <DeleteIcon
-                      className="space-menu__icon"
-                      aria-hidden="true"
-                    />
-
-                    <span>삭제</span>
-                  </button>
                 </>
               )}
             </div>

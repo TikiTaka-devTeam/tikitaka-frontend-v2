@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
-import backIcon from "../../../assets/icons/go-back.svg";
 import assignmentEmptyIcon from "../../../assets/icons/assignment-empty.svg";
 import closeIcon from "../../../assets/icons/close.svg";
 import pdfIcon from "../../../assets/icons/pdf.svg";
 
-import { AppToolbars } from "../../../components/common/AppToolbars.jsx";
-import SpaceToolbar from "../../spaces/components/SpaceToolbar.jsx";
 
+import { useSpaceAccess } from "../../spaces/context/SpaceAccessContext.js";
 import {
   getAssignmentDetail,
   getAssignmentSummary,
@@ -262,16 +260,13 @@ function AssignmentEmptyState() {
 }
 
 function StudentAssignmentPage() {
-  const navigate = useNavigate();
+  const { readOnly } = useSpaceAccess();
   const location = useLocation();
   const { spaceId } = useParams();
 
   const fileInputRef =
     useRef(null);
 
-  const spaceName =
-    location.state?.spaceName ??
-    "Space";
 
   const [
     assignments,
@@ -537,6 +532,7 @@ function StudentAssignmentPage() {
   }
 
   function handleOpenSubmission() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       assignmentDetail.status !==
@@ -624,6 +620,7 @@ function StudentAssignmentPage() {
   }
 
   function handleRequestSubmit() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       isSubmitting
@@ -644,6 +641,7 @@ function StudentAssignmentPage() {
   }
 
   async function handleConfirmSubmit() {
+    if (readOnly) return;
     if (
       !assignmentDetail ||
       isSubmitting
@@ -856,7 +854,7 @@ function StudentAssignmentPage() {
           }
         </div>
 
-        {viewState ===
+        {!readOnly && viewState ===
           "NOT_SUBMITTED" && (
           <button
             type="button"
@@ -869,7 +867,7 @@ function StudentAssignmentPage() {
           </button>
         )}
 
-        {viewState ===
+        {!readOnly && viewState ===
           "SUBMITTED" && (
           <button
             type="button"
@@ -926,6 +924,20 @@ function StudentAssignmentPage() {
         )}
 
         <div className="assignment-detail-divider assignment-detail-divider--attachments" />
+
+        {readOnly && existingSubmissionFiles.length > 0 && (
+          <section className="assignment-existing-submission">
+            <div className="assignment-existing-submission__header"><span>내 제출 파일</span></div>
+            <div className="assignment-existing-submission__files">
+              {existingSubmissionFiles.map((file) => (
+                <button type="button" className="assignment-existing-submission__file" key={file.file_id} onClick={() => handleFileOpen(file)}>
+                  <img src={pdfIcon} alt="" /><strong>{file.file_name}</strong>
+                </button>
+              ))}
+            </div>
+            {assignmentDetail.my_submission?.comment && <p>{assignmentDetail.my_submission.comment}</p>}
+          </section>
+        )}
 
         <section className="assignment-detail__attachments">
           <div className="assignment-detail__attachments-title">
@@ -1267,38 +1279,7 @@ function StudentAssignmentPage() {
   return (
     <main className="assignment-page">
       <div className="app-frame assignment-frame">
-        <button
-          type="button"
-          className="assignment-back"
-          aria-label="Space 목록으로 돌아가기"
-          onClick={() =>
-            navigate("/spaces")
-          }
-        >
-          <img
-            src={backIcon}
-            alt=""
-          />
-        </button>
-
-        <header className="assignment-header">
-          <h1>
-            {spaceName}
-          </h1>
-
-          <p>
-            과제
-          </p>
-        </header>
-
-        <AppToolbars
-          showBottomNavigation={
-            false
-          }
-          onSearch={() =>
-            navigate("/search")
-          }
-        />
+        
 
         <section className="assignment-layout">
           <aside className="assignment-list-panel">
@@ -1389,17 +1370,11 @@ function StudentAssignmentPage() {
           </aside>
 
           <section className="assignment-right-panel">
-            {pageMode === "submit"
+            {!readOnly && pageMode === "submit"
               ? renderSubmission()
               : renderDetail()}
           </section>
         </section>
-
-        <SpaceToolbar
-          activeItem="assignment"
-          spaceId={spaceId}
-          spaceName={spaceName}
-        />
 
         <AssignmentSubmitModal
           type={
