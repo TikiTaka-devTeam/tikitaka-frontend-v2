@@ -47,7 +47,7 @@
   margin-inline: auto;
 
   padding-top: 40px;
-  padding-bottom: 42px;
+  padding-bottom: 110px;
 }
 
 .lecture-header {
@@ -235,12 +235,7 @@
 
   width: 100%;
 
-  height:
-    clamp(
-      360px,
-      50.66vw,
-      613px
-    );
+  height: calc(100dvh - 250px);
 
   margin-top: 15px;
 
@@ -266,7 +261,7 @@
 
 .lecture-page.is-panel-open
   .pdf-stage {
-  height: 586px;
+  height: calc(100dvh - 250px);
 
   margin-top: 20px;
 
