@@ -220,6 +220,7 @@ function SlideBlock({
           />
         ) : (
           <PdfPageCanvas
+            cacheRenderedPage
             className="document-modify-pdf-page--thumbnail"
             emptyMessage={emptyMessage}
             pageNumber={pdfPage}
@@ -278,6 +279,7 @@ function FloatingSlideBlock({ imageUrl, page, pdfDocument, position }) {
         />
       ) : (
         <PdfPageCanvas
+          cacheRenderedPage
           className="document-modify-pdf-page--thumbnail"
           pageNumber={page}
           pdfDocument={pdfDocument}
@@ -352,6 +354,7 @@ function DocumentModifyPage() {
   const material = location.state?.material ?? {};
   const spaceName = location.state?.spaceName ?? "강의 Space";
   const initialDocumentName = material.title ?? material.fileName ?? "강의자료.pdf";
+  const initialDocumentNameRef = useRef(initialDocumentName);
   const [documentName, setDocumentName] = useState(initialDocumentName);
   const [documentNameDraft, setDocumentNameDraft] = useState(initialDocumentName);
   const [isEditingDocumentName, setIsEditingDocumentName] = useState(false);
@@ -376,6 +379,7 @@ function DocumentModifyPage() {
     || isCompletingRevision;
   const canUndo = Boolean(revisionSession?.can_undo ?? revisionSession?.canUndo);
   const canRedo = Boolean(revisionSession?.can_redo ?? revisionSession?.canRedo);
+  const hasUnsavedChanges = canUndo || documentName !== initialDocumentNameRef.current;
   const isRevisionEditable = revisionSession?.status === "EDITING";
   const isRevisionInteractionLocked = !isRevisionEditable
     || isApplyingRevisionOperation;
@@ -577,6 +581,7 @@ function DocumentModifyPage() {
           setRevisionSlides(normalizeRevisionSlides(normalizedRevision));
 
           if (normalizedRevision.title) {
+            initialDocumentNameRef.current = normalizedRevision.title;
             setDocumentName(normalizedRevision.title);
             setDocumentNameDraft(normalizedRevision.title);
           }
@@ -1617,7 +1622,10 @@ function DocumentModifyPage() {
         <p>강의자료 수정</p>
       </header>
 
-      <div className="document-modify-actions" aria-label="강의자료 수정 도구">
+      <div
+        className={`document-modify-actions${isApplyingHistory ? " is-applying-history" : ""}`}
+        aria-label="강의자료 수정 도구"
+      >
         <button
           type="button"
           aria-label="실행 취소"
@@ -1637,7 +1645,7 @@ function DocumentModifyPage() {
         <button
           type="button"
           aria-label="저장"
-          disabled={!isRevisionEditable || isApplyingRevisionOperation}
+          disabled={!isRevisionEditable || !hasUnsavedChanges || isApplyingRevisionOperation}
           onClick={() => {
             setSaveModalError("");
             setSaveModalStep("confirm");
@@ -1686,7 +1694,7 @@ function DocumentModifyPage() {
                   <h2>{documentName}</h2>
                   <button
                     type="button"
-                    className="document-modify-preview-title-edit"
+                    className={`document-modify-preview-title-edit${isApplyingHistory ? " is-applying-history" : ""}`}
                     aria-label="강의자료 이름 변경"
                     disabled={isRevisionInteractionLocked}
                     onClick={startEditingDocumentName}
@@ -1853,7 +1861,7 @@ function DocumentModifyPage() {
             <span>{revisionFile?.name ?? revisionSourceFileName ?? "수정본을 선택해 주세요"}</span>
           </header>
           <div className="document-modify-panel-divider" />
-          {isRevisionPanelLoading && (
+          {isRevisionPanelLoading && !hasReadyRevisionSlides && (
             <p className="document-modify-upload-status" role="status">
               강의자료 렌더링 중입니다.
             </p>
@@ -1877,7 +1885,7 @@ function DocumentModifyPage() {
             disabled={isRevisionInteractionLocked}
             onChange={(event) => selectRevisionFile(event.target.files?.[0])}
           />
-          {!isRevisionPanelLoading && hasReadyRevisionSlides && (
+          {hasReadyRevisionSlides && (
             <div
               ref={revisionPageListRef}
               className={`document-modify-page-list${scrollingPanel === "revision" ? " is-scrolling" : ""}`}
