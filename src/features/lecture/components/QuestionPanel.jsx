@@ -476,6 +476,73 @@ function StudentAnswer({
   );
 }
 
+function StudentQuestionDetail({
+  question,
+  similarQuestionState,
+  onCheckSimilar,
+  onBack,
+}) {
+  const answer = question?.answers?.[0] ?? null;
+  const questionTitle = getQuestionTitle(question);
+  const questionContent = question?.content ?? question?.description ?? "";
+
+  return (
+    <aside className="question-panel question-panel--list question-panel--student-list question-panel--student-detail">
+      <div className="question-panel__header">
+        <div className="question-panel__header-copy">
+          <h2>{questionTitle}</h2>
+          <p>{answer ? "\uB2F5\uBCC0\uC644\uB8CC" : "\uBBF8\uB2F5\uBCC0"}</p>
+        </div>
+        <div className="question-panel__header-actions">
+          <button type="button" className="question-panel__back" onClick={onBack}>
+            {"\uB4A4\uB85C\uAC00\uAE30"}
+          </button>
+        </div>
+      </div>
+
+      <div className="question-panel__scroll question-panel__student-detail-scroll">
+        <article className="question-panel__student-detail-question">
+          {questionContent ? (
+            <p>{questionContent}</p>
+          ) : null}
+        </article>
+
+        <div className="question-panel__student-detail-divider" />
+
+        <section className="question-panel__student-detail-answer">
+          <h3 className="question-panel__answer-heading">{"\uB2F5\uBCC0"}</h3>
+          {answer?.content ? <StudentAnswer question={question} /> : null}
+        </section>
+
+        {onCheckSimilar ? (
+          <div className="question-panel__detail-question">
+            <button
+              type="button"
+              className="question-panel__similar-trigger"
+              disabled={
+                similarQuestionState?.questionId === question.id
+                && similarQuestionState?.status === "loading"
+              }
+              onClick={() => onCheckSimilar(question.id)}
+            >
+              {similarQuestionState?.questionId === question.id
+                && similarQuestionState?.status === "loading"
+                ? "AI \uC720\uC0AC \uC9C8\uBB38 \uD655\uC778 \uC911"
+                : "AI \uC720\uC0AC \uC9C8\uBB38 \uD655\uC778"}
+            </button>
+            {similarQuestionState?.questionId === question.id
+              && similarQuestionState?.status === "success"
+              && similarQuestionState?.questions?.length > 0 ? (
+                <SimilarQuestionList questions={similarQuestionState.questions} />
+              ) : null}
+          </div>
+        ) : null}
+
+      </div>
+    </aside>
+  );
+}
+
 export default function QuestionPanel({
   role,
   open,
@@ -637,6 +704,7 @@ export default function QuestionPanel({
       onQuestionScopeChange={onQuestionScopeChange}
       onSubmitAnswer={onSubmitAnswer}
       onSubmitVoice={onSubmitVoice}
+      onSelectQuestion={onSelectQuestion}
       renderList={(items) => <QuestionList questions={items} selectedQuestionId={selectedQuestionId} onSelectQuestion={onSelectQuestion} />}
     />;
   }
@@ -651,8 +719,19 @@ export default function QuestionPanel({
       ? "전체"
       : "해당 페이지";
 
+  if (selectedQuestion) {
+    return (
+      <StudentQuestionDetail
+        question={selectedQuestion}
+        similarQuestionState={similarQuestionState}
+        onCheckSimilar={onCheckSimilar}
+        onBack={() => onSelectQuestion?.(null)}
+      />
+    );
+  }
+
   return (
-    <aside className={`question-panel question-panel--list question-panel--student-list${selectedQuestion ? " is-question-selected" : ""}`}>
+    <aside className="question-panel question-panel--list question-panel--student-list">
       <div className="question-panel__header">
         <div className="question-panel__header-copy">
           <h2>

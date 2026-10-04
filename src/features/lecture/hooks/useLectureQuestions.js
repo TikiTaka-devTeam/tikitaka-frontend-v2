@@ -586,6 +586,9 @@ export default function useLectureQuestions({
         ?.questionId;
 
     if (!questionId) {
+      selectionRequestRef.current += 1;
+      setSelectedQuestion(null);
+      setSimilarQuestionState(null);
       return;
     }
 

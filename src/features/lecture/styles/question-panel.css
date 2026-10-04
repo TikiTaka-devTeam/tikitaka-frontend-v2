@@ -530,6 +530,66 @@
   -webkit-backdrop-filter: none;
 }
 
+.question-panel--student-detail .question-panel__back {
+  width: 70px;
+  min-width: 70px;
+  height: 28px;
+  margin-top: 3px;
+  padding: 0;
+  border: 1px solid #d8dbe7;
+  border-radius: 12px;
+  background: #fafafa;
+  color: #292e3d;
+  font: 600 10px "Tikitaka UI", sans-serif;
+  cursor: pointer;
+}
+
+.question-panel__student-detail-scroll {
+  padding-bottom: 24px;
+}
+
+.question-panel__student-detail-question {
+  flex: 0 0 auto;
+  margin: 20px 24px 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.question-panel__student-detail-divider {
+  flex: 0 0 1px;
+  height: 1px;
+  margin: 32px 24px 20px;
+  background: rgba(194, 204, 222, 0.45);
+}
+
+.question-panel__student-detail-question h3 {
+  margin: 0;
+  color: #292e3d;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.question-panel__student-detail-question p {
+  margin: 0;
+  color: #758094;
+  font-size: 12px;
+  line-height: 17px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.question-panel__student-detail-answer {
+  flex: 0 0 auto;
+  margin: 0 24px;
+}
+
+.question-panel__student-detail-answer .question-panel__answer-heading {
+  margin-bottom: 12px;
+}
+
 /* Keep the student question panel above the fixed slide pagination. */
 .lecture-page.is-panel-open
   .question-panel--student-list {
