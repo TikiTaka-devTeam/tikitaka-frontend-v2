@@ -1474,20 +1474,12 @@
 }
 
 .slide-pagination {
-  position: fixed;
+  position: relative;
 
   z-index: 50;
 
-  left: 50%;
-
-  bottom:
-    calc(
-      15px +
-      env(
-        safe-area-inset-bottom,
-        0px
-      )
-    );
+  width: max-content;
+  margin: 4px auto 0;
 
   height: 50px;
 
@@ -1495,11 +1487,7 @@
     14px
     17px;
 
-  transform:
-    translate(
-      -50%,
-      12px
-    );
+  transform: translateY(12px);
 
   display: flex;
 
@@ -1546,11 +1534,7 @@
 }
 
 .slide-pagination.is-visible {
-  transform:
-    translate(
-      -50%,
-      0
-    );
+  transform: translateY(0);
 
   opacity: 0.9;
 

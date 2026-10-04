@@ -1043,6 +1043,26 @@ export default function LectureViewerPage({
                 handleCreateFixer
               }
             />
+            <SlidePagination
+              currentPage={
+                currentPage
+              }
+              totalPages={
+                totalPages
+              }
+              onPrevious={() =>
+                movePage(
+                  currentIndex -
+                    1,
+                )
+              }
+              onNext={() =>
+                movePage(
+                  currentIndex +
+                    1,
+                )
+              }
+            />
           </div>
 
           <QuestionPanel
@@ -1097,27 +1117,6 @@ export default function LectureViewerPage({
           />
         </div>
       </div>
-
-      <SlidePagination
-        currentPage={
-          currentPage
-        }
-        totalPages={
-          totalPages
-        }
-        onPrevious={() =>
-          movePage(
-            currentIndex -
-              1,
-          )
-        }
-        onNext={() =>
-          movePage(
-            currentIndex +
-              1,
-          )
-        }
-      />
 
       <DocumentChangesModal
         count={pendingChanges.length}

@@ -778,16 +778,6 @@ function SpaceLecturePage() {
               </button>
             )}
 
-          {isLoadingMaterials && (
-            <p
-              className="space-lecture-status space-lecture-status--loading"
-              role="status"
-            >
-              강의자료를
-              불러오는 중입니다.
-            </p>
-          )}
-
           {!isLoadingMaterials &&
             materialsLoadError && (
               <p

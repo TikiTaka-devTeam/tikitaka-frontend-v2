@@ -176,13 +176,6 @@ export default function PdfSlideStage({
         }
         className="pdf-stage__viewport"
       >
-        {!normalizedPdfUrl &&
-          !visibleErrorMessage && (
-            <div className="pdf-stage__message">
-              강의자료를 불러오는 중입니다.
-            </div>
-          )}
-
         {visibleErrorMessage && (
           <div className="pdf-stage__message pdf-stage__message--error">
             {visibleErrorMessage}

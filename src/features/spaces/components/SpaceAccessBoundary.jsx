@@ -67,10 +67,10 @@ export default function SpaceAccessBoundary() {
     };
   }, [refresh]);
 
-  if (!ready) {
+  if (!ready && access.error) {
     return <div className="space-access-state" role={access.error ? "alert" : "status"}>
-      <p>{access.error || "Space 상태를 확인하는 중입니다."}</p>
-      {access.error && <button type="button" disabled={checking} onClick={refresh}>다시 시도</button>}
+      <p>{access.error}</p>
+      <button type="button" disabled={checking} onClick={refresh}>다시 시도</button>
     </div>;
   }
   if (archived && location.pathname.endsWith("/modify")) {
