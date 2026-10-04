@@ -5,6 +5,7 @@ import { useSpaceAccess } from "../context/SpaceAccessContext.js";
 import SpaceArchiveStatus from "./SpaceArchiveStatus.jsx";
 import SpaceToolbar from "./SpaceToolbar.jsx";
 import "../styles/space-layout.css";
+import usePageTransitionScrollLock from "../../../components/common/usePageTransitionScrollLock.js";
 
 const TABS = {
   "": ["lecture", "강의자료"],
@@ -20,6 +21,7 @@ export default function SpaceLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [leaving, setLeaving] = useState(false);
+  usePageTransitionScrollLock(location.pathname, leaving);
   const transitionTimerRef = useRef(null);
   useEffect(() => () => {
     window.clearTimeout(transitionTimerRef.current);

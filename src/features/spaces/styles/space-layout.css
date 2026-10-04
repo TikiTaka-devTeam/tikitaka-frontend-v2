@@ -8,7 +8,7 @@
   z-index: 6;
   pointer-events: none;
 }
-.space-layout > main { animation: none; }
+.space-layout > main { animation: none; overflow: clip; }
 .space-layout__chrome > * { pointer-events: auto; }
 .space-layout__back {
   position: absolute;

@@ -3,11 +3,13 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import BrandLogo from "./BrandLogo.jsx";
 import { AppToolbars } from "./AppToolbars.jsx";
 import "./mainLayout.css";
+import usePageTransitionScrollLock from "./usePageTransitionScrollLock.js";
 
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [leaving, setLeaving] = useState(false);
+  usePageTransitionScrollLock(location.pathname, leaving);
   const timerRef = useRef(null);
   useEffect(() => () => window.clearTimeout(timerRef.current), []);
 
