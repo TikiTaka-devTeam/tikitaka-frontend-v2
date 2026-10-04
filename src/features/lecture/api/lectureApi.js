@@ -16,9 +16,10 @@ export async function getDocumentSlides(documentId) {
   return response.data;
 }
 
-export async function getDocumentDownloadUrl(documentId) {
+export async function getDocumentDownloadUrl(documentId, noteType = "NONE") {
   const response = await apiClient.get(
     `/documents/${documentId}/download`,
+    { params: { note_type: noteType } },
   );
 
   return response.data;
