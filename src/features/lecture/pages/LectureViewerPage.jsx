@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -145,6 +146,13 @@ export default function LectureViewerPage({
         .default,
   });
 
+  const [includeSharedNotes, setIncludeSharedNotes] = useState(false);
+  const [includePrivateNotes, setIncludePrivateNotes] = useState(false);
+  const [downloadPhase, setDownloadPhase] = useState("");
+  const [downloadError, setDownloadError] = useState("");
+  const downloadLockRef = useRef(false);
+  const retrySavesRef = useRef(false);
+
   const [colorPreferenceKey] = useState(getDrawingColorStorageKey);
   const [drawingColorPreferences, setDrawingColorPreferences] = useState(() =>
     readDrawingColorPreferences(colorPreferenceKey),
@@ -267,6 +275,7 @@ export default function LectureViewerPage({
   const editableLayer = ["PROFESSOR", "ASSISTANT"].includes(viewerRole)
     ? "SHARED"
     : "PRIVATE";
+  const canIncludePrivateNotes = editableLayer === "PRIVATE";
 
   const currentSlide =
     slides[currentIndex] ??
@@ -349,6 +358,7 @@ export default function LectureViewerPage({
 
   const {
     createStrokeOnServer,
+    waitForPendingSaves,
     deleteStrokesOnServer,
 
     handleLiveStroke,
@@ -364,6 +374,7 @@ export default function LectureViewerPage({
   } =
     useLectureStrokes({
       spaceId,
+      documentId,
       currentSlideId,
       role,
       editableLayer,
@@ -590,6 +601,11 @@ export default function LectureViewerPage({
   }
 
   function openDownloadModal() {
+    if (downloadLockRef.current) return;
+    setIncludeSharedNotes(false);
+    setIncludePrivateNotes(false);
+    setDownloadError("");
+    setDownloadPhase("");
     setDownloadCompleted(
       false,
     );
@@ -600,7 +616,7 @@ export default function LectureViewerPage({
   }
 
   function closeDownloadModal() {
-    if (downloading) {
+    if (downloadLockRef.current) {
       return;
     }
 
@@ -614,7 +630,7 @@ export default function LectureViewerPage({
   async function handleDownload() {
     if (
       !documentId ||
-      downloading
+      downloadLockRef.current
     ) {
       return;
     }
@@ -624,11 +640,27 @@ export default function LectureViewerPage({
     );
 
     setDownloading(true);
+    downloadLockRef.current = true;
+    setDownloadError("");
+    setDownloadPhase("SAVING");
 
     try {
+      try {
+        await waitForPendingSaves(retrySavesRef.current);
+        retrySavesRef.current = false;
+      } catch (error) {
+        retrySavesRef.current = true;
+        throw new Error("필기를 저장하지 못해 다운로드를 중단했습니다. 다시 시도해주세요.", { cause: error });
+      }
+      setDownloadPhase("GENERATING");
+      const privateSelected = canIncludePrivateNotes && includePrivateNotes;
+      const noteType = includeSharedNotes
+        ? privateSelected ? "ALL" : "SHARED"
+        : privateSelected ? "PRIVATE" : "NONE";
       const response =
         await getDocumentDownloadUrl(
           documentId,
+          noteType,
         );
 
       const downloadUrl =
@@ -639,17 +671,17 @@ export default function LectureViewerPage({
         );
 
       if (!downloadUrl) {
-        throw new Error();
+        throw new Error("다운로드 URL을 받지 못했습니다. 다시 시도해주세요.");
       }
 
       const fileResponse = await fetch(downloadUrl);
       if (!fileResponse.ok) {
-        throw new Error();
+        throw new Error("PDF 파일을 다운로드하지 못했습니다. 다시 시도해주세요.");
       }
 
       const pdfBlob = await fileResponse.blob();
       if (!pdfBlob.size || pdfBlob.type.includes("text/html")) {
-        throw new Error();
+        throw new Error("다운로드한 PDF 파일이 올바르지 않습니다. 다시 시도해주세요.");
       }
 
       const objectUrl = URL.createObjectURL(pdfBlob);
@@ -670,6 +702,7 @@ export default function LectureViewerPage({
         true,
       );
     } catch (error) {
+      setDownloadError(error?.response?.data?.message || error?.message || "강의자료를 다운로드하지 못했습니다. 다시 시도해주세요.");
       setToast(
         error?.response
           ?.data
@@ -682,6 +715,8 @@ export default function LectureViewerPage({
       );
     } finally {
       setDownloading(false);
+      setDownloadPhase("");
+      downloadLockRef.current = false;
     }
   }
 
@@ -1092,6 +1127,13 @@ export default function LectureViewerPage({
       />
 
       <DownloadModal
+        saving={downloadPhase === "SAVING"}
+        error={downloadError}
+        includeShared={includeSharedNotes}
+        includePrivate={includePrivateNotes}
+        canIncludePrivate={canIncludePrivateNotes}
+        onSharedChange={setIncludeSharedNotes}
+        onPrivateChange={setIncludePrivateNotes}
         open={
           downloadOpen
         }

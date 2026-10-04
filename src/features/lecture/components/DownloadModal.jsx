@@ -2,11 +2,19 @@ import DownloadDocumentIcon from "../../../assets/icons/download-document.svg";
 
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
+import "../styles/lecture-download-modal.css";
 
 export default function DownloadModal({
   open,
   loading,
   completed = false,
+  saving = false,
+  error = "",
+  includeShared,
+  includePrivate,
+  canIncludePrivate,
+  onSharedChange,
+  onPrivateChange,
   onCancel,
   onConfirm,
   onComplete,
@@ -30,7 +38,7 @@ export default function DownloadModal({
 
   return (
     <CompactModal
-      className="lecture-modal"
+      className="lecture-modal lecture-download-modal"
       onClose={handleClose}
       labelledBy="lecture-download-title"
       describedBy="lecture-download-description"
@@ -56,9 +64,27 @@ export default function DownloadModal({
         <p id="lecture-download-description">
           {completed
             ? "강의자료를 다운로드했습니다."
-            : "해당 강의자료를 다운로드합니다"}
+            : "포함할 필기를 선택하세요. 선택하지 않으면 원본 PDF를 다운로드합니다."}
         </p>
       </div>
+
+      {!completed && (
+        <fieldset className="lecture-download-modal__options" disabled={loading}>
+          <legend className="lecture-download-modal__legend">다운로드에 포함할 필기</legend>
+          <label>
+            <input type="checkbox" checked={includeShared} onChange={(event) => onSharedChange(event.target.checked)} />
+            교수 필기 포함
+          </label>
+          {canIncludePrivate && (
+            <label>
+              <input type="checkbox" checked={includePrivate} onChange={(event) => onPrivateChange(event.target.checked)} />
+              내 필기 포함
+            </label>
+          )}
+        </fieldset>
+      )}
+      {loading && <p className="lecture-download-modal__status" role="status">{saving ? "필기 저장 중…" : "PDF 생성 및 다운로드 중…"}</p>}
+      {error && <p className="lecture-download-modal__error" role="alert">{error}</p>}
 
       {completed ? (
         <ModalActions
@@ -71,12 +97,12 @@ export default function DownloadModal({
           cancelText="취소"
           confirmText={
             loading
-              ? "다운로드 중"
-              : "다운로드"
+              ? saving ? "저장 중" : "다운로드 중"
+              : error ? "다시 시도" : "다운로드"
           }
           cancelDisabled={loading}
           confirmDisabled={loading}
-          onCancel={onCancel}
+          onCancel={handleClose}
           onConfirm={onConfirm}
         />
       )}

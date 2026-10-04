@@ -24,6 +24,7 @@ import {
 } from "../utils/lectureData";
 
 import { createSharedStrokeSync, createLiveStrokeSender, sortStrokes } from "../utils/sharedStrokeSync.js";
+import { createStrokeSaveQueue } from "../utils/strokeSaveQueue.js";
 
 function isSameHistoryAction(first, second) {
   return first === second || Boolean(
@@ -33,6 +34,7 @@ function isSameHistoryAction(first, second) {
 
 export default function useLectureStrokes({
   spaceId,
+  documentId,
   currentSlideId,
   editableLayer,
 
@@ -70,6 +72,10 @@ export default function useLectureStrokes({
     setRedoStack([]);
   }
   const strokeMappingsRef = useRef(new Map());
+  const [saveQueue] = useState(() => createStrokeSaveQueue({
+    PRIVATE: privateQueueRef,
+    SHARED: sharedQueueRef,
+  }));
 
   useEffect(() => {
     const session = { slideId: currentSlideId, client: null, sync: null, sender: null };
@@ -191,25 +197,9 @@ export default function useLectureStrokes({
   function enqueueLayerTask(
     layer,
     task,
+    fallback = null,
   ) {
-    const {
-      queue,
-    } =
-      getLayerState(
-        layer,
-      );
-
-    const nextTask =
-      queue.current
-        .catch(
-          () => undefined,
-        )
-        .then(task);
-
-    queue.current =
-      nextTask;
-
-    return nextTask;
+    return saveQueue.enqueue(layer, task, fallback, documentId);
   }
 
   async function refreshLayer(layer, slideId, session = sessionRef.current) {
@@ -271,6 +261,7 @@ export default function useLectureStrokes({
 
     const localStrokeId =
       `local-${clientStrokeId}`;
+    const clientOperationId = createUuid();
 
     const optimisticStroke = {
       ...stroke,
@@ -300,7 +291,7 @@ export default function useLectureStrokes({
       async () => {
         try {
           const response = await syncOperations(layer, slideId, [{
-            client_operation_id: createUuid(), type: "CREATE",
+            client_operation_id: clientOperationId, type: "CREATE",
             stroke: toStrokeRequest(stroke, clientStrokeId),
           }], session);
           const responseVersion = Number(response.version);
@@ -385,7 +376,7 @@ export default function useLectureStrokes({
               "필기를 저장하지 못했습니다.",
           );
 
-          return null;
+          throw error;
         }
       },
     );
@@ -419,6 +410,8 @@ export default function useLectureStrokes({
 
     const session = sessionRef.current;
 
+    const operationIds = strokeIds.map(() => createUuid());
+
     const removed =
       strokes.filter(
         (stroke) =>
@@ -441,12 +434,16 @@ export default function useLectureStrokes({
       layer,
       async () => {
         try {
-          const serverStrokeIds = strokeIds.map((id) =>
-            String(id).startsWith("local-") ? strokeMappingsRef.current.get(id) : id,
-          ).filter(Boolean);
+          const serverStrokeIds = strokeIds.map((id) => {
+            if (!String(id).startsWith("local-")) return id;
+            const savedId = strokeMappingsRef.current.get(id);
+            if (!savedId) throw new Error("삭제할 필기의 저장을 먼저 완료해야 합니다.");
+            return savedId;
+          });
           if (!serverStrokeIds.length) return [];
-          const response = await syncOperations(layer, slideId, serverStrokeIds.map((id) => ({
-            client_operation_id: createUuid(), type: "DELETE", stroke_id: id,
+          const response = await syncOperations(layer, slideId, serverStrokeIds.map((id, index) => ({
+            client_operation_id: operationIds[index],
+            type: "DELETE", stroke_id: id,
           })), session);
           if (layer === "SHARED" && sessionRef.current === session) {
             session.sync.acceptSaved(response, [], serverStrokeIds);
@@ -492,9 +489,10 @@ export default function useLectureStrokes({
               "필기를 삭제하지 못했습니다.",
           );
 
-          return [];
+          throw error;
         }
       },
+      [],
     );
   }
 
@@ -668,6 +666,7 @@ export default function useLectureStrokes({
   }
 
   return {
+    waitForPendingSaves: (retryFailed = false) => saveQueue.waitForPending(documentId, retryFailed),
     createStrokeOnServer,
     deleteStrokesOnServer,
     handleLiveStroke,
