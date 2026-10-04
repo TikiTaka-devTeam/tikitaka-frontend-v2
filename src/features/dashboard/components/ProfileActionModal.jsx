@@ -936,6 +936,7 @@ function LogoutContent({ onClose }) {
   if (isComplete) {
     return (
       <CompactModal
+        key="logout-complete"
         onClose={handleMoveToLogin}
         backdropClassName="modal-backdrop--light"
         labelledBy="logout-complete-modal-title"
@@ -971,6 +972,7 @@ function LogoutContent({ onClose }) {
 
   return (
     <CompactModal
+      key="logout-confirm"
       onClose={onClose}
       backdropClassName="modal-backdrop--light"
       labelledBy="logout-confirm-modal-title"
