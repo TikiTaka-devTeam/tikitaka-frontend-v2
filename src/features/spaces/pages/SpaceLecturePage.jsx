@@ -139,11 +139,15 @@ function SpaceLecturePage() {
   const [sortOrder, setSortOrder] = useState("latest");
   const scrollIndicatorTimerRef = useRef(null);
 
+  const [permissionContext, setPermissionContext] = useState({ spaceId, isProfessor });
+  if (permissionContext.spaceId !== spaceId || permissionContext.isProfessor !== isProfessor) {
+    setPermissionContext({ spaceId, isProfessor });
+    setCurrentSpaceRole(isProfessor ? "PROFESSOR" : "STUDENT");
+    setHasLectureMaterialManagePermission(false);
+  }
+
   useEffect(() => {
     if (isProfessor) return undefined;
-
-    setCurrentSpaceRole("STUDENT");
-    setHasLectureMaterialManagePermission(false);
     const controller = new AbortController();
 
     async function loadLectureMaterialPermission() {

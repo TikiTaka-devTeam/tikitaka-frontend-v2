@@ -32,7 +32,7 @@ function PdfPageCanvas({
 }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
-  const hasRenderedPageRef = useRef(false);
+  const [hasRenderedPage, setHasRenderedPage] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [renderError, setRenderError] = useState("");
 
@@ -99,7 +99,7 @@ function PdfPageCanvas({
             cssViewport.width,
             cssViewport.height,
           );
-          hasRenderedPageRef.current = true;
+          setHasRenderedPage(true);
           setRenderError("");
           return;
         }
@@ -125,7 +125,7 @@ function PdfPageCanvas({
             cssViewport.width,
             cssViewport.height,
           );
-          hasRenderedPageRef.current = true;
+          setHasRenderedPage(true);
 
           if (cache) {
             cache.set(cacheKey, renderCanvas);
@@ -152,7 +152,7 @@ function PdfPageCanvas({
   }, [cacheRenderedPage, containerSize.height, containerSize.width, pageNumber, pdfDocument, zoom]);
 
   const statusMessage = renderError
-    || (!pdfDocument && !hasRenderedPageRef.current ? emptyMessage : "");
+    || (!pdfDocument && !hasRenderedPage ? emptyMessage : "");
 
   return (
     <div

@@ -248,12 +248,13 @@ export default function LectureViewerPage({
 
   const viewerRole = String(role || "").toUpperCase();
   const [hasQuestionManagePermission, setHasQuestionManagePermission] = useState(viewerRole === "PROFESSOR");
+  const [permissionContext, setPermissionContext] = useState({ spaceId, viewerRole });
+  if (permissionContext.spaceId !== spaceId || permissionContext.viewerRole !== viewerRole) {
+    setPermissionContext({ spaceId, viewerRole });
+    setHasQuestionManagePermission(viewerRole === "PROFESSOR");
+  }
   useEffect(() => {
-    if (viewerRole !== "ASSISTANT") {
-      setHasQuestionManagePermission(viewerRole === "PROFESSOR");
-      return undefined;
-    }
-    setHasQuestionManagePermission(false);
+    if (viewerRole !== "ASSISTANT") return undefined;
     const controller = new AbortController();
     async function loadQuestionPermission() {
       try {
