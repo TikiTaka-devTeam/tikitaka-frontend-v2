@@ -257,9 +257,14 @@ export default function usePdfPageRender({
                 cssScale,
             });
 
-          const pixelRatio =
-            window.devicePixelRatio ||
-            1;
+          // Supersample small text while keeping large/zoomed pages within
+          // a reasonable canvas memory budget (16M pixels, about 64MB).
+          const preferredPixelRatio = Math.max(2, window.devicePixelRatio || 1);
+          const pixelRatio = Math.min(
+            preferredPixelRatio,
+            Math.sqrt(16_000_000 / (cssViewport.width * cssViewport.height)),
+            8192 / Math.max(cssViewport.width, cssViewport.height),
+          );
 
           const renderViewport =
             page.getViewport({

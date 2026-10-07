@@ -481,17 +481,18 @@ function SpaceNoticePage() {
         location.state,
       ],
     );
-  const [hasNoticeManagePermission, setHasNoticeManagePermission] = useState(null);
+  const [hasNoticeManagePermission, setHasNoticeManagePermission] = useState(isProfessor ? true : null);
   const { readOnly } = useSpaceAccess();
   const showCreateButton = !readOnly && (isProfessor || hasNoticeManagePermission === true);
 
-  useEffect(() => {
-    if (isProfessor) {
-      setHasNoticeManagePermission(true);
-      return undefined;
-    }
+  const [permissionContext, setPermissionContext] = useState({ spaceId, isProfessor });
+  if (permissionContext.spaceId !== spaceId || permissionContext.isProfessor !== isProfessor) {
+    setPermissionContext({ spaceId, isProfessor });
+    setHasNoticeManagePermission(isProfessor ? true : null);
+  }
 
-    setHasNoticeManagePermission(null);
+  useEffect(() => {
+    if (isProfessor) return undefined;
     const controller = new AbortController();
 
     async function loadNoticeManagePermission() {

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ModalCloseTransitionContext } from "./ModalBackdrop.jsx";
+import { ModalCloseTransitionContext } from "./ModalCloseTransitionContext.js";
 import { closeWithModalTransition } from "./modalTransition.js";
 import "./modalActions.css";
 
