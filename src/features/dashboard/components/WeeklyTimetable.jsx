@@ -21,7 +21,7 @@ const DAY_LABELS = [
   "SUNDAY",
 ];
 
-const TIME_LABEL_WIDTH = 75;
+const TIME_LABEL_WIDTH = 42;
 
 function getMobileDayIndexes(todayIndex) {
   if (todayIndex <= 0) return [0, 1];
@@ -34,8 +34,15 @@ function getTodayIndex() {
   return (new Date().getDay() + 6) % 7;
 }
 
-function CourseBlock({ course, dayIndex, dayWidth, isSelected, onSelect }) {
-  const { top, height } = getCoursePosition(course);
+function CourseBlock({
+  course,
+  dayIndex,
+  dayWidth,
+  hourHeight,
+  isSelected,
+  onSelect,
+}) {
+  const { top, height } = getCoursePosition(course, hourHeight);
   const spaceColor = course.colorKey ? getSpaceColor(course.colorKey) : null;
 
   return (
@@ -82,6 +89,7 @@ function WeeklyTimetable({
   const timetableRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const [timetableWidth, setTimetableWidth] = useState(0);
+  const [availableHeight, setAvailableHeight] = useState(0);
   const [mobileDayAnchor, setMobileDayAnchor] = useState(null);
 
   useEffect(() => {
@@ -97,11 +105,13 @@ function WeeklyTimetable({
   useEffect(() => {
     if (!timetableRef.current) return undefined;
 
+    const timetablePanel = timetableRef.current.parentElement;
     const observer = new ResizeObserver(([entry]) => {
-      setTimetableWidth(entry.contentRect.width);
+      setTimetableWidth(timetableRef.current.offsetWidth);
+      setAvailableHeight(entry.contentRect.height);
     });
 
-    observer.observe(timetableRef.current);
+    observer.observe(timetablePanel);
 
     return () => observer.disconnect();
   }, []);
@@ -117,7 +127,17 @@ function WeeklyTimetable({
     [courses],
   );
   const timetableEndMinutes = getTimetableEndMinutes(courses);
-  const timetableMetrics = getTimetableMetrics(timetableEndMinutes);
+  const defaultTimetableMetrics = getTimetableMetrics(timetableEndMinutes);
+  const hourHeight = availableHeight > 0
+    ? Math.max(
+        1,
+        (availableHeight - 54 - 19) / defaultTimetableMetrics.hourCount,
+      )
+    : 57;
+  const timetableMetrics = getTimetableMetrics(
+    timetableEndMinutes,
+    hourHeight,
+  );
   const timetableBoundaryOffsets = getTimetableBoundaryOffsets(
     timetableEndMinutes,
   );
@@ -136,6 +156,7 @@ function WeeklyTimetable({
       ref={timetableRef}
       style={{
         "--day-width": `${dayWidth}px`,
+        "--hour-height": `${hourHeight}px`,
         "--timetable-height": `${timetableMetrics.height}px`,
       }}
       aria-label={`${semesterLabel} 주간 시간표`}
@@ -210,7 +231,7 @@ function WeeklyTimetable({
         {timetableBoundaryOffsets.map((offset) => (
           <i
             className="horizontal"
-            style={{ "--time-top": `${54 + offset * 57}px` }}
+            style={{ "--time-top": `${54 + offset * hourHeight}px` }}
             key={`h-${offset}`}
           />
         ))}
@@ -219,7 +240,7 @@ function WeeklyTimetable({
       {timeLabels.map((time, index) => (
         <time
           className="dashboard-timetable__time"
-          style={{ "--time-top": `${60 + index * 57}px` }}
+          style={{ "--time-top": `${60 + index * hourHeight}px` }}
           key={time}
         >
           {time}
@@ -231,6 +252,7 @@ function WeeklyTimetable({
           course={course}
           dayIndex={visibleDayIndexes.indexOf(course.day)}
           dayWidth={dayWidth}
+          hourHeight={hourHeight}
           isSelected={course.id === selectedCourseId}
           onSelect={onCourseSelect}
           key={course.id}

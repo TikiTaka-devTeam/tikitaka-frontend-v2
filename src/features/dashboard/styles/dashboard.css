@@ -98,20 +98,15 @@
   width: 100%;
   min-width: 0;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   border-radius: 24px;
   background: rgba(251, 253, 255, 0.82);
   box-shadow: 0 10px 26px rgba(20, 36, 71, 0.07);
   backdrop-filter: blur(9px);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(87, 102, 130, 0.35) transparent;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
 }
 
 .dashboard-timetable {
-  --time-label-width: 75px;
+  --time-label-width: 42px;
   --hour-height: 57px;
 
   position: relative;
@@ -152,7 +147,7 @@
 
 .dashboard-timetable__corner {
   position: absolute;
-  left: 24px;
+  left: 12px;
   top: 18px;
   color: #576682;
   font-size: 12px;
@@ -332,7 +327,8 @@
   font-size: 9px;
   line-height: 11px;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .dashboard-course--purple {
