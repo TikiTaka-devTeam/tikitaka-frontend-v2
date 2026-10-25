@@ -52,7 +52,7 @@ function normalizeMemberDetail(member) {
 }
 
 function roleLabel(role) {
-  return { PROFESSOR: "교수", ASSISTANT: "조교", STUDENT: "학생" }[role] ?? "학생";
+  return { PROFESSOR: "운영자", ASSISTANT: "조교", STUDENT: "참여자" }[role] ?? "참여자";
 }
 
 function normalizeJoinRequest(request) {
@@ -121,7 +121,7 @@ function isOwnMember(member, user) {
 }
 
 function formatRequestSummary(requests) {
-  if (requests.length === 0) return "선택한 학생";
+  if (requests.length === 0) return "선택한 참여자";
   if (requests.length === 1) return requests[0].name;
   return `${requests[0].name} 외 ${requests.length - 1}명`;
 }
@@ -892,9 +892,9 @@ function SpaceMembersPage() {
                   {!isJoinRequestsLoading && !joinRequestsError && joinRequests.length === 0 ? (
                     <div className="member-management__empty">
                       <img src={memberBackgroundIcon} alt="" />
-                      <strong>현재 승인 대기 중인 학생이 없습니다</strong>
+                      <strong>현재 승인 대기 중인 참여자가 없습니다</strong>
                       <p>{archived
-                        ? "보관된 Space에서는 새로운 학생을 초대하거나 참여 신청을 승인·거절할 수 없습니다."
+                        ? "보관된 Space에서는 새로운 참여자를 초대하거나 참여 신청을 승인·거절할 수 없습니다."
                         : <>새로운 참여 신청이 들어오면<br />이곳에서 승인 또는 거절할 수 있습니다</>}</p>
                     </div>
                   ) : null}
@@ -946,7 +946,7 @@ function SpaceMembersPage() {
                     <div>
                       <strong>자동 승인</strong>
                       <p className={settingsError ? "is-error" : ""}>
-                        {settingsError || "강의 코드를 입력한 학생을 자동으로 승인합니다"}
+                        {settingsError || "강의 코드를 입력한 참여자를 자동으로 승인합니다"}
                       </p>
                     </div>
                     <button
@@ -1123,8 +1123,8 @@ function SpaceMembersPage() {
           step={permissionSaveModalStep}
           description={
             permissionSaveModalStep === "complete"
-              ? `${selectedMember?.name || "선택한"} 학생의 권한이 저장되었습니다`
-              : `${selectedMember?.name || "선택한"} 학생의 권한을 업데이트합니다`
+              ? `${selectedMember?.name || "선택한 멤버"}의 권한이 저장되었습니다`
+              : `${selectedMember?.name || "선택한 멤버"}의 권한을 업데이트합니다`
           }
           errorMessage={permissionSaveError}
           isSubmitting={isPermissionsSaving}

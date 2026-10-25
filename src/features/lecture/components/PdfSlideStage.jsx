@@ -81,6 +81,13 @@ export default function PdfSlideStage({
   onFixerDraftSubmit,
 }) {
   const { readOnly } = useSpaceAccess();
+
+  function changeZoom(step) {
+    onZoomChange?.(
+      Math.min(3, Math.max(0.75, Math.round((zoom + step) * 100) / 100)),
+    );
+  }
+
   const {
     containerRef,
 
@@ -335,6 +342,25 @@ export default function PdfSlideStage({
             <button type="button" aria-label="현재 변경 확인 및 다음 변경으로 이동" onClick={onAcknowledgePageChange}><img src={CheckCircleIcon} alt="" /></button>
           </div>
         )}
+      </div>
+      <div className="pdf-stage__zoom-controls" role="group" aria-label="강의자료 확대 및 축소">
+        <button
+          type="button"
+          aria-label="강의자료 축소"
+          disabled={!normalizedPdfUrl || zoom <= 0.75}
+          onClick={() => changeZoom(-0.25)}
+        >
+          −
+        </button>
+        <span aria-live="polite">{Math.round(zoom * 100)}%</span>
+        <button
+          type="button"
+          aria-label="강의자료 확대"
+          disabled={!normalizedPdfUrl || zoom >= 3}
+          onClick={() => changeZoom(0.25)}
+        >
+          +
+        </button>
       </div>
     </section>
   );

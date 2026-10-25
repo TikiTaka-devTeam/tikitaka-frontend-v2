@@ -73,7 +73,7 @@ export default function DownloadModal({
           <legend className="lecture-download-modal__legend">다운로드에 포함할 필기</legend>
           <label>
             <input type="checkbox" checked={includeShared} onChange={(event) => onSharedChange(event.target.checked)} />
-            교수 필기 포함
+            운영자 필기 포함
           </label>
           {canIncludePrivate && (
             <label>

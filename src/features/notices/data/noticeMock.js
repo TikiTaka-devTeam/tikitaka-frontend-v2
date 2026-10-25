@@ -20,7 +20,7 @@ export const MOCK_NOTICE_DETAILS = {
     notice_id: "mock-notice-1",
     title: "중간 발표 일정 안내",
     created_at: "2026-07-20T10:30:00+09:00",
-    author_name: "김승훈 교수",
+    author_name: "김승훈 운영자",
     view_count: 34,
     is_read: true,
     read_at: "2026-07-20T10:35:00+09:00",

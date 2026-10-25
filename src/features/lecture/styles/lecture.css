@@ -290,6 +290,47 @@
   display: none;
 }
 
+.pdf-stage__zoom-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 13;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #e0e5f0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+}
+
+.pdf-stage__zoom-controls button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #292e3d;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pdf-stage__zoom-controls button:disabled {
+  color: #a8b0be;
+  cursor: default;
+}
+
+.pdf-stage__zoom-controls span {
+  min-width: 42px;
+  color: #292e3d;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .pdf-stage__page {
   position: relative;
 
@@ -1575,6 +1616,8 @@
   font-weight: 600;
 
   text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .lecture-modal-backdrop {

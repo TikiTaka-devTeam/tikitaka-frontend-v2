@@ -111,7 +111,7 @@ function getCommentAuthorLabel(comment, isViewingOwnQuestion, currentSpaceRole) 
   if (isViewingOwnQuestion && (isCurrentUser || isAnonymous)) return getStoredUserName();
   if (authorRole === "STUDENT" || isAnonymous) return "질문자";
   if (authorName) return authorName;
-  if (authorRole === "PROFESSOR") return "교수";
+  if (authorRole === "PROFESSOR") return "운영자";
   if (authorRole === "ASSISTANT") return "조교";
   return "작성자";
 }
@@ -499,13 +499,13 @@ export default function SpaceQuestionDetail({
       </div>}
 
       {existingAnswer && (readOnly || !editing) && <article className="space-question-detail__answer">
-        <span>교수 답변</span>
+        <span>운영자 답변</span>
         <p>{existingAnswer.content}</p>
       </article>}
 
       {isQuestionManager && editing && <>
         <div className="space-question-detail__editor">
-          <span>교수 답변</span>
+          <span>운영자 답변</span>
           <textarea value={answerContent} autoFocus onChange={(event) => setAnswerContent(event.target.value)} placeholder="질문에 대한 답변을 입력해 주세요." />
         </div>
         <div className="space-question-detail__editor-actions">

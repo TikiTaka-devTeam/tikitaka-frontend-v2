@@ -79,7 +79,7 @@ function MemberPermissionModal({
             <div className="member-permission-modal__role-select">
               {readOnly ? (
                 <div className="member-permission-modal__role-control member-permission-modal__role-control--readonly">
-                  <span>{isAssistant ? "조교" : "학생"}</span>
+                  <span>{isAssistant ? "조교" : "참여자"}</span>
                 </div>
               ) : (
                 <button
@@ -89,7 +89,7 @@ function MemberPermissionModal({
                   aria-expanded={isRoleMenuOpen}
                   onClick={() => setIsRoleMenuOpen((previous) => !previous)}
                 >
-                  <span>{isAssistant ? "조교" : "학생"}</span>
+                  <span>{isAssistant ? "조교" : "참여자"}</span>
                   <img
                     className={isRoleMenuOpen ? "is-open" : ""}
                     src={chevronIcon}
@@ -112,7 +112,7 @@ function MemberPermissionModal({
                         className={isSelected ? "is-selected" : ""}
                         onClick={() => handleRoleChange(option)}
                       >
-                        <span>{option === "ASSISTANT" ? "조교" : "학생"}</span>
+                        <span>{option === "ASSISTANT" ? "조교" : "참여자"}</span>
                         {isSelected ? <span aria-hidden="true">✓</span> : null}
                       </button>
                     );

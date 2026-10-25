@@ -1234,7 +1234,7 @@ function StudentAssignmentPage() {
               value={
                 submissionComment
               }
-              placeholder="제출과 관련해 교수님께 전달할 내용을 입력해주세요."
+              placeholder="제출과 관련해 운영자에게 전달할 내용을 입력해주세요."
               onChange={(event) =>
                 setSubmissionComment(
                   event.target.value,
