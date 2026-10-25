@@ -1179,7 +1179,7 @@ function AssignmentEditorForm({
           id="assignment-editor-description"
           value={description}
           disabled={isSaving}
-          placeholder="제출과 관련해 학생들에게 전달할 내용을 입력해주세요."
+          placeholder="제출과 관련해 참여자들에게 전달할 내용을 입력해주세요."
           onChange={(event) =>
             setDescription(
               event.target.value,
@@ -1345,8 +1345,8 @@ function AssignmentEditorForm({
           <div className="professor-assignment-editor__actions">
             <p>
               {isEdit
-                ? "수정 후 학생들에게 바로 반영됩니다."
-                : "등록 후 학생들에게 바로 공개됩니다."}
+                ? "수정 후 참여자들에게 바로 반영됩니다."
+                : "등록 후 참여자들에게 바로 공개됩니다."}
             </p>
 
             <button

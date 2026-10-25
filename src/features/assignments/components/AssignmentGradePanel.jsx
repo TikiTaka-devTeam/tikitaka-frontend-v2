@@ -304,7 +304,7 @@ function AssignmentGradePanel({
         setError(
           getApiErrorMessage(
             requestError,
-            "학생 제출 현황을 불러오지 못했습니다.",
+            "참여자 제출 현황을 불러오지 못했습니다.",
           ),
         );
       } finally {
@@ -968,9 +968,9 @@ function AssignmentGradePanel({
             </h2>
 
             <p>
-              {readOnly ? "학생별 제출물과 성적을 확인하세요" : isGradeEdit
-                ? "학생별 제출물을 확인하고 성적을 수정하세요"
-                : "학생별 제출물을 확인하고 성적을 입력하세요"}
+              {readOnly ? "참여자별 제출물과 성적을 확인하세요" : isGradeEdit
+                ? "참여자별 제출물을 확인하고 성적을 수정하세요"
+                : "참여자별 제출물을 확인하고 성적을 입력하세요"}
             </p>
           </div>
 

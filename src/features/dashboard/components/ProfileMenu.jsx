@@ -92,7 +92,7 @@ function ProfileMenu({ onSelect }) {
   const email = getProfileValue(profile, ["email"], "이메일 정보 없음");
   const accountType = getProfileValue(profile, ["account_type"], "");
   const role =
-    { PROFESSOR: "교수", ASSISTANT: "조교", STUDENT: "학생" }[accountType] ||
+    { PROFESSOR: "운영자", ASSISTANT: "조교", STUDENT: "참여자" }[accountType] ||
     "";
   const profileImage = getProfileValue(
     profile,

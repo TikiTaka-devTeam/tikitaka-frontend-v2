@@ -75,7 +75,7 @@ const MODAL_CONTENT = {
     confirm: {
       title: "성적을 수정하시겠습니까?",
       description:
-        "저장 시, 수정한 성적이 학생에게 공개됩니다.",
+        "저장 시, 수정한 성적이 참여자에게 공개됩니다.",
       confirmLabel: "저장",
     },
 
@@ -92,7 +92,7 @@ const MODAL_CONTENT = {
       title:
         "모든 제출물을 다운로드하시겠습니까?",
       description:
-        "학생들의 제출물을 모두 저장합니다",
+        "참여자들의 제출물을 모두 저장합니다",
       confirmLabel: "저장",
     },
 

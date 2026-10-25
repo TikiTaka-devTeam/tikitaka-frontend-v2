@@ -230,7 +230,7 @@ export default function QuestionComposer({
             {error && !submitModal && <p className="question-composer-error" role="alert">{error}</p>}
             {draftMessage && <p className="question-composer-draft-message" role="status">{draftMessage}</p>}
             <footer className="question-composer-form__footer">
-              <small>질문 등록 후에는 학생이 답변을 작성할 수 없습니다.</small>
+              <small>질문 등록 후에는 참여자가 답변을 작성할 수 없습니다.</small>
               <div>
                 <button type="button" className="question-composer-secondary" onClick={saveDraft}>임시 저장</button>
                 <button type="button" className="question-composer-primary" onClick={requestSubmit}>질문 등록</button>
@@ -270,7 +270,7 @@ export default function QuestionComposer({
         <div className="question-submit-modal__icon"><img src={questionSubmitIcon} alt="" /></div>
         <div className="question-submit-modal__copy">
           <h2 id="question-submit-modal-title">{submitModal === "success" ? "등록이 완료되었습니다" : "질문을 등록할까요?"}</h2>
-          <p id="question-submit-modal-description">{submitModal === "success" ? "학생은 이후, 질문을 수정할 수 있습니다" : "질문 등록 시, 삭제 수정이 불가합니다."}</p>
+          <p id="question-submit-modal-description">{submitModal === "success" ? "참여자는 이후 질문을 수정할 수 있습니다" : "질문 등록 시, 삭제 수정이 불가합니다."}</p>
           {error && <p className="question-composer-error" role="alert">{error}</p>}
         </div>
         <ModalActions
