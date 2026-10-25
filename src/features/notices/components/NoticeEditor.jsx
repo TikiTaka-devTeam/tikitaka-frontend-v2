@@ -243,6 +243,7 @@ function NoticeEditor({
 
       <EditorContent
         editor={editor}
+        className="notice-editor__scroll"
       />
 
       <div className="notice-editor-toolbar">
