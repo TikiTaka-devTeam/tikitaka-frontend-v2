@@ -20,7 +20,8 @@ Tikitaka는 강의자료를 중심으로 필기, 질문, 공지사항, 과제를
 - Axios, Zustand
 - PDF.js(`pdfjs-dist`), Canvas
 - STOMP.js, SockJS
-- pnpm 10, Node.js 22(CI 기준)
+- pnpm 10, Node.js 24.22.1(CI 기준)
+- 로컬 확인 환경: Homebrew `node@24` 24.22.1, pnpm 11.28.8
 
 ## 로컬 실행
 
