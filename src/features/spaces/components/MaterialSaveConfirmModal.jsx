@@ -7,12 +7,15 @@ function MaterialSaveConfirmModal({
   error = "",
   isEditing = false,
   isSubmitting = false,
+  uploadProgress = null,
   onCancel,
   onConfirm,
 }) {
+  const isProcessing = uploadProgress === 100;
+
   return (
     <CompactModal
-      onClose={onCancel}
+      onClose={isSubmitting ? undefined : onCancel}
       labelledBy="material-save-confirm-modal-title"
       describedBy="material-save-confirm-modal-description"
       className={`save-status-modal ${error ? "save-status-modal--error" : ""}`}
@@ -31,12 +34,36 @@ function MaterialSaveConfirmModal({
         {error && <p className="save-status-modal__error" role="alert">{error}</p>}
       </div>
 
+      {isSubmitting && (
+        <div className="save-status-modal__progress" role="status" aria-live="polite">
+          <div
+            className={`save-status-modal__progress-track${uploadProgress === null ? " is-indeterminate" : ""}`}
+            role="progressbar"
+            aria-label="강의자료 업로드 진행률"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={uploadProgress ?? undefined}
+          >
+            <span style={uploadProgress === null ? undefined : { width: `${uploadProgress}%` }} />
+          </div>
+          <p className="save-status-modal__progress-label">
+            {isProcessing
+              ? "파일 전송 완료 · 서버에서 처리 중..."
+              : uploadProgress === null
+                ? "파일 전송 준비 중..."
+                : `파일 전송 중 · ${uploadProgress}%`}
+          </p>
+        </div>
+      )}
+
       <ModalActions
         className="save-confirm-modal__actions"
         onCancel={onCancel}
         onConfirm={onConfirm}
-        confirmText={isSubmitting ? "업로드 중..." : isEditing ? "수정" : "저장"}
+        confirmText={isSubmitting ? "업로드 중..." : error ? "다시 시도" : isEditing ? "수정" : "저장"}
+        confirmType="submit"
         confirmDisabled={isSubmitting}
+        cancelDisabled={isSubmitting}
       />
     </CompactModal>
   );
