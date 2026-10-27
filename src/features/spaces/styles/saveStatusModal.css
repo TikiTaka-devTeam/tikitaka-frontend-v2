@@ -74,6 +74,42 @@
   min-height: 237px;
 }
 
+.save-status-modal__progress {
+  width: 100%;
+}
+
+.save-status-modal__progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e9ecf5;
+}
+
+.save-status-modal__progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #2e6bff;
+}
+
+.save-status-modal__progress-track.is-indeterminate span {
+  width: 35%;
+  animation: material-upload-progress 1.5s ease-in-out infinite alternate;
+}
+
+.save-status-modal__progress-label {
+  margin: 8px 0 0;
+  color: #7d8194;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+}
+
+@keyframes material-upload-progress {
+  from { transform: translateX(0); }
+  to { transform: translateX(185%); }
+}
+
 .save-confirm-modal__actions {
   gap: 12px;
 }

@@ -125,6 +125,8 @@ function SpaceLecturePage() {
   const [pendingMaterial, setPendingMaterial] = useState(null);
   const [materialSaveError, setMaterialSaveError] = useState("");
   const [isUploadingMaterial, setIsUploadingMaterial] = useState(false);
+  const [materialUploadProgress, setMaterialUploadProgress] = useState(null);
+  const uploadingMaterialRef = useRef(false);
   const [materials, setMaterials] = useState([]);
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
   const [materialsLoadError, setMaterialsLoadError] = useState("");
@@ -382,12 +384,14 @@ function SpaceLecturePage() {
       if (
         !pendingMaterial ||
         !canManageMaterials ||
-        isUploadingMaterial
+        uploadingMaterialRef.current
       ) {
         return;
       }
 
+      uploadingMaterialRef.current = true;
       setMaterialSaveError("");
+      setMaterialUploadProgress(null);
 
       try {
         setIsUploadingMaterial(
@@ -398,6 +402,15 @@ function SpaceLecturePage() {
           await uploadDocument(
             spaceId,
             pendingMaterial,
+            {
+              onUploadProgress: ({ loaded, total }) => {
+                if (total > 0) {
+                  setMaterialUploadProgress(
+                    Math.min(100, Math.floor((loaded / total) * 100)),
+                  );
+                }
+              },
+            },
           );
 
         setMaterials(
@@ -423,6 +436,7 @@ function SpaceLecturePage() {
             "강의자료 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.",
         );
       } finally {
+        uploadingMaterialRef.current = false;
         setIsUploadingMaterial(
           false,
         );
@@ -988,9 +1002,12 @@ function SpaceLecturePage() {
             isSubmitting={
               isUploadingMaterial
             }
+            uploadProgress={
+              materialUploadProgress
+            }
             onCancel={() => {
               if (
-                isUploadingMaterial
+                uploadingMaterialRef.current
               ) {
                 return;
               }

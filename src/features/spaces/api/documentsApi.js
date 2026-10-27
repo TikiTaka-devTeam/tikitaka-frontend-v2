@@ -5,7 +5,7 @@ export async function getDocuments(spaceId, config = {}) {
   return response.data;
 }
 
-export async function uploadDocument(spaceId, { title, file }) {
+export async function uploadDocument(spaceId, { title, file }, config = {}) {
   const formData = new FormData();
   formData.append("title", title);
   formData.append("file", file);
@@ -13,6 +13,7 @@ export async function uploadDocument(spaceId, { title, file }) {
   const response = await apiClient.post(
     `/spaces/${spaceId}/documents`,
     formData,
+    config,
   );
 
   return response.data;
