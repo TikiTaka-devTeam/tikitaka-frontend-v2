@@ -10,16 +10,84 @@ const saved = (id, clientId = id) => ({
 const event = (type, fields = {}) => ({
   type, slide_id: "slide", space_id: "space", ...fields,
 });
-function harness(t, fetchSnapshot = async () => ({ version: 0, strokes: [] })) {
+function harness(t, fetchSnapshot = async () => ({ version: 0, strokes: [] }), scheduler = {}) {
   const states = [];
   const errors = [];
   const sync = createSharedStrokeSync({
     slideId: "slide", spaceId: "space", fetchSnapshot,
     onChange: (value) => states.push(value), onError: (error) => errors.push(error),
+    ...scheduler,
   });
   t.after(() => sync.dispose());
   return { sync, states, errors, latest: () => states.at(-1) };
 }
+
+function frameScheduler() {
+  let next = 0;
+  const callbacks = new Map();
+  return {
+    requestFrame(callback) { callbacks.set(++next, callback); return next; },
+    cancelFrame(id) { callbacks.delete(id); },
+    flush() {
+      const pending = [...callbacks.values()];
+      callbacks.clear();
+      for (const callback of pending) callback();
+    },
+    size: () => callbacks.size,
+  };
+}
+
+test("one display frame preserves every point and previous immutable snapshots", async (t) => {
+  const scheduler = frameScheduler();
+  const h = harness(t, undefined, scheduler);
+  await h.sync.refresh();
+  const count = h.states.length;
+  h.sync.receive(event("STROKE_START", { client_stroke_id: "c", point, stroke_order: 2 }));
+  const expected = [{ x: point.x_ratio, y: point.y_ratio }];
+  for (let chunk = 1; chunk <= 100; chunk += 1) {
+    const p = { x_ratio: chunk / 100, y_ratio: 0.3 };
+    expected.push({ x: p.x_ratio, y: p.y_ratio });
+    h.sync.receive(event("STROKE_POINTS", { client_stroke_id: "c", chunk_seq: chunk, points: [p] }));
+  }
+  assert.equal(h.states.length, count);
+  assert.equal(scheduler.size(), 1);
+  scheduler.flush();
+  assert.equal(h.states.length, count + 1);
+  const previous = h.latest().liveStrokes[0];
+  assert.deepEqual(previous.points, expected);
+  h.sync.receive(event("STROKE_START", { client_stroke_id: "first", point, stroke_order: 1 }));
+  h.sync.receive(event("STROKE_POINTS", { client_stroke_id: "c", chunk_seq: 101, points: [point] }));
+  h.sync.receive(event("STROKE_END", { client_stroke_id: "c", last_chunk_seq: 101 }));
+  scheduler.flush();
+  assert.deepEqual(h.latest().liveStrokes.map((s) => s.id), ["live-first", "live-c"]);
+  assert.equal(h.latest().liveStrokes[1].points.length, 102);
+  assert.deepEqual(previous.points, expected);
+});
+
+test("save, cancel, reconnect and disposal cannot publish stale pending live frames", async (t) => {
+  const scheduler = frameScheduler();
+  const h = harness(t, undefined, scheduler);
+  await h.sync.refresh();
+  h.sync.receive(event("STROKE_START", { client_stroke_id: "c", point }));
+  h.sync.acceptSaved({ version: 1 }, [saved("s", "c")]);
+  assert.equal(scheduler.size(), 0);
+  assert.equal(h.latest().liveStrokes.length, 0);
+  assert.equal(h.latest().strokes[0].id, "s");
+  h.sync.receive(event("STROKE_START", { client_stroke_id: "cancel", point }));
+  h.sync.receive(event("STROKE_CANCEL", { client_stroke_id: "cancel" }));
+  scheduler.flush();
+  assert.equal(h.latest().liveStrokes.length, 0);
+  h.sync.receive(event("STROKE_START", { client_stroke_id: "old", point }));
+  await h.sync.reconnect();
+  scheduler.flush();
+  assert.equal(h.latest().liveStrokes.length, 0);
+  h.sync.receive(event("STROKE_START", { client_stroke_id: "late", point }));
+  const count = h.states.length;
+  h.sync.dispose();
+  assert.equal(scheduler.size(), 0);
+  scheduler.flush();
+  assert.equal(h.states.length, count);
+});
 
 test("live broadcasts reuse saved paths; only saved changes invalidate them", async (t) => {
   const h = harness(t, async () => ({ version: 1, strokes: [saved("existing")] }));

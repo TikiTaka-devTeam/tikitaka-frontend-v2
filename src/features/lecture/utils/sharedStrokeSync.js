@@ -7,7 +7,11 @@ export function sortStrokes(strokes) {
 }
 
 // NTE-003 is the snapshot; only NTE-010 SYNCED events advance its version.
-export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChange, onError }) {
+export function createSharedStrokeSync({
+  slideId, spaceId, fetchSnapshot, onChange, onError,
+  requestFrame = globalThis.requestAnimationFrame?.bind(globalThis),
+  cancelFrame = globalThis.cancelAnimationFrame?.bind(globalThis),
+}) {
   let version = 0;
   let permanent = new Map();
   const temporary = new Map();
@@ -20,17 +24,56 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
   let generation = 0;
   let savedStrokes = [];
   let savedDirty = true;
+  let liveOrderDirty = true;
+  let liveEntries = [];
+  let frame = null;
+
+  function clearTemporary() {
+    temporary.clear();
+    liveOrderDirty = true;
+  }
+
+  function removeTemporary(id) {
+    if (temporary.delete(id)) liveOrderDirty = true;
+  }
+
+  function scheduleEmit() {
+    if (!requestFrame) return emit();
+    if (frame !== null) return;
+    frame = requestFrame(() => {
+      frame = null;
+      emit();
+    });
+  }
 
   function emit() {
+    if (disposed) return;
+    if (frame !== null) {
+      cancelFrame?.(frame);
+      frame = null;
+    }
     if (savedDirty) {
       savedStrokes = sortStrokes(permanent.values());
       savedDirty = false;
     }
-    if (!disposed) onChange({
+    if (liveOrderDirty) {
+      liveEntries = [...temporary.values()].sort((a, b) =>
+        a.stroke.strokeOrder - b.stroke.strokeOrder || String(a.stroke.id).localeCompare(String(b.stroke.id)),
+      );
+      liveOrderDirty = false;
+    }
+    // Copy the accumulated points once per display frame. Published snapshots
+    // remain immutable for React and Canvas consumers.
+    for (const entry of liveEntries) {
+      if (!entry.pendingPoints.length) continue;
+      entry.stroke = { ...entry.stroke, points: entry.stroke.points.concat(entry.pendingPoints) };
+      entry.pendingPoints = [];
+    }
+    onChange({
       version,
       ready: !initializing,
       strokes: savedStrokes,
-      liveStrokes: sortStrokes([...temporary.values()].map((entry) => entry.stroke)),
+      liveStrokes: liveEntries.map((entry) => entry.stroke),
       completed: new Set(completed.keys()),
     });
   }
@@ -39,7 +82,7 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
     for (const item of items) {
       if (!item.client_stroke_id) continue;
       completed.set(item.client_stroke_id, Date.now());
-      temporary.delete(item.client_stroke_id);
+      removeTemporary(item.client_stroke_id);
     }
   }
 
@@ -62,21 +105,19 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
     if (event.type === "STROKE_START" && !existing) {
       temporary.set(id, {
         stroke: normalizeStroke({ ...event, stroke_id: `live-${id}`, points: [event.point] }),
-        chunk: 0, ended: false, updated: Date.now(),
+        pendingPoints: [], chunk: 0, ended: false, updated: Date.now(),
       });
+      liveOrderDirty = true;
     } else if (event.type === "STROKE_POINTS" && existing && !existing.ended) {
       if (event.chunk_seq !== existing.chunk + 1) return true;
-      existing.stroke = {
-        ...existing.stroke,
-        points: [...existing.stroke.points, ...event.points.map((p) => ({ x: p.x_ratio, y: p.y_ratio }))],
-      };
+      for (const p of event.points) existing.pendingPoints.push({ x: p.x_ratio, y: p.y_ratio });
       existing.chunk = event.chunk_seq;
       existing.updated = Date.now();
     } else if (event.type === "STROKE_END" && existing) {
       existing.ended = true;
       existing.updated = Date.now();
     } else if (event.type === "STROKE_CANCEL") {
-      temporary.delete(id);
+      removeTemporary(id);
     }
     return true;
   }
@@ -92,7 +133,8 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
       buffer.push(event);
       void refresh();
     }
-    emit();
+    if (event.type === "SHARED_STROKES_SYNCED") emit();
+    else scheduleEmit();
   }
 
   function refresh() {
@@ -100,7 +142,7 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
     if (refreshTask) return refreshTask;
     clearTimeout(retryTimer);
     initializing = true;
-    temporary.clear();
+    clearTemporary();
     emit();
     refreshTask = (async () => {
       // Retry a fresh snapshot if events reveal another gap during recovery.
@@ -112,7 +154,7 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
         version = Number(snapshot.version);
         permanent = new Map((snapshot.strokes ?? []).map((s) => [s.stroke_id, normalizeStroke(s)]));
         savedDirty = true;
-        temporary.clear();
+        clearTemporary();
         const events = buffer;
         buffer = [];
         const saved = events.filter((e) => e.type === "SHARED_STROKES_SYNCED")
@@ -147,7 +189,7 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
     generation += 1;
     initializing = true;
     buffer = [];
-    temporary.clear();
+    clearTemporary();
     return refresh();
   }
 
@@ -162,7 +204,7 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
     const now = Date.now();
     let changed = false;
     for (const [id, entry] of temporary) {
-      if (now - entry.updated > 30000) { temporary.delete(id); changed = true; }
+      if (now - entry.updated > 30000) { removeTemporary(id); changed = true; }
     }
     for (const [id, time] of completed) {
       if (now - time > 60000) completed.delete(id);
@@ -177,6 +219,10 @@ export function createSharedStrokeSync({ slideId, spaceId, fetchSnapshot, onChan
       disposed = true;
       clearInterval(expiryTimer);
       clearTimeout(retryTimer);
+      if (frame !== null) cancelFrame?.(frame);
+      frame = null;
+      clearTemporary();
+      liveEntries = [];
       buffer = [];
     },
   };
