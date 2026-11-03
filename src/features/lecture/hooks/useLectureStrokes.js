@@ -294,14 +294,30 @@ export default function useLectureStrokes({
       setRedoStack([]);
     }
 
-    return enqueueLayerTask(
-      layer,
-      async () => {
+    return saveQueue.enqueueCreate(layer, {
+      key: session,
+      operation: {
+        client_operation_id: clientOperationId, type: "CREATE",
+        stroke: toStrokeRequest(stroke, clientStrokeId),
+      },
+      send: async (operations) => {
+        const response = await syncOperations(layer, slideId, operations, session);
+        const created = operations.map((operation) => {
+          const mapping = response.created_strokes?.find((item) =>
+            item.client_stroke_id === operation.stroke.client_stroke_id);
+          if (!mapping?.stroke_id) throw new Error("필기 저장 응답에 stroke_id가 없습니다.");
+          return { ...operation.stroke, stroke_id: mapping.stroke_id };
+        });
+        // Apply a shared version once with ALL its strokes, including when the
+        // socket notification arrives before/after this HTTP response.
+        if (layer === "SHARED" && sessionRef.current === session) {
+          session.sync.acceptSaved(response, created);
+        }
+        return response;
+      },
+      task: async (pendingResponse) => {
         try {
-          const response = await syncOperations(layer, slideId, [{
-            client_operation_id: clientOperationId, type: "CREATE",
-            stroke: toStrokeRequest(stroke, clientStrokeId),
-          }], session);
+          const response = await pendingResponse;
           const responseVersion = Number(response.version);
           if (layer === "PRIVATE") versions.current.set(slideId, responseVersion);
 
@@ -336,9 +352,6 @@ export default function useLectureStrokes({
           strokeMappingsRef.current.set(localStrokeId, savedStroke.id);
           if (layer === "SHARED" && sessionRef.current === session) {
             session.sender.saved(clientStrokeId);
-            session.sync.acceptSaved(response, [{
-              ...toStrokeRequest(stroke, clientStrokeId), stroke_id: savedStroke.id,
-            }]);
           } else if (layer === "SHARED") {
             versions.current.set(slideId, Math.max(versions.current.get(slideId) ?? 0, responseVersion));
           }
@@ -387,7 +400,7 @@ export default function useLectureStrokes({
           throw error;
         }
       },
-    );
+    }, documentId);
   }
 
   async function deleteStrokesOnServer(

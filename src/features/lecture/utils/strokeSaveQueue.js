@@ -1,8 +1,11 @@
 // Keep failed saves observable even when drawing handlers recover with a fallback.
 export function createStrokeSaveQueue(queues) {
   const failedTasks = new Map();
+  const openBatches = new Map();
 
   function enqueue(layer, task, fallback, scope) {
+    // Deletes and other ordinary tasks are ordering barriers for CREATE batches.
+    openBatches.delete(layer);
     const queue = queues[layer];
     const pending = queue.current.catch(() => undefined).then(task).then(
       (result) => {
@@ -16,6 +19,28 @@ export function createStrokeSaveQueue(queues) {
     );
     queue.current = pending;
     return pending.catch(() => fallback);
+  }
+
+  function enqueueCreate(layer, { key, operation, send, task }, scope) {
+    let batch = openBatches.get(layer);
+    if (!batch || batch.key !== key || batch.scope !== scope || batch.entries.length >= 5) {
+      batch = { key, scope, entries: [] };
+      const currentBatch = batch;
+      batch.completion = enqueue(layer, async () => {
+        if (openBatches.get(layer) === currentBatch) openBatches.delete(layer);
+        // No timer: the next request takes only work already waiting in the queue.
+        // Keep this exact operation set (and IDs) intact when retrying a failure.
+        const response = Promise.resolve().then(() => send(currentBatch.entries.map((entry) => entry.operation)));
+        const results = await Promise.allSettled(currentBatch.entries.map((entry) => entry.task(response)));
+        const failure = results.find((result) => result.status === "rejected");
+        if (failure) throw failure.reason;
+        return results.map((result) => result.value);
+      }, null, scope);
+      openBatches.set(layer, batch);
+    }
+    const index = batch.entries.length;
+    batch.entries.push({ operation, task });
+    return batch.completion.then((results) => results ? results[index] : null);
   }
 
   async function waitForPending(scope, retryFailed = false) {
@@ -43,5 +68,5 @@ export function createStrokeSaveQueue(queues) {
     if (failure) throw failure.error;
   }
 
-  return { enqueue, waitForPending };
+  return { enqueue, enqueueCreate, waitForPending };
 }
