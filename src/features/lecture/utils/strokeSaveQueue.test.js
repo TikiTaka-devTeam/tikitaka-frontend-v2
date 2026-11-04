@@ -72,3 +72,91 @@ test("failed saves from another document do not block or get retried", async () 
   await queue.waitForPending("current", true);
   assert.equal(attempts, 1);
 });
+
+function deferred() {
+  let resolve;
+  const promise = new Promise((done) => { resolve = done; });
+  return { promise, resolve };
+}
+
+test("idle CREATE sends without a timer; waiting strokes batch up to five and drain the tail", async () => {
+  const queue = setup();
+  const started = deferred();
+  const firstResponse = deferred();
+  const requests = [];
+  const send = async (operations) => {
+    requests.push(operations);
+    if (requests.length === 1) {
+      started.resolve();
+      await firstResponse.promise;
+    }
+    return operations.map((operation) => `saved-${operation.id}`);
+  };
+  const add = (id) => queue.enqueueCreate("PRIVATE", {
+    key: "slide", operation: { id }, send,
+    task: async (response) => (await response).find((value) => value === `saved-${id}`),
+  }, "doc");
+  const results = [add(0)];
+  await started.promise;
+  for (let id = 1; id <= 12; id += 1) results.push(add(id));
+  assert.equal(requests.length, 1);
+  const waiting = queue.waitForPending("doc");
+  firstResponse.resolve();
+  await waiting;
+  assert.deepEqual(requests.map((items) => items.length), [1, 5, 5, 2]);
+  assert.deepEqual(await Promise.all(results), Array.from({ length: 13 }, (_, id) => `saved-${id}`));
+  assert.deepEqual(requests.flat().map((item) => item.id), Array.from({ length: 13 }, (_, id) => id));
+});
+
+test("delete waits for CREATE mappings and separates subsequent CREATE batches", async () => {
+  const queue = setup();
+  const events = [];
+  const mappings = new Map();
+  const add = (id, key = "slide", scope = "doc", layer = "PRIVATE") => queue.enqueueCreate(layer, {
+    key, operation: { id },
+    send: async (operations) => {
+      events.push(operations.map((item) => item.id));
+      return operations;
+    },
+    task: async (response) => {
+      await response;
+      mappings.set(id, `server-${id}`);
+      return mappings.get(id);
+    },
+  }, scope);
+  add(1);
+  add(2);
+  queue.enqueue("PRIVATE", async () => {
+    assert.equal(mappings.get(2), "server-2");
+    events.push("delete-2");
+  }, [], "doc");
+  add(3);
+  add(4, "other-slide");
+  add(5, "other-slide", "other-doc");
+  await queue.waitForPending("doc");
+  assert.deepEqual(events, [[1, 2], "delete-2", [3], [4], [5]]);
+});
+
+test("failed CREATE batch retries the same operation IDs and preserves each result handler", async () => {
+  const queue = setup();
+  let online = false;
+  const requests = [];
+  const saved = [];
+  const send = async (operations) => {
+    requests.push(operations);
+    if (!online) throw new Error("offline");
+    return operations;
+  };
+  for (const id of ["uuid-1", "uuid-2"]) {
+    queue.enqueueCreate("SHARED", {
+      key: "slide", operation: { client_operation_id: id }, send,
+      task: async (response) => { await response; saved.push(id); return id; },
+    }, "doc");
+  }
+  await assert.rejects(queue.waitForPending("doc"), /offline/);
+  online = true;
+  await queue.waitForPending("doc", true);
+  assert.deepEqual(requests[0], requests[1]);
+  assert.deepEqual(saved, ["uuid-1", "uuid-2"]);
+  assert.equal(requests.length, 2);
+});

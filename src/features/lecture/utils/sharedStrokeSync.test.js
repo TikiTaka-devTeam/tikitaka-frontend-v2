@@ -83,6 +83,26 @@ test("REST and socket completion in either order never duplicate or resurrect a 
   }
 });
 
+test("one saved version retains every batched stroke regardless of REST/socket arrival order", async (t) => {
+  for (const restFirst of [true, false]) {
+    const h = harness(t);
+    await h.sync.refresh();
+    const created = [saved("s1", "c1"), saved("s2", "c2"), saved("s3", "c3")];
+    for (const item of created) {
+      h.sync.receive(event("STROKE_START", { client_stroke_id: item.client_stroke_id, point }));
+    }
+    const rest = () => h.sync.acceptSaved({ version: 1 }, created);
+    const socket = () => h.sync.receive(event("SHARED_STROKES_SYNCED", { version: 1, created_strokes: created }));
+    if (restFirst) { rest(); socket(); } else { socket(); rest(); }
+    assert.deepEqual(h.latest().strokes.map((stroke) => stroke.id), ["s1", "s2", "s3"]);
+    assert.equal(h.latest().liveStrokes.length, 0);
+    // Saving together must still allow deleting just one stroke.
+    h.sync.acceptSaved({ version: 2 }, [], ["s2"]);
+    rest();
+    assert.deepEqual(h.latest().strokes.map((stroke) => stroke.id), ["s1", "s3"]);
+  }
+});
+
 test("snapshot buffers out-of-order versions and ignores completed late live frames", async (t) => {
   let resolve;
   const h = harness(t, () => new Promise((done) => { resolve = done; }));
