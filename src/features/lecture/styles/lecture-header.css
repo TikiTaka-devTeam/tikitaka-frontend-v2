@@ -1,3 +1,10 @@
+.lecture-page .lecture-header,
+.lecture-page .lecture-header * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .lecture-page .lecture-header {
   position: relative;
   width: 100%;
