@@ -118,7 +118,8 @@ function formatQuestionTime(value) {
   return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`;
 }
 
-function QuestionRow({ question, isProfessor, isMenuOpen, onDeleteRequest, onMenuToggle, onSelect }) {
+function QuestionRow({ question, documentThumbnailUrl, isProfessor, isMenuOpen, onDeleteRequest, onMenuToggle, onSelect }) {
+  const thumbnailUrl = question.slide?.thumbnail_url || documentThumbnailUrl;
   const category = question.categories?.map((item) => item.name ?? item.category_name).filter(Boolean).join(", ");
   const detail = [
     question.document?.title,
@@ -130,7 +131,7 @@ function QuestionRow({ question, isProfessor, isMenuOpen, onDeleteRequest, onMen
     <li className="space-questions-row">
       <button type="button" className={`space-questions-row__button${isProfessor ? " has-menu" : ""}`} onClick={() => onSelect(question)}>
         <span className="space-questions-row__thumbnail">
-          {question.slide?.thumbnail_url ? <img src={question.slide.thumbnail_url} alt="" /> : null}
+          {thumbnailUrl ? <img src={thumbnailUrl} alt="" /> : null}
         </span>
         <span className="space-questions-row__copy">
           <strong>{question.title}</strong>
@@ -699,6 +700,8 @@ export default function SpaceQuestionsPage() {
               return <QuestionRow
                 key={questionId}
                 question={{ ...question, ...(questionLikeOverrides[questionId] ?? {}) }}
+                documentThumbnailUrl={documents.find((document) =>
+                  (document.document_id ?? document.id) === question.document?.document_id)?.thumbnail_url}
                 isProfessor={!readOnly && isQuestionManager}
                 isMenuOpen={questionMenuId === questionId}
                 onMenuToggle={(selectedQuestion) => {
