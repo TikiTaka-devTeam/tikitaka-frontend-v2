@@ -10,6 +10,7 @@ function ModalActions({
   confirmText = "저장",
   confirmType = "button",
   confirmDisabled = false,
+  closeOnConfirm = true,
   cancelDisabled = false,
   showCancel = true,
   className = "",
@@ -24,7 +25,7 @@ function ModalActions({
   };
   const handleCancel = (event) => runModalClose(onCancel, event);
   const handleConfirm = (event) => {
-    if (confirmType !== "submit" && onConfirm) {
+    if (closeOnConfirm && confirmType !== "submit" && onConfirm) {
       runModalClose(onConfirm, event);
       return;
     }
