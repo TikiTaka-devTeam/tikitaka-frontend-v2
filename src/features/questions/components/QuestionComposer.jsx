@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CompactModal from "../../../components/common/CompactModal.jsx";
 import ModalActions from "../../../components/common/ModalActions.jsx";
@@ -24,6 +24,8 @@ const STEP_DESCRIPTIONS = [
   "질문을 등록하고 공유해요.",
   "작성한 질문과 유사한 질문을 확인해요.",
 ];
+const AI_POLL_INTERVAL_MS = 2000;
+const AI_POLL_MAX_ATTEMPTS = 15;
 function readDraft(spaceId) {
   try {
     const value = JSON.parse(localStorage.getItem(`tikitaka_question_draft_${spaceId}`) || "null");
@@ -80,6 +82,7 @@ export default function QuestionComposer({
   const [createdQuestion, setCreatedQuestion] = useState(null);
   const [similarQuestions, setSimilarQuestions] = useState([]);
   const [similarStatus, setSimilarStatus] = useState("idle");
+  const [similarRetryKey, setSimilarRetryKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [draftMessage, setDraftMessage] = useState("");
@@ -114,24 +117,63 @@ export default function QuestionComposer({
     setSubmitModal("confirm");
   }
 
-  async function loadSimilarQuestions(questionId) {
-    if (!questionId) return;
-    setSimilarStatus("loading");
-    try {
-      const response = await getSimilarQuestions(questionId);
-      setSimilarQuestions(response?.similar_questions ?? []);
-      setSimilarStatus("ready");
-    } catch {
-      setSimilarStatus("error");
+  const createdQuestionId = createdQuestion?.question_id;
+
+  useEffect(() => {
+    if (!createdQuestionId) return;
+
+    let cancelled = false;
+    let pollTimer;
+    let attempts = 0;
+
+    async function checkSimilarQuestions() {
+      try {
+        const detail = await getQuestionDetail(createdQuestionId);
+        if (cancelled) return;
+        setCreatedQuestion((current) => ({ ...current, ...detail }));
+
+        const aiStatus = detail?.ai_processing_status;
+        if (aiStatus === "PENDING" || aiStatus === "PROCESSING") {
+          attempts += 1;
+          if (attempts >= AI_POLL_MAX_ATTEMPTS) {
+            setSimilarStatus("timeout");
+            return;
+          }
+          setSimilarStatus("processing");
+          pollTimer = window.setTimeout(checkSimilarQuestions, AI_POLL_INTERVAL_MS);
+          return;
+        }
+        if (aiStatus === "FAILED") {
+          setSimilarStatus("failed");
+          return;
+        }
+
+        // 상태 필드를 제공하지 않는 응답에서는 기존 유사 질문 API로 조회한다.
+        if (aiStatus && aiStatus !== "COMPLETED") {
+          setSimilarStatus("error");
+          return;
+        }
+        setSimilarStatus("loading");
+        const response = await getSimilarQuestions(createdQuestionId);
+        if (cancelled) return;
+        if (!Array.isArray(response?.similar_questions)) {
+          throw new Error("Invalid similar questions response");
+        }
+        setSimilarQuestions(response.similar_questions);
+        setSimilarStatus("ready");
+      } catch (cause) {
+        if (cancelled) return;
+        console.warn("유사 질문을 확인하지 못했습니다.", cause);
+        setSimilarStatus("error");
+      }
     }
 
-    try {
-      const detail = await getQuestionDetail(questionId);
-      setCreatedQuestion((current) => current ? { ...current, ...detail } : detail);
-    } catch (cause) {
-      console.warn("등록한 질문의 카테고리를 갱신하지 못했습니다.", cause);
-    }
-  }
+    void checkSimilarQuestions();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(pollTimer);
+    };
+  }, [createdQuestionId, similarRetryKey]);
 
   async function submitQuestion() {
     if (isSubmitting) return;
@@ -143,8 +185,11 @@ export default function QuestionComposer({
         title: draft.title.trim(),
         content: draft.content.trim(),
       });
+      if (!question?.question_id) {
+        throw new Error("질문 등록 응답에 질문 ID가 없습니다.");
+      }
       setCreatedQuestion(question);
-      void loadSimilarQuestions(question.question_id);
+      setSimilarStatus("processing");
       try {
         localStorage.removeItem(`tikitaka_question_draft_${spaceId}`);
       } catch (storageError) {
@@ -204,8 +249,8 @@ export default function QuestionComposer({
             </article>
             <div className="question-composer-similar-banner">
               <strong>{similarStatus === "ready" ? `AI 유사 질문 ${similarQuestions.length}개 발견` : "AI 유사 질문 확인"}</strong>
-              <span>{similarStatus === "loading" ? "유사 질문을 찾고 있습니다." : similarStatus === "error" ? "AI 분석이 끝난 뒤 다시 시도해 주세요." : similarStatus === "ready" && similarQuestions.length === 0 ? "유사 질문이 없습니다." : "등록한 질문과 비슷한 질문을 확인해 보세요."}</span>
-              {similarStatus === "error" && <button type="button" onClick={() => loadSimilarQuestions(createdQuestion.question_id)}>다시 확인</button>}
+              <span>{similarStatus === "processing" ? "AI가 질문을 분석하고 있습니다." : similarStatus === "loading" ? "유사 질문을 찾고 있습니다." : similarStatus === "timeout" ? "AI 분석이 지연되고 있습니다. 잠시 후 다시 확인해 주세요." : similarStatus === "failed" ? "AI 분석에 실패했습니다. 잠시 후 다시 확인해 주세요." : similarStatus === "error" ? "유사 질문을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요." : similarStatus === "ready" && similarQuestions.length === 0 ? "유사 질문이 없습니다." : "등록한 질문과 비슷한 질문을 확인해 보세요."}</span>
+              {["error", "timeout", "failed"].includes(similarStatus) && <button type="button" onClick={() => { setSimilarStatus("processing"); setSimilarRetryKey((value) => value + 1); }}>다시 확인</button>}
               {similarStatus === "ready" && similarQuestions.length > 0 && <button type="button" onClick={() => setSimilarModalOpen(true)}>유사 질문 보기 →</button>}
             </div>
             <button type="button" className="question-composer-return" onClick={onReturnToMine}>{returnLabel}으로 돌아가기 →</button>
@@ -280,6 +325,8 @@ export default function QuestionComposer({
           cancelText="취소"
           confirmText={submitModal === "success" ? "확인" : isSubmitting ? "등록 중" : "질문 등록"}
           confirmDisabled={isSubmitting}
+          cancelDisabled={isSubmitting}
+          closeOnConfirm={submitModal === "success"}
           showCancel={submitModal !== "success"}
         />
       </CompactModal>}
